@@ -1,4 +1,4 @@
-# MAREVA - Proyecto Bootcamp
+# MAREVA - Proyecto Agencia de Viajes
 
 ## 1️⃣ ¿Qué Problema Resuelve?
 
@@ -51,6 +51,6 @@ Es importante porque democratiza la planificación vacacional para jóvenes y ad
 
 ---
 
-**Autor**: Nicoll Valeria Sabogal
-**Fecha**: Abril 2026
+**Autor**: Nicoll Valeria Sabogal- Sofia Munevar - Laura Rubiano - Cesar Uzcategui
+**Fecha**: 25 Abril 2026 
 **Bootcamp**: Arquitectura de Software - SENA
