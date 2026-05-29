@@ -12,45 +12,94 @@ Es importante porque democratiza la planificación vacacional para jóvenes y ad
 
 ## 2️⃣ Usuarios Principales
 
-1. **Viajero / Usuario final**: Busca destinos, organiza su plan vacacional, gestiona hospedaje, alimentación y actividades desde la plataforma.
-2. **Administrador del sistema**: Gestiona el contenido de la plataforma, supervisa los planes creados y garantiza el correcto funcionamiento del aplicativo.
+### Viajero / Usuario Final
+
+Busca destinos, organiza su plan vacacional, gestiona hospedaje, alimentación y actividades desde la plataforma.
+
+### Administrador del Sistema
+
+Gestiona el contenido de la plataforma, supervisa los planes creados y garantiza el correcto funcionamiento del aplicativo.
 
 ---
 
 ## 3️⃣ Funcionalidades Principales
 
-- [ ] Registro e inicio de sesión de usuarios
-- [ ] Creación y gestión de planes vacacionales personalizados
-- [ ] Búsqueda y selección de hospedaje
-- [ ] Búsqueda y selección de opciones de alimentación
-- [ ] Búsqueda y selección de actividades turísticas
-- [ ] Visualización del plan vacacional completo
-- [ ] Estimación de costos del plan
+* Registro e inicio de sesión de usuarios
+* Creación y gestión de planes vacacionales personalizados
+* Búsqueda y selección de hospedaje
+* Búsqueda y selección de opciones de alimentación
+* Búsqueda y selección de actividades turísticas
+* Visualización del plan vacacional completo
+* Estimación de costos del plan
 
 ---
 
-## 4️⃣ Decisiones Iniciales
+## 4️⃣ Metodología de Desarrollo
 
-### Metodología de Desarrollo
+### Scrum
 
-**Elegí**: Scrum
-
-**¿Por qué?**: MAREVA puede presentar cambios en los requerimientos durante el desarrollo, por lo que Scrum permite adaptarse a esos cambios mediante sprints cortos de 2 a 4 semanas. Además, al desarrollarse en equipo, facilita la comunicación constante y la entrega de avances funcionales que pueden validarse con usuarios reales.
-
-### Arquitectura Inicial
-
-**Elegí**: N-Capas
-
-**¿Por qué?**: Al tener proyección de comercialización futura, una arquitectura en capas permite separar la lógica de negocio, la presentación y el acceso a datos, facilitando el mantenimiento y la escalabilidad del sistema a medida que crezca.
-
-### Tecnologías
-
-- **Backend**: Node.js (porque ya lo conocemos)
-- **Base de datos**: PostgreSQL (porque es gratis y potente)
-- **Frontend**: React (porque tiene mucha documentación)
+MAREVA puede presentar cambios en los requerimientos durante el desarrollo, por lo que Scrum permite adaptarse a esos cambios mediante sprints cortos de 2 a 4 semanas.
 
 ---
 
-**Autor**: Nicoll Valeria Sabogal- Sofia Munevar - Laura Rubiano - Cesar Uzcategui
-**Fecha**: 25 Abril 2026 
-**Bootcamp**: Arquitectura de Software - SENA
+## 5️⃣ Arquitectura
+
+### Arquitectura N-Capas
+
+La arquitectura en capas permite separar la lógica de negocio, presentación y acceso a datos, facilitando el mantenimiento y escalabilidad del sistema.
+
+---
+
+## 6️⃣ Tecnologías
+
+### Backend
+
+* Flask (Python)
+
+### Base de Datos
+
+* PostgreSQL
+
+### Frontend
+
+* HTML
+* CSS
+* JavaScript
+
+---
+
+## 7️⃣ Integrantes
+
+* Nicoll Valeria Sabogal
+* Sofia Munevar
+* Laura Rubiano
+* Cesar Uzcategui
+* Andres Aroca
+
+---
+
+## 8️⃣ Estado Actual del Proyecto
+
+✅ Requisitos funcionales y no funcionales
+✅ Historias de usuario
+✅ Modelo entidad-relación (MER)
+✅ Modelo lógico de base de datos
+✅ Prototipos HTML/CSS
+✅ Configuración inicial GitHub Projects
+✅ Repositorio colaborativo
+✅ Scripts SQL PostgreSQL
+
+🚧 En desarrollo:
+
+* Backend con Flask
+* Integración frontend + backend
+* Sistema de autenticación
+* Conexión a PostgreSQL
+
+---
+
+## 9️⃣ Bootcamp
+
+SENA — Arquitectura de Software
+Fecha: 25 Abril 2026
+
