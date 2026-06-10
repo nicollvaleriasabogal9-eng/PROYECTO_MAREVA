@@ -626,3 +626,174 @@ ON metodo_pago_proveedor(estado);
 ALTER TABLE cliente
 ADD CONSTRAINT chk_cliente_rol
 CHECK (rol IN ('admin', 'cliente'));
+--alteraciones hechas hoy en clase---
+ALTER TABLE cliente
+ADD COLUMN id_nivel INT REFERENCES nivel(id_nivel);
+
+ALTER TABLE nivel
+ADD COLUMN porcentaje_descuento NUMERIC(5,2) DEFAULT 0;
+
+CREATE TABLE tipo_seguro (
+    id_tipo_seguro SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+ALTER TABLE seguro
+ADD COLUMN id_tipo_seguro
+INT REFERENCES tipo_seguro(id_tipo_seguro);
+
+CREATE TABLE servicio_seguro (
+    id_servicio_seguro SERIAL PRIMARY KEY,
+
+    id_seguro INT NOT NULL
+    REFERENCES seguro(id_seguro),
+
+    id_actividad INT NULL
+    REFERENCES actividad_turistica(id_actividad),
+
+    id_alojamiento INT NULL
+    REFERENCES alojamiento(id_alojamiento),
+
+    id_alimentacion INT NULL
+    REFERENCES alimentacion(id_alimentacion),
+
+    id_transporte INT NULL
+    REFERENCES transporte(id_transporte)
+);
+
+
+CREATE TABLE paquete_transporte (
+    id_paquete INT REFERENCES paquete_turistico(id_paquete),
+    id_transporte INT REFERENCES transporte(id_transporte),
+    PRIMARY KEY(id_paquete,id_transporte)
+);
+
+CREATE TABLE paquete_alojamiento (
+    id_paquete INT REFERENCES paquete_turistico(id_paquete),
+    id_alojamiento INT REFERENCES alojamiento(id_alojamiento),
+    PRIMARY KEY(id_paquete,id_alojamiento)
+);
+
+CREATE TABLE paquete_alimentacion (
+    id_paquete INT REFERENCES paquete_turistico(id_paquete),
+    id_alimentacion INT REFERENCES alimentacion(id_alimentacion),
+    PRIMARY KEY(id_paquete,id_alimentacion)
+);
+
+CREATE TABLE paquete_actividad (
+    id_paquete INT REFERENCES paquete_turistico(id_paquete),
+    id_actividad INT REFERENCES actividad_turistica(id_actividad),
+    PRIMARY KEY(id_paquete,id_actividad)
+);
+
+CREATE TABLE reserva_servicio (
+    id_reserva_servicio SERIAL PRIMARY KEY,
+
+    id_reserva INT NOT NULL
+    REFERENCES reserva(id_reserva),
+
+    id_transporte INT NULL
+    REFERENCES transporte(id_transporte),
+
+    id_alojamiento INT NULL
+    REFERENCES alojamiento(id_alojamiento),
+
+    id_alimentacion INT NULL
+    REFERENCES alimentacion(id_alimentacion),
+
+    id_actividad INT NULL
+    REFERENCES actividad_turistica(id_actividad)
+);
+
+ALTER TABLE promocion
+ADD COLUMN tipo_promocion VARCHAR(30);
+
+CREATE TABLE promocion_insignia (
+    id_promocion INT REFERENCES promocion(id_promocion),
+    id_insignia INT REFERENCES insignia(id_insignia),
+    PRIMARY KEY(id_promocion,id_insignia)
+);
+
+CREATE TABLE promocion_nivel (
+    id_promocion INT REFERENCES promocion(id_promocion),
+    id_nivel INT REFERENCES nivel(id_nivel),
+    PRIMARY KEY(id_promocion,id_nivel)
+);
+
+DROP TABLE guia_descargable;
+
+ALTER TABLE reserva
+ADD COLUMN guia_pdf VARCHAR(255);
+
+DROP TABLE cliente_nivel;
+
+DROP TABLE paquete_proveedor;
+
+ALTER TABLE paquete_turistico
+DROP COLUMN id_seguro;
+
+ALTER TABLE paquete_turistico
+DROP COLUMN incluye_transporte;
+
+ALTER TABLE paquete_turistico
+DROP COLUMN incluye_alojamiento;
+
+ALTER TABLE paquete_turistico
+DROP COLUMN incluye_alimentacion;
+
+ALTER TABLE promocion
+DROP COLUMN nivel_minimo;
+
+ALTER TABLE servicio_seguro
+ADD CONSTRAINT chk_servicio_seguro_unico
+CHECK (
+    (CASE WHEN id_transporte IS NOT NULL THEN 1 ELSE 0 END) +
+    (CASE WHEN id_alojamiento IS NOT NULL THEN 1 ELSE 0 END) +
+    (CASE WHEN id_alimentacion IS NOT NULL THEN 1 ELSE 0 END) +
+    (CASE WHEN id_actividad IS NOT NULL THEN 1 ELSE 0 END)
+    = 1
+);
+
+TRUNCATE TABLE
+respuesta_detalle,
+encuesta_respuesta,
+encuesta_pregunta,
+auditoria_admin,
+ruleta,
+notificacion,
+referido,
+historial_busqueda,
+lista_suenos,
+favoritos,
+reserva_servicio_extra,
+servicio_extra,
+itinerario_actividad,
+itinerario_viaje,
+viajero_reserva,
+reserva_servicio,
+reserva,
+promocion_insignia,
+promocion_nivel,
+promocion,
+servicio_seguro,
+paquete_actividad,
+paquete_alimentacion,
+paquete_alojamiento,
+paquete_transporte,
+actividad_turistica,
+transporte,
+alimentacion,
+alojamiento,
+seguro,
+tipo_seguro,
+guia_turistico,
+metodo_pago_proveedor,
+proveedor,
+destino,
+cliente_insignia,
+cliente,
+insignia,
+nivel
+RESTART IDENTITY CASCADE;
+
