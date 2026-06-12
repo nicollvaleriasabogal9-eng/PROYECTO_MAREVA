@@ -1,0 +1,529 @@
+CREATE TABLE nivel (
+    id_nivel             SERIAL PRIMARY KEY,
+    nombre               VARCHAR(50)  NOT NULL,
+    min_monto            NUMERIC(12,2) NOT NULL DEFAULT 0,
+    min_reservas         INT           NOT NULL DEFAULT 0,
+    descripcion          TEXT,
+    porcentaje_descuento NUMERIC(5,2) DEFAULT 0
+);
+CREATE TABLE insignia (
+    id_insignia     SERIAL PRIMARY KEY,
+    nombre          VARCHAR(100) NOT NULL,
+    criterio        TEXT,
+    imagen_url      VARCHAR(255),
+    estado          BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE cliente (
+    id_cliente          SERIAL PRIMARY KEY,
+    nombre              VARCHAR(50)  NOT NULL,
+    apellido            VARCHAR(50)  NOT NULL,
+    tipo_documento      VARCHAR(30)  NOT NULL,
+    numero_documento    VARCHAR(30)  NOT NULL UNIQUE,
+    telefono            VARCHAR(20),
+    correo              VARCHAR(100) NOT NULL UNIQUE,
+    contrasena          VARCHAR(255) NOT NULL,
+    rol                 VARCHAR(20)  NOT NULL DEFAULT 'cliente',
+    codigo_referido     VARCHAR(20)  UNIQUE,
+    fecha_registro      DATE         NOT NULL DEFAULT CURRENT_DATE,
+    estado              BOOLEAN      NOT NULL DEFAULT TRUE,
+    intentos_fallidos   INT          NOT NULL DEFAULT 0,
+    bloqueado_hasta     TIMESTAMP,
+    id_nivel            INT REFERENCES nivel(id_nivel),
+    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente'))
+);
+CREATE TABLE cliente_insignia (
+    id_cliente_insignia SERIAL PRIMARY KEY,
+    id_cliente          INT  NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_insignia         INT  NOT NULL REFERENCES insignia(id_insignia),
+    fecha_obtenida      DATE NOT NULL DEFAULT CURRENT_DATE,
+    UNIQUE (id_cliente, id_insignia)
+);
+CREATE TABLE destino (
+    id_destino          SERIAL PRIMARY KEY,
+    nombre_destino      VARCHAR(100) NOT NULL,
+    departamento        VARCHAR(100),
+    ciudad              VARCHAR(100),
+    categoria           VARCHAR(50),
+    descripcion         TEXT,
+    atracciones         TEXT,
+    docs_requeridos     TEXT,
+    imagen_principal    VARCHAR(255),
+    estado              BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE proveedor (
+    id_proveedor        SERIAL PRIMARY KEY,
+    nombre              VARCHAR(100) NOT NULL,
+    nit                 VARCHAR(30),
+    tipo_empresa        VARCHAR(50),
+    descripcion         TEXT,
+    direccion           VARCHAR(200),
+    ciudad              VARCHAR(100),
+    telefono            VARCHAR(20),
+    correo              VARCHAR(100),
+    nombre_contacto     VARCHAR(100),
+    telefono_contacto   VARCHAR(20),
+    correo_contacto     VARCHAR(100),
+    estado              BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE guia_turistico (
+    id_guia             SERIAL PRIMARY KEY,
+    nombre              VARCHAR(50)  NOT NULL,
+    apellido            VARCHAR(50)  NOT NULL,
+    idiomas             VARCHAR(200),
+    especialidad        VARCHAR(200),
+    telefono            VARCHAR(20),
+    correo              VARCHAR(100),
+    estado              BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE tipo_seguro (
+    id_tipo_seguro SERIAL PRIMARY KEY,
+    nombre         VARCHAR(100) NOT NULL,
+    descripcion    TEXT
+);
+CREATE TABLE seguro (
+    id_seguro           SERIAL PRIMARY KEY,
+    tipo_seguro         VARCHAR(100) NOT NULL,
+    cobertura           TEXT,
+    precio              NUMERIC(10,2) NOT NULL,
+    descripcion         TEXT,
+    id_tipo_seguro      INT REFERENCES tipo_seguro(id_tipo_seguro)
+);
+CREATE TABLE paquete_turistico (
+    id_paquete          SERIAL PRIMARY KEY,
+    nombre              VARCHAR(100)  NOT NULL,
+    descripcion         TEXT,
+    precio              NUMERIC(10,2) NOT NULL,
+    duracion_dias       INT,
+    duracion_noches     INT,
+    cupos_totales       INT           NOT NULL DEFAULT 0,
+    cupos_disponibles   INT           NOT NULL DEFAULT 0,
+    fecha_inicio        DATE,
+    fecha_fin           DATE,
+    imagen_principal    VARCHAR(255),
+    personalizable      BOOLEAN       NOT NULL DEFAULT FALSE,
+    estado              VARCHAR(20)   NOT NULL DEFAULT 'activo',
+    id_destino          INT REFERENCES destino(id_destino),
+    id_guia             INT REFERENCES guia_turistico(id_guia)
+);
+CREATE TABLE alojamiento (
+    id_alojamiento      SERIAL PRIMARY KEY,
+    nombre              VARCHAR(100) NOT NULL,
+    tipo_alojamiento    VARCHAR(50),
+    ciudad              VARCHAR(100),
+    direccion           VARCHAR(200),
+    servicios           TEXT,
+    id_proveedor        INT REFERENCES proveedor(id_proveedor)
+);
+CREATE TABLE alimentacion (
+    id_alimentacion     SERIAL PRIMARY KEY,
+    restaurante         VARCHAR(100),
+    tipo_comida         VARCHAR(100),
+    tipo_servicio       VARCHAR(50),
+    incluye_bebidas     BOOLEAN NOT NULL DEFAULT FALSE,
+    precio              NUMERIC(10,2),
+    id_proveedor        INT REFERENCES proveedor(id_proveedor)
+);
+CREATE TABLE transporte (
+    id_transporte       SERIAL PRIMARY KEY,
+    tipo                VARCHAR(50),
+    empresa             VARCHAR(100),
+    ruta                VARCHAR(200),
+    capacidad           INT,
+    hora_salida         TIME,
+    hora_regreso        TIME,
+    fecha_inicio        DATE,
+    fecha_fin           DATE,
+    id_proveedor        INT REFERENCES proveedor(id_proveedor)
+);
+CREATE TABLE actividad_turistica (
+    id_actividad        SERIAL PRIMARY KEY,
+    nombre              VARCHAR(100) NOT NULL,
+    tipo                VARCHAR(100),
+    duracion_horas      NUMERIC(4,1),
+    costo               NUMERIC(10,2),
+    id_destino          INT REFERENCES destino(id_destino),
+    id_guia             INT REFERENCES guia_turistico(id_guia),
+    id_proveedor        INT REFERENCES proveedor(id_proveedor)
+);
+CREATE TABLE paquete_transporte (
+    id_paquete    INT REFERENCES paquete_turistico(id_paquete),
+    id_transporte INT REFERENCES transporte(id_transporte),
+    PRIMARY KEY(id_paquete, id_transporte)
+);
+CREATE TABLE paquete_alojamiento (
+    id_paquete     INT REFERENCES paquete_turistico(id_paquete),
+    id_alojamiento INT REFERENCES alojamiento(id_alojamiento),
+    PRIMARY KEY(id_paquete, id_alojamiento)
+);
+CREATE TABLE paquete_alimentacion (
+    id_paquete      INT REFERENCES paquete_turistico(id_paquete),
+    id_alimentacion INT REFERENCES alimentacion(id_alimentacion),
+    PRIMARY KEY(id_paquete, id_alimentacion)
+);
+CREATE TABLE paquete_actividad (
+    id_paquete   INT REFERENCES paquete_turistico(id_paquete),
+    id_actividad INT REFERENCES actividad_turistica(id_actividad),
+    PRIMARY KEY(id_paquete, id_actividad)
+);
+CREATE TABLE reserva (
+    id_reserva          SERIAL PRIMARY KEY,
+    codigo_unico        VARCHAR(30)  NOT NULL UNIQUE,
+    fecha_reserva       DATE         NOT NULL DEFAULT CURRENT_DATE,
+    fecha_viaje         DATE,
+    estado              VARCHAR(30)  NOT NULL DEFAULT 'solicitada',
+    valor_referencial   NUMERIC(12,2),
+    cant_adultos        INT          NOT NULL DEFAULT 1,
+    cant_menores        INT          NOT NULL DEFAULT 0,
+    observaciones       TEXT,
+    acepta_no_reembolso BOOLEAN      NOT NULL DEFAULT FALSE,
+    metodo_contacto     VARCHAR(30),                   
+    guia_pdf            VARCHAR(255),
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente),
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete)
+);
+CREATE TABLE viajero_reserva (
+    id_viajero          SERIAL PRIMARY KEY,
+    nombre              VARCHAR(50)  NOT NULL,
+    apellido            VARCHAR(50)  NOT NULL,
+    tipo_documento      VARCHAR(30)  NOT NULL,
+    numero_documento    VARCHAR(30)  NOT NULL,
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+CREATE TABLE itinerario_viaje (
+    id_itinerario       SERIAL PRIMARY KEY,
+    origen              VARCHAR(100),
+    destino             VARCHAR(100),
+    fecha_salida        DATE,
+    fecha_regreso       DATE,
+    hora_salida         TIME,
+    hora_regreso        TIME,
+    medio_transporte    VARCHAR(50),
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+CREATE TABLE itinerario_actividad (
+    id_itin_actividad   SERIAL PRIMARY KEY,
+    dia                 INT,
+    hora_inicio         TIME,
+    lugar               VARCHAR(200),
+    descripcion         TEXT,
+    costos_adicionales  NUMERIC(10,2) DEFAULT 0,
+    id_actividad        INT REFERENCES actividad_turistica(id_actividad),
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+CREATE TABLE reserva_servicio (
+    id_reserva_servicio SERIAL PRIMARY KEY,
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva),
+    id_transporte       INT NULL REFERENCES transporte(id_transporte),
+    id_alojamiento      INT NULL REFERENCES alojamiento(id_alojamiento),
+    id_alimentacion     INT NULL REFERENCES alimentacion(id_alimentacion),
+    id_actividad        INT NULL REFERENCES actividad_turistica(id_actividad)
+);
+CREATE TABLE servicio_seguro (
+    id_servicio_seguro SERIAL PRIMARY KEY,
+    id_seguro          INT NOT NULL REFERENCES seguro(id_seguro),
+    id_actividad       INT NULL REFERENCES actividad_turistica(id_actividad),
+    id_alojamiento     INT NULL REFERENCES alojamiento(id_alojamiento),
+    id_alimentacion    INT NULL REFERENCES alimentacion(id_alimentacion),
+    id_transporte      INT NULL REFERENCES transporte(id_transporte),
+    CONSTRAINT chk_servicio_seguro_unico CHECK (
+        (CASE WHEN id_transporte   IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN id_alojamiento  IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN id_alimentacion IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN id_actividad    IS NOT NULL THEN 1 ELSE 0 END)
+        = 1
+    )
+);
+CREATE TABLE promocion (
+    id_promocion        SERIAL PRIMARY KEY,
+    codigo              VARCHAR(30)   NOT NULL UNIQUE,
+    descuento           NUMERIC(5,2)  NOT NULL,
+    descripcion         TEXT,
+    fecha_inicio        DATE,
+    fecha_fin           DATE,
+    tipo_promocion      VARCHAR(30),
+    id_paquete          INT REFERENCES paquete_turistico(id_paquete)
+);
+CREATE TABLE promocion_insignia (
+    id_promocion INT REFERENCES promocion(id_promocion),
+    id_insignia  INT REFERENCES insignia(id_insignia),
+    PRIMARY KEY(id_promocion, id_insignia)
+);
+CREATE TABLE promocion_nivel (
+    id_promocion INT REFERENCES promocion(id_promocion),
+    id_nivel     INT REFERENCES nivel(id_nivel),
+    PRIMARY KEY(id_promocion, id_nivel)
+);
+CREATE TABLE servicio_extra (
+    id_servicio_extra   SERIAL PRIMARY KEY,
+    nombre              VARCHAR(100) NOT NULL,
+    precio              NUMERIC(10,2) NOT NULL,
+    descripcion         TEXT,
+    estado              BOOLEAN NOT NULL DEFAULT TRUE,
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
+);
+CREATE TABLE reserva_servicio_extra (
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    id_servicio_extra   INT NOT NULL REFERENCES servicio_extra(id_servicio_extra),
+    PRIMARY KEY (id_reserva, id_servicio_extra)
+);
+CREATE TABLE favoritos (
+    id_favorito         SERIAL PRIMARY KEY,
+    fecha_agregado      DATE NOT NULL DEFAULT CURRENT_DATE,
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    UNIQUE (id_cliente, id_paquete)
+);
+CREATE TABLE lista_suenos (
+    id_sueno            SERIAL PRIMARY KEY,
+    fecha_inicio_ahorro DATE,
+    meta_semanal        NUMERIC(10,2),
+    meta_mensual        NUMERIC(10,2),
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    UNIQUE (id_cliente, id_paquete)
+);
+CREATE TABLE historial_busqueda (
+    id_busqueda         SERIAL PRIMARY KEY,
+    destino_buscado     VARCHAR(100),
+    filtros             JSONB,
+    fecha_busqueda      TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
+);
+CREATE TABLE referido (
+    id_referido         SERIAL PRIMARY KEY,
+    fecha_referido      DATE    NOT NULL DEFAULT CURRENT_DATE,
+    puntos_ganados      INT     NOT NULL DEFAULT 0,
+    estado              VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    id_referidor        INT NOT NULL REFERENCES cliente(id_cliente),
+    id_referido_cliente INT NOT NULL REFERENCES cliente(id_cliente),
+    UNIQUE (id_referidor, id_referido_cliente)
+);
+CREATE TABLE notificacion (
+    id_notificacion     SERIAL PRIMARY KEY,
+    tipo                VARCHAR(50),
+    mensaje             TEXT,
+    fecha               TIMESTAMP NOT NULL DEFAULT NOW(),
+    leida               BOOLEAN   NOT NULL DEFAULT FALSE,
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
+);
+CREATE TABLE ruleta (
+    id_ruleta           SERIAL PRIMARY KEY,
+    categoria           VARCHAR(50),
+    fecha_giro          TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_destino_resultado INT REFERENCES destino(id_destino),
+    id_cliente          INT REFERENCES cliente(id_cliente) ON DELETE SET NULL
+);
+CREATE TABLE encuesta_pregunta (
+    id_pregunta         SERIAL PRIMARY KEY,
+    texto               TEXT    NOT NULL,
+    tipo_respuesta      VARCHAR(30) NOT NULL,
+    orden               INT,
+    estado              BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE TABLE encuesta_respuesta (
+    id_enc_respuesta    SERIAL PRIMARY KEY,
+    fecha_respuesta     TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_reserva          INT NOT NULL REFERENCES reserva(id_reserva),
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente)
+);
+CREATE TABLE respuesta_detalle (
+    id_resp_detalle     SERIAL PRIMARY KEY,
+    respuesta_texto     TEXT,
+    id_enc_respuesta    INT NOT NULL REFERENCES encuesta_respuesta(id_enc_respuesta) ON DELETE CASCADE,
+    id_pregunta         INT NOT NULL REFERENCES encuesta_pregunta(id_pregunta)
+);
+CREATE TABLE auditoria_admin (
+    id_auditoria        SERIAL PRIMARY KEY,
+    accion              VARCHAR(100) NOT NULL,
+    descripcion         TEXT,
+    fecha               TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_admin            INT NOT NULL REFERENCES cliente(id_cliente)
+);
+CREATE TABLE metodo_pago_proveedor (
+    id_metodo_pago      SERIAL PRIMARY KEY,
+    id_proveedor        INT NOT NULL REFERENCES proveedor(id_proveedor) ON DELETE CASCADE,
+    tipo_metodo         VARCHAR(30) NOT NULL,
+    entidad             VARCHAR(100),
+    titular             VARCHAR(150),
+    numero_referencia   VARCHAR(100),
+    instrucciones       TEXT,
+    estado              BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE INDEX idx_cliente_correo         ON cliente(correo);
+CREATE INDEX idx_reserva_cliente        ON reserva(id_cliente);
+CREATE INDEX idx_reserva_paquete        ON reserva(id_paquete);
+CREATE INDEX idx_reserva_estado         ON reserva(estado);
+CREATE INDEX idx_paquete_destino        ON paquete_turistico(id_destino);
+CREATE INDEX idx_paquete_estado         ON paquete_turistico(estado);
+CREATE INDEX idx_historial_cliente      ON historial_busqueda(id_cliente);
+CREATE INDEX idx_notif_cliente          ON notificacion(id_cliente);
+CREATE INDEX idx_favoritos_cliente      ON favoritos(id_cliente);
+CREATE INDEX idx_metodo_pago_proveedor  ON metodo_pago_proveedor(id_proveedor);
+CREATE INDEX idx_metodo_pago_estado     ON metodo_pago_proveedor(estado);
+INSERT INTO nivel (nombre, min_monto, min_reservas, descripcion) VALUES
+('Explorador',    0,          0,  'Nivel inicial para nuevos viajeros'),
+('Aventurero',    2000000,    2,  'Viajeros con experiencia'),
+('Viajero Elite', 6000000,    5,  'Acceso a promociones exclusivas'),
+('Embajador',     15000000,   10, 'El nivel más alto de MAREVA');
+INSERT INTO insignia (nombre, criterio, estado) VALUES
+('Primera Aventura',    'Completar su primera reserva',               TRUE),
+('Playero',             'Reservar un destino de playa',               TRUE),
+('Montañista',          'Reservar un destino de montaña',             TRUE),
+('Viajero Frecuente',   'Completar 5 reservas',                       TRUE),
+('Referidor Estrella',  'Referir 3 amigos que hayan reservado',       TRUE);
+INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento,
+                     telefono, correo, contrasena, rol, codigo_referido)
+VALUES
+('Cesar',  'Uzcategui', 'CC', '1000000001', '3100000001', 'cesar@mareva.co',
+ 'Admin_mareva01', 'admin', NULL),
+('Andres', 'Aroca',     'CC', '1000000002', '3100000002', 'andres@mareva.co',
+ 'Admin_mareva01', 'admin', NULL),
+('Laura',  'Rubiano',   'CC', '1000000003', '3100000003', 'laura@mareva.co',
+ 'Admin_mareva01', 'admin', NULL),
+('Sofia',  'Munevar',   'CC', '1000000004', '3100000004', 'sofia@mareva.co',
+ 'Admin_mareva01', 'admin', NULL),
+('Nicoll', 'Sabogal',   'CC', '1000000005', '3100000005', 'nicoll@mareva.co',
+ 'Admin_mareva01', 'admin', NULL);
+INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento,
+                     telefono, correo, contrasena, rol, codigo_referido)
+VALUES
+('Yadira', 'Narvaez', 'CC', '2000000001', '3200000001', 'yadira@test.co',
+ 'cliente_prueba', 'cliente', 'YN20261');
+INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones, imagen_principal, estado)
+VALUES
+('Cartagena de Indias', 'Bolívar',         'Cartagena',  'playa',
+ 'Ciudad amurallada Patrimonio de la Humanidad con playas caribeñas.',
+ 'Ciudad Amurallada, Islas del Rosario, Castillo de San Felipe, Bocagrande',
+ 'img/cartagena.jpeg', TRUE),
+('Medellín',            'Antioquia',       'Medellín',   'ciudad',
+ 'La ciudad de la eterna primavera, innovadora y cultural.',
+ 'El Poblado, Metro Cable, Pueblito Paisa, Museo de Antioquia',
+ 'img/medellin.jpeg', TRUE),
+('Guatapé',             'Antioquia',       'Guatapé',    'aventura',
+ 'Pueblo colorido con la imponente Piedra del Peñol.',
+ 'La Piedra del Peñol, Embalse de Guatapé, Zócalos pintados',
+ 'img/guatape.jpeg', TRUE),
+('San Andrés',          'San Andrés',      'San Andrés', 'playa',
+ 'El mar de los siete colores en el Caribe colombiano.',
+ 'Hoyo Soplador, Johnny Cay, La Piscinita, El Acuario',
+ 'img/san_andres.jpeg', TRUE),
+('Parque Tayrona',      'Magdalena',       'Santa Marta','playa',
+ 'Naturaleza salvaje: selva tropical y playas vírgenes.',
+ 'Cabo San Juan, Playa Cristal, Arrecifes, Pueblito',
+ 'img/tayrona.jpeg', TRUE),
+('Valle del Cocora',    'Quindío',         'Salento',    'montaña',
+ 'Hogar de las palmas de cera, árbol nacional de Colombia.',
+ 'Palmas de Cera, Salento, Finca El Ocaso, Mirador',
+ 'img/valle_salento.jpeg', TRUE),
+('Barichara',           'Santander',       'Barichara',  'cultural',
+ 'El pueblo más bonito de Colombia, arquitectura colonial.',
+ 'Catedral de la Inmaculada, Camino Real, Capilla de Santa Bárbara',
+ 'img/barichara.jpeg', TRUE),
+('Leticia',             'Amazonas',        'Leticia',    'aventura',
+ 'Puerta de entrada a la Amazonía colombiana.',
+ 'Parque Amacayacu, Isla de los Micos, Reserva Tanimboca',
+ 'img/leticia.jpeg', TRUE);
+INSERT INTO proveedor (nombre, nit, tipo_empresa, descripcion, ciudad,
+                       telefono, correo, nombre_contacto, telefono_contacto)
+VALUES
+('Hotel Las Américas',  '800100200-1', 'Hotel',       'Hotel 5 estrellas en Cartagena', 'Cartagena',
+ '6056543210', 'reservas@lasamericas.co', 'María Torres', '3001234567'),
+('Avianca',             '860002964-4', 'Aerolínea',   'Aerolínea nacional',              'Bogotá',
+ '018000953434', 'grupos@avianca.com', 'Carlos Reyes',  '3009876543'),
+('Decameron Colombia',  '800112233-5', 'Todo incluido','Resorts todo incluido en Colombia','San Andrés',
+ '6085121212', 'reservas@decameron.co', 'Ana Gómez',    '3152345678'),
+('Ecoturismo Tayrona',  '900345678-2', 'Operador',    'Operador turístico local Tayrona','Santa Marta',
+ '3123456789', 'info@ecotayrona.co', 'Pedro Silva',    '3123456789'),
+('CocoraTours',         '900567890-3', 'Operador',    'Tours en el Quindío',             'Salento',
+ '3145678901', 'info@cocoratours.co', 'Juliana Ríos', '3145678901');
+INSERT INTO metodo_pago_proveedor
+(id_proveedor, tipo_metodo, entidad, titular, numero_referencia, instrucciones)
+VALUES
+(
+    1,
+    'cuenta_bancaria',
+    'Bancolombia',
+    'Hotel Las Americas SAS',
+    '12345678901',
+    'Transferir y enviar comprobante al correo del proveedor'
+);
+INSERT INTO metodo_pago_proveedor
+(id_proveedor, tipo_metodo, entidad, titular, numero_referencia)
+VALUES
+(
+    5,
+    'nequi',
+    'Nequi',
+    'CocoraTours',
+    '3001234567'
+);
+INSERT INTO metodo_pago_proveedor
+(id_proveedor, tipo_metodo, entidad, titular, numero_referencia)
+VALUES
+(
+    5,
+    'daviplata',
+    'Daviplata',
+    'CocoraTours',
+    '3209876543'
+);
+INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo, estado)
+VALUES
+('Andrés',  'Herrera',  'Español, Inglés',          'Cartagena histórica y playas', '3100001111', 'andres.guia@mareva.co', TRUE),
+('Valentina','López',   'Español, Inglés, Francés', 'Ecoturismo y naturaleza',      '3100002222', 'valentina.guia@mareva.co', TRUE),
+('Miguel',  'Castillo', 'Español',                   'Aventura y deportes extremos', '3100003333', 'miguel.guia@mareva.co', TRUE);
+INSERT INTO seguro (tipo_seguro, cobertura, precio, descripcion)
+VALUES
+('Básico',    'Accidentes y emergencias médicas hasta $50.000.000',  120000, 'Seguro esencial para viajes nacionales'),
+('Completo',  'Accidentes, médico, cancelación y equipaje',          280000, 'Cobertura amplia recomendada'),
+('Premium',   'Todo incluido con cobertura de $500.000.000',         520000, 'Máxima protección para tu viaje');
+INSERT INTO paquete_turistico
+    (nombre, descripcion, precio, duracion_dias, duracion_noches,
+     cupos_totales, cupos_disponibles, fecha_inicio, fecha_fin,
+     personalizable, estado, id_destino, id_guia)
+VALUES
+('Cartagena Mágica',
+ 'Descubre la ciudad amurallada con playas privadas e historia colonial.',
+ 1850000, 5, 4, 20, 14,
+ '2026-07-01', '2026-07-05', TRUE, 'activo', 1, 1),
+('Medellín Innovadora',
+ 'Conoce la ciudad más transformadora de América Latina.',
+ 1200000, 4, 3, 25, 20,
+ '2026-07-10', '2026-07-13', FALSE, 'activo', 2, 2),
+('Guatapé Extremo',
+ 'Adrenalina pura: sube la Piedra del Peñol y navega el embalse.',
+ 890000, 3, 2, 15, 12,
+ '2026-07-15', '2026-07-17', TRUE, 'activo', 3, 3),
+('San Andrés Todo Incluido',
+ 'El mar de los siete colores con todo incluido en resort 5 estrellas.',
+ 3200000, 7, 6, 30, 18,
+ '2026-08-01', '2026-08-07', FALSE, 'activo', 4, 1),
+('Tayrona Salvaje',
+ 'Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.',
+ 1450000, 5, 4, 12, 8,
+ '2026-08-10', '2026-08-14', TRUE, 'activo', 5, 2),
+('Valle del Cocora Místico',
+ 'Caminata entre palmas de cera y fincas cafeteras del Quindío.',
+ 980000, 3, 2, 20, 15,
+ '2026-09-01', '2026-09-03', FALSE, 'activo', 6, 3);
+INSERT INTO servicio_extra (nombre, precio, descripcion, estado, id_paquete)
+VALUES
+('Snorkel en Islas del Rosario', 180000, 'Equipo incluido, 3 horas',  TRUE, 1),
+('Foto profesional en la Muralla',120000,'Sesión de 1 hora con fotógrafo', TRUE, 1),
+('Kayak en el embalse',          95000, 'Kayak doble 2 horas',          TRUE, 3),
+('Rappel en La Piedra',          140000,'Equipo y seguro de escalada',   TRUE, 3),
+('Buceo certificado',            350000,'Bautismo de buceo 2 inmersiones',TRUE,5),
+('Senderismo nocturno',          120000,'Guía nocturno 4 horas',         TRUE,5);
+INSERT INTO promocion (codigo, descuento, descripcion, fecha_inicio, fecha_fin, id_paquete)
+VALUES
+('VERANO10', 10.00, '10% de descuento temporada de verano', '2026-06-01', '2026-07-31', 1),
+('PAREJA20', 20.00, '20% para parejas en San Andrés',       '2026-07-01', '2026-08-31', 4),
+('MOCHILA15',15.00, '15% para viajeros aventureros',        '2026-07-01', '2026-09-30', 5);
+INSERT INTO encuesta_pregunta (texto, tipo_respuesta, orden, estado)
+VALUES
+('¿Cómo calificarías la calidad general del paquete?',        'calificacion',      1, TRUE),
+('¿Qué tan satisfecho estás con el servicio del proveedor?',  'calificacion',      2, TRUE),
+('¿El proceso de reserva en MAREVA fue fácil y claro?',       'calificacion',      3, TRUE),
+('¿Recomendarías MAREVA a un amigo o familiar?',              'calificacion',      4, TRUE),
+('Cuéntanos qué fue lo mejor de tu experiencia:',             'texto',             5, TRUE),
+('¿Qué podríamos mejorar?',                                   'texto',             6, TRUE);
