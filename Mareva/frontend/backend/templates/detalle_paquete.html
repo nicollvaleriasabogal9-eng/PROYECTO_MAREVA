@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">← Volver</a>
+<title>Detalle del paquete</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+<a href="{{ url_for('inicio') }}">
+MAREVA
+</a>
+</nav>
+
+<div class="container">
+
+<h1>{{ paquete.nombre }}</h1>
+<p>{{ paquete.duracion_dias }} días / {{ paquete.duracion_noches }} noches</p>
+<p>{{ paquete.categoria }}</p>
+<h2>${{ "{:,.0f}".format(paquete.precio) }}</h2>
+<p>{{ paquete.descripcion }}</p>
+
+<a href="{{ url_for('reserva', slug=paquete.slug) }}" class="btn btn-primary btn-lg">Reservar ahora</a>
+
+</div>
+
+<script>
+const paquete = JSON.parse(localStorage.getItem("paqueteSeleccionado"));
+
+if (!paquete) {
+  window.location.href = "/paquetes";
+}
+
+document.getElementById("nombrePaquete").innerText = paquete.nombre;
+document.getElementById("precioPaquete").innerText = paquete.precio;
+document.getElementById("duracionPaquete").innerText = paquete.duracion;
+document.getElementById("categoriaPaquete").innerText = paquete.categoria;
+
+document.getElementById("nombrePaquete").innerText = nombre;
+
+function irReserva(){
+  const paquete = JSON.parse(localStorage.getItem("paqueteSeleccionado"));
+  window.location.href = "/reserva?paquete=" + encodeURIComponent(paquete.nombre);
+}
+</script>
+
+</body>
+</html>
