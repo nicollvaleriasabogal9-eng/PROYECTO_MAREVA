@@ -158,7 +158,7 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ## 10. Metodología de Desarrollo
 
-**Scrum** con sprints de 2 semanas, tablero en GitHub Projects.
+**Scrum** 
 
 ---
 
@@ -167,10 +167,10 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 | Nombre | Rol |
 |---|---|
 | Nicoll Valeria Sabogal | Lider del proyecto |
-| Sofía Munevar | Analisis de requisitos |
-| Laura Rubiano |  |
-| César Uzcátegui | Desarrollo |
-| Andrés Aroca | Desarrollo |
+| Sofía Munevar | Tester|
+| Laura Rubiano |Analisis de requisitos|
+| César Uzcátegui |Diseñadora UX/UI|
+| Andrés Aroca | Desarrollador |
 
 ---
 
