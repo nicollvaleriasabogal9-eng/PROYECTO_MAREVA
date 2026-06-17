@@ -1,3 +1,6 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+from abc import ABC, abstractmethod
+
 PAQUETES = [
     {"slug":"cartagena-magica","nombre":"Cartagena Mágica","categoria":"playa","precio":1850000,"duracion_dias":5,"duracion_noches":4,"descripcion":"Descubre la ciudad amurallada con playas privadas e historia colonial.","emoji":"🏰","destino":"Cartagena","departamento":"Bolívar","incluye":["alojamiento","transporte","guia"],"servicios_extra":[{"nombre":"Snorkel en Islas del Rosario","precio":180000},{"nombre":"Foto profesional en la Muralla","precio":120000}]},
     {"slug":"medellin-innovadora","nombre":"Medellín Innovadora","categoria":"ciudad","precio":1200000,"duracion_dias":4,"duracion_noches":3,"descripcion":"Conoce la ciudad más transformadora de América Latina.","emoji":"🚡","destino":"Medellín","departamento":"Antioquia","incluye":["alojamiento","transporte"],"servicios_extra":[]},
@@ -44,7 +47,78 @@ DESTINOS = [
     {"nombre_destino":"Capurganá","departamento":"Chocó","ciudad":"Acandí","categoria":"playa","descripcion":"Pueblo caribeño sin carreteras, paraíso de buceadores.","emoji":"🐠"},
 ]
 
-from flask import Flask, render_template, request, redirect, url_for, session
+class PaqueteBase(ABC):
+    def __init__(self, paquete_dict):
+        self._data = paquete_dict
+
+    def get_nombre(self):
+        return self._data["nombre"]
+
+    def get_precio(self):
+        return self._data["precio"]
+
+    def get_categoria(self):
+        return self._data["categoria"]
+
+    @abstractmethod
+    def calcular_precio_final(self):
+        pass
+
+
+class Playa(PaqueteBase):
+    def calcular_precio_final(self):
+        return self._data["precio"] * 1.10
+
+
+class Aventura(PaqueteBase):
+    def calcular_precio_final(self):
+        return self._data["precio"] * 1.15
+
+
+class Ecoturismo(PaqueteBase):
+    def calcular_precio_final(self):
+        return self._data["precio"] * 1.08
+
+
+class Cultural(PaqueteBase):
+    def calcular_precio_final(self):
+        return self._data["precio"] * 0.95
+
+
+def factory_paquete(paquete_dict):
+    categoria = paquete_dict["categoria"]
+
+    if categoria == "playa":
+        return Playa(paquete_dict)
+    elif categoria == "aventura":
+        return Aventura(paquete_dict)
+    elif categoria == "ecoturismo":
+        return Ecoturismo(paquete_dict)
+    else:
+        return Cultural(paquete_dict)
+
+
+def obtener_paquetes_poo():
+    return [factory_paquete(p) for p in PAQUETES]
+
+def paquetes_con_precio_poo():
+    paquetes_obj = obtener_paquetes_poo()
+
+    return [
+    {
+        "slug": p._data["slug"],
+        "nombre": p.get_nombre(),
+        "categoria": p.get_categoria(),
+        "precio": p.get_precio(),
+        "precio_final": p.calcular_precio_final(),
+        "emoji": p._data["emoji"],
+        "departamento": p._data["departamento"],
+        "descripcion": p._data["descripcion"],
+        "duracion_dias": p._data["duracion_dias"],
+        "incluye": p._data["incluye"]
+    }
+    for p in paquetes_obj
+]
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -59,7 +133,14 @@ def inicio():
 @app.route("/paquetes")
 def paquetes():
     query = request.args.get("q", "")
-    return render_template("paquetes.html", query=query, paquetes=PAQUETES)
+
+    paquetes_poo = paquetes_con_precio_poo()
+
+    return render_template(
+        "paquetes.html",
+        query=query,
+        paquetes=paquetes_poo
+    )
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -97,6 +178,12 @@ def registro():
 def destinos():
     return render_template('destinos.html', destinos=DESTINOS)
 
+@app.route('/detalle/<slug>')
+def detalle_paquete(slug):
+    paquete = next((p for p in PAQUETES if p['slug'] == slug), None)
+    if not paquete:
+        return redirect(url_for('paquetes'))
+    return render_template('detalle_paquete.html', paquete=paquete)
 
 @app.route('/reserva/<slug>')
 def reserva(slug):
