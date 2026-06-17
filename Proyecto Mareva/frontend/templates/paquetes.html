@@ -12,35 +12,34 @@
 
 <body>
 
-
 <header>
   <nav class="navbar">
     <div class="container navbar__inner">
-    <a href="{{ url_for('inicio') }}" class="navbar__logo" aria-label="MAREVA – volver al inicio">
-    <img src="{{ url_for('static', filename='img/logo.jpeg') }}"
-       alt="Logo MAREVA"
-       class="navbar__logo-img"
-       style="height: 32px; width: auto;">
-      MAREVA
-    </a>
 
-    <ul class="navbar__nav">
-      <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
-      <li><a href="{{ url_for('paquetes') }}" class="active">Paquetes</a></li>
-      <li><a href="{{ url_for('destinos') }}">Destinos</a></li>
-    </ul>
+      <a href="{{ url_for('inicio') }}" class="navbar__logo">
+        <img src="{{ url_for('static', filename='img/logo.jpeg') }}"
+             alt="Logo MAREVA"
+             class="navbar__logo-img"
+             style="height: 32px; width: auto;">
+        MAREVA
+      </a>
 
-    <div class="navbar__actions">
-      {% if session.get('usuario') %}
-        <a href="{{ url_for('perfil') }}" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:var(--space-2)">
-        <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem">👤</span>
-      {{ session['usuario']['nombre'] }}
-        </a>
-      {% else %}
-        <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
-        <a href="{{ url_for('registro') }}" class="btn btn-primary btn-sm">Registrarse</a>
-      {% endif %}
-    </div>
+      <ul class="navbar__nav">
+        <li><a href="{{ url_for('inicio') }}">Inicio</a></li>
+        <li><a href="{{ url_for('paquetes') }}" class="active">Paquetes</a></li>
+        <li><a href="{{ url_for('destinos') }}">Destinos</a></li>
+      </ul>
+
+      <div class="navbar__actions">
+        {% if session.get('usuario') %}
+          <a href="{{ url_for('perfil') }}" class="btn btn-ghost btn-sm">
+            👤 {{ session['usuario']['nombre'] }}
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
+          <a href="{{ url_for('registro') }}" class="btn btn-primary btn-sm">Registrarse</a>
+        {% endif %}
+      </div>
 
     </div>
   </nav>
@@ -50,68 +49,58 @@
 
 <section class="page-hero">
   <div class="container">
-
     <h1>Paquetes turísticos</h1>
     <p>Explora, filtra y encuentra tu próximo viaje</p>
 
-    <!-- ✔ BUSCADOR ÚNICO -->
-    <form class="paquetes-search" onsubmit="buscarPaquete(event)">
-      <input
-        type="search"
-        id="searchInput"
-        placeholder="Buscar por destino o nombre..."
-      />
-      <button class="btn btn-primary" type="submit">Buscar</button>
-    </form>
+<form class="paquetes-search" onsubmit="buscarPaquete(event)">
+  <input
+    type="search"
+    id="searchInput"
+    placeholder="Buscar por destino o nombre..."
+  />
+  <button class="btn btn-primary" type="submit">Buscar</button>
+</form>
 
   </div>
-</section>
 
 <div class="container paquetes-layout">
+
   <aside class="filtros-sidebar">
 
-<fieldset class="filtro-group">
-  <legend class="filtro-group__title">Categoría</legend>
-  <select class="form-select" id="categoria" onchange="aplicarFiltros()">
-      <option value="todos">Todos</option>
-      <option value="playa">Playa</option>
-      <option value="aventura">Aventura</option>
-      <option value="ecoturismo">Ecoturismo</option>
-      <option value="cultural">Cultural</option>
-    </select>
+    <fieldset class="filtro-group">
+      <legend>Categoría</legend>
+      <select id="categoria" onchange="aplicarFiltros()">
+        <option value="todos">Todos</option>
+        <option value="playa">Playa</option>
+        <option value="aventura">Aventura</option>
+        <option value="ecoturismo">Ecoturismo</option>
+        <option value="cultural">Cultural</option>
+        <option value="ciudad">Ciudad</option>
+      </select>
+    </fieldset>
 
-   </fieldset>
-<fieldset class="filtro-group">
-  <legend class="filtro-group__title">Duración</legend>
-  <div class="filtro-group__options">
-    <label class="filtro-check"><input type="checkbox" name="duracion" value="corto" onchange="aplicarFiltros()"> 1–3 días</label>
-    <label class="filtro-check"><input type="checkbox" name="duracion" value="medio" onchange="aplicarFiltros()"> 4–7 días</label>
-    <label class="filtro-check"><input type="checkbox" name="duracion" value="largo" onchange="aplicarFiltros()"> 8+ días</label>
-  </div>
-</fieldset>
+    <fieldset class="filtro-group">
+      <legend>Duración</legend>
+      <label><input type="checkbox" value="corto" onchange="aplicarFiltros()"> 1–3 días</label>
+      <label><input type="checkbox" value="medio" onchange="aplicarFiltros()"> 4–7 días</label>
+      <label><input type="checkbox" value="largo" onchange="aplicarFiltros()"> 8+ días</label>
+    </fieldset>
 
     <label>Precio máximo</label>
-    <input
-      type="range"
-      id="precioRange"
-      min="500000"
-      max="5000000"
-      step="100000"
-      value="5000000"
-      oninput="actualizarPrecio(this.value)"
-    />
+    <input type="range" id="precioRange"
+           min="500000" max="5000000"
+           step="100000"
+           value="5000000"
+           oninput="actualizarPrecio(this.value)" />
     <div id="precioValor">$5.000.000</div>
 
-   <fieldset class="filtro-group">
-  <legend class="filtro-group__title">Incluye</legend>
-  <div class="filtro-group__options">
-    <label class="filtro-check"><input type="checkbox" name="incluye" value="alojamiento" onchange="aplicarFiltros()"> Alojamiento</label>
-    <label class="filtro-check"><input type="checkbox" name="incluye" value="transporte" onchange="aplicarFiltros()"> Transporte</label>
-    <label class="filtro-check"><input type="checkbox" name="incluye" value="guia" onchange="aplicarFiltros()"> Guía</label>
-    <label class="filtro-check"><input type="checkbox" name="incluye" value="seguro" onchange="aplicarFiltros()"> Seguro</label>
-  </div>
-</fieldset>
-
+    <fieldset class="filtro-group">
+      <legend>Incluye</legend>
+      <label><input type="checkbox" value="alojamiento" onchange="aplicarFiltros()"> Alojamiento</label>
+      <label><input type="checkbox" value="transporte" onchange="aplicarFiltros()"> Transporte</label>
+      <label><input type="checkbox" value="guia" onchange="aplicarFiltros()"> Guía</label>
+      <label><input type="checkbox" value="seguro" onchange="aplicarFiltros()"> Seguro</label>
+    </fieldset>
 
   </aside>
 
@@ -123,257 +112,35 @@
 
     <div class="paquetes-grid grid-3" id="paquetesGrid">
 
-    
+      {% for p in paquetes %}
+      <article class="card"
+        data-categoria="{{ p.categoria }}"
+        data-precio="{{ p.precio }}"
+        data-duracion="{% if p.duracion_dias <= 3 %}corto{% elif p.duracion_dias <= 7 %}medio{% else %}largo{% endif %}"
+        data-incluye="{{ ' '.join(p.incluye) }}">
 
-<article class="card" data-categoria="playa" data-precio="1850000" data-duracion="medio" data-incluye="alojamiento transporte guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏰</div></div>
-  <div class="card__body">
-    <div class="card__tag">Bolívar</div>
-    <h3 class="card__title">Cartagena Mágica</h3>
-    <p class="card__desc">Descubre la ciudad amurallada con playas privadas e historia colonial.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.850.000</div>
-  </div>
-</article>
+        <div class="card__img-wrap">
+          <div class="card__img--placeholder">{{ p.emoji }}</div>
+        </div>
 
-<article class="card" data-categoria="ecoturismo" data-precio="1450000" data-duracion="medio" data-incluye="alojamiento transporte seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🌴</div></div>
-  <div class="card__body">
-    <div class="card__tag">Magdalena</div>
-    <h3 class="card__title">Tayrona Salvaje</h3>
-    <p class="card__desc">Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.450.000</div>
-  </div>
-</article>
+        <div class="card__body">
+          <div class="card__tag">{{ p.departamento }}</div>
+          <h3 class="card__title">{{ p.nombre }}</h3>
+          <p class="card__desc">{{ p.descripcion }}</p>
+        </div>
 
-<article class="card" data-categoria="aventura" data-precio="2950000" data-duracion="medio" data-incluye="alojamiento vuelo guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🌈</div></div>
-  <div class="card__body">
-    <div class="card__tag">Meta</div>
-    <h3 class="card__title">Caño Cristales Premium</h3>
-    <p class="card__desc">Visita el río más hermoso del mundo con guía especializado.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.950.000</div>
-  </div>
-</article>
+        <div class="card__footer">
+          <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
+        </div>
 
-<article class="card" data-categoria="cultural" data-precio="1350000" data-duracion="medio" data-incluye="alojamiento transporte">
-  <div class="card__img-wrap"><div class="card__img--placeholder">☕</div></div>
-  <div class="card__body">
-    <div class="card__tag">Quindío</div>
-    <h3 class="card__title">Eje Cafetero Tradicional</h3>
-    <p class="card__desc">Recorrido por fincas cafeteras y pueblos patrimonio.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.350.000</div>
-  </div>
-</article>
-
-  </article>
-<article class="card" data-categoria="playa" data-precio="2400000" data-duracion="medio" data-incluye="alojamiento transporte guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🐋</div></div>
-  <div class="card__body">
-    <div class="card__tag">Chocó</div>
-    <h3 class="card__title">Nuquí Ecoturismo</h3>
-    <p class="card__desc">Avistamiento de ballenas y playas vírgenes del Pacífico.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.400.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="cultural" data-precio="890000" data-duracion="corto" data-incluye="alojamiento transporte">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏘️</div></div>
-  <div class="card__body">
-    <div class="card__tag">Santander</div>
-    <h3 class="card__title">Barichara Colonial</h3>
-    <p class="card__desc">Uno de los pueblos más bonitos de Colombia.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$890.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="cultural" data-precio="680000" data-duracion="corto" data-incluye="transporte guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">⛪</div></div>
-  <div class="card__body">
-    <div class="card__tag">Nariño</div>
-    <h3 class="card__title">Santuario Las Lajas</h3>
-    <p class="card__desc">Basílica neogótica sobre un cañón, ícono religioso.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$680.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="cultural" data-precio="980000" data-duracion="medio" data-incluye="alojamiento transporte guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏛️</div></div>
-  <div class="card__body">
-    <div class="card__tag">Boyacá</div>
-    <h3 class="card__title">Boyacá Histórica</h3>
-    <p class="card__desc">Villa de Leyva, Ráquira y monumentos históricos.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$980.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="1150000" data-duracion="medio" data-incluye="alojamiento guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🪂</div></div>
-  <div class="card__body">
-    <div class="card__tag">Santander</div>
-    <h3 class="card__title">Cañón del Chicamocha</h3>
-    <p class="card__desc">Deportes extremos y paisajes espectaculares.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.150.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="cultural" data-precio="1250000" data-duracion="medio" data-incluye="alojamiento transporte">
-  <div class="card__img-wrap"><div class="card__img--placeholder">⛵</div></div>
-  <div class="card__body">
-    <div class="card__tag">Bolívar</div>
-    <h3 class="card__title">Mompox Patrimonial</h3>
-    <p class="card__desc">Historia, arquitectura colonial y cultura ribereña.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.250.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="2100000" data-duracion="medio" data-incluye="alojamiento guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏔️</div></div>
-  <div class="card__body">
-    <div class="card__tag">Magdalena</div>
-    <h3 class="card__title">Sierra Nevada Ancestral</h3>
-    <p class="card__desc">Conexión con comunidades indígenas y naturaleza.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.100.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="playa" data-precio="1100000" data-duracion="medio" data-incluye="alojamiento transporte">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏖️</div></div>
-  <div class="card__body">
-    <div class="card__tag">Sucre</div>
-    <h3 class="card__title">Tolú y Coveñas Relax</h3>
-    <p class="card__desc">Playas tranquilas y actividades acuáticas.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.100.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="2800000" data-duracion="medio" data-incluye="alojamiento guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🦈</div></div>
-  <div class="card__body">
-    <div class="card__tag">Cauca</div>
-    <h3 class="card__title">Isla Gorgona Explorer</h3>
-    <p class="card__desc">Naturaleza, senderismo y biodiversidad marina.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.800.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="playa" data-precio="1900000" data-duracion="medio" data-incluye="alojamiento guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🐠</div></div>
-  <div class="card__body">
-    <div class="card__tag">Chocó</div>
-    <h3 class="card__title">Capurganá Paraíso</h3>
-    <p class="card__desc">Playas cristalinas y ecoturismo en el Caribe.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.900.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="2750000" data-duracion="largo" data-incluye="alojamiento vuelo guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🌿</div></div>
-  <div class="card__body">
-    <div class="card__tag">Amazonas</div>
-    <h3 class="card__title">Amazonas Aventura</h3>
-    <p class="card__desc">Explora la selva amazónica y comunidades indígenas.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.750.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="750000" data-duracion="corto" data-incluye="transporte guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🌵</div></div>
-  <div class="card__body">
-    <div class="card__tag">Huila</div>
-    <h3 class="card__title">Desierto de la Tatacoa</h3>
-    <p class="card__desc">Observación astronómica y paisajes únicos.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$750.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="2950000" data-duracion="medio" data-incluye="alojamiento vuelo guia seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🌈</div></div>
-  <div class="card__body">
-    <div class="card__tag">Meta</div>
-    <h3 class="card__title">Caño Cristales Premium</h3>
-    <p class="card__desc">El río más hermoso del mundo con guía especializado.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$2.950.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="ciudad" data-precio="1200000" data-duracion="medio" data-incluye="alojamiento transporte">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🚡</div></div>
-  <div class="card__body">
-    <div class="card__tag">Antioquia</div>
-    <h3 class="card__title">Medellín Innovadora</h3>
-    <p class="card__desc">La ciudad más transformadora de América Latina.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$1.200.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="aventura" data-precio="890000" data-duracion="corto" data-incluye="alojamiento guia">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🪨</div></div>
-  <div class="card__body">
-    <div class="card__tag">Antioquia</div>
-    <h3 class="card__title">Guatapé Extremo</h3>
-    <p class="card__desc">Sube la Piedra del Peñol y navega el embalse.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$890.000</div>
-  </div>
-</article>
-
-<article class="card" data-categoria="playa" data-precio="3200000" data-duracion="largo" data-incluye="alojamiento vuelo transporte seguro">
-  <div class="card__img-wrap"><div class="card__img--placeholder">🏝️</div></div>
-  <div class="card__body">
-    <div class="card__tag">San Andrés</div>
-    <h3 class="card__title">San Andrés Todo Incluido</h3>
-    <p class="card__desc">El mar de los siete colores, resort 5 estrellas.</p>
-  </div>
-  <div class="card__footer">
-    <div class="card__price">$3.200.000</div>
-  </div>
-</article>
+      </article>
+      {% endfor %}
 
     </div>
 
     <div id="noResultados" hidden>
       <h3>No se encontraron paquetes</h3>
       <p>Intenta cambiar los filtros</p>
-      <button onclick="aplicarFiltros()" class="btn btn-primary">
-        Ver todos
-      </button>
     </div>
 
   </section>
