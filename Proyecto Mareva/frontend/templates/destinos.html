@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAREVA | Destinos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+<header>
+  <nav class="navbar">
+    <div class="container navbar__inner">
+
+      <a href="{{ url_for('inicio') }}" class="navbar__logo">
+        <img src="{{ url_for('static', filename='img/logo.jpeg') }}"
+             alt="Logo MAREVA"
+             class="navbar__logo-img"
+             style="height: 32px; width: auto;">
+        MAREVA
+      </a>
+
+      <ul class="navbar__nav">
+        <li><a href="{{ url_for('inicio') }}" class="navbar__link">Inicio</a></li>
+        <li><a href="{{ url_for('paquetes') }}" class="navbar__link">Paquetes</a></li>
+        <li><a href="{{ url_for('destinos') }}" class="navbar__link active">Destinos</a></li>
+      </ul>
+
+      <div class="navbar__actions">
+        {% if session.get('usuario') %}
+          <a href="{{ url_for('perfil') }}" class="btn btn-ghost btn-sm"
+             style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem">
+              👤
+            </span>
+            {{ session['usuario']['nombre'] }}
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
+          <a href="{{ url_for('registro') }}" class="btn btn-primary btn-sm">Registrarse</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <p class="section-label">🗺️ Colombia entera</p>
+      <h1 class="section-title">Nuestros destinos</h1>
+      <p class="section-desc">20 destinos increíbles por todo el país</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-3">
+        {% for d in destinos %}
+        <article class="card">
+          <div class="card__img-wrap">
+            <div class="card__img--placeholder">{{ d.emoji }}</div>
+            <span class="card__badge badge badge-blue">{{ d.categoria }}</span>
+          </div>
+          <div class="card__body">
+            <div class="card__tag">{{ d.departamento }}</div>
+            <h3 class="card__title">{{ d.nombre_destino }}</h3>
+            <p class="card__desc">{{ d.descripcion }}</p>
+          </div>
+          <div class="card__footer">
+            <span class="text-muted" style="font-size:var(--text-xs)">{{ d.ciudad }}</span>
+            <a href="{{ url_for('paquetes') }}?q={{ d.nombre_destino }}" class="btn btn-outline btn-sm">Ver paquetes</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

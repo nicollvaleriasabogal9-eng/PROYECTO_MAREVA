@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil – MAREVA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <div class="container navbar__inner">
+      
+<a href="{{ url_for('inicio') }}" class="navbar__logo">
+  <img src="{{ url_for('static', filename='img/logo.jpeg') }}"
+       alt="Logo MAREVA"
+       class="navbar__logo-img"
+       style="height: 32px; width: auto;">
+  MAREVA
+</a>
+      <ul class="navbar__nav">
+        <li><a href="{{ url_for('inicio') }}" class="navbar__link">Inicio</a></li>
+        <li><a href="{{ url_for('paquetes') }}" class="navbar__link">Paquetes</a></li>
+        <li><a href="{{ url_for('destinos') }}" class="navbar__link">Destinos</a></li>
+      </ul>
+      <div class="navbar__actions">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main class="perfil-main">
+  <div class="container">
+
+    <a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">
+      ← Volver
+    </a>
+
+    <div class="perfil-layout">
+
+      <aside class="perfil-sidebar">
+        <div class="perfil-avatar">👤</div>
+        <h2 class="perfil-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</h2>
+        <p class="perfil-correo">{{ usuario.correo }}</p>
+        <span class="perfil-nivel">{{ usuario.nivel }}</span>
+
+        <div class="divider"></div>
+
+        <a href="{{ url_for('logout') }}" class="btn btn-outline" style="width:100%;justify-content:center">
+          Cerrar sesión
+        </a>
+      </aside>
+
+      <div class="perfil-content">
+
+        <div class="perfil-card">
+          <h3 class="perfil-card__title">🏆 Mis insignias</h3>
+          <div class="insignias-grid">
+            {% for i in usuario.insignias %}
+              <span class="badge badge-blue">{{ i }}</span>
+            {% else %}
+              <p class="text-muted">Aún no tienes insignias. ¡Haz tu primera reserva!</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="perfil-card">
+          <h3 class="perfil-card__title">📋 Última reserva</h3>
+          {% if usuario.get('ultima_reserva') %}
+            <p>{{ usuario.ultima_reserva }}</p>
+          {% else %}
+            <p class="text-muted">No tienes reservas aún. <a href="{{ url_for('paquetes') }}" class="form-link">Explorar paquetes</a></p>
+          {% endif %}
+        </div>
+
+        <div class="perfil-card">
+          <h3 class="perfil-card__title">👤 Información de cuenta</h3>
+          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
+            <strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}
+          </p>
+          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
+            <strong>Correo:</strong> {{ usuario.correo }}
+          </p>
+          <p style="font-size:var(--text-sm);color:var(--gray-600)">
+            <strong>Nivel:</strong> {{ usuario.nivel }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
