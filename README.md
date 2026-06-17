@@ -1,122 +1,200 @@
-# MAREVA - Proyecto Agencia de Viajes
+# 🌊 MAREVA — Agencia de Viajes Digital
 
-## 1️⃣ ¿Qué Problema Resuelve?
-
-Este sistema resuelve la dificultad que enfrentan muchas personas al organizar sus vacaciones. Actualmente, los usuarios deben buscar por separado hospedaje, alimentación y actividades turísticas, lo que genera desorden, pérdida de tiempo y mayores gastos innecesarios.
-
-MAREVA es un aplicativo web que centraliza en una sola plataforma la organización de planes vacacionales personalizados. Los usuarios podrán gestionar hospedaje, alimentación y actividades desde un único lugar, logrando una planificación más eficiente, organizada y económica.
-
-Es importante porque democratiza la planificación vacacional para jóvenes y adultos que no cuentan con herramientas integradas y accesibles, reduciendo el estrés del proceso y optimizando el presupuesto de viaje.
+> Plataforma web para la organización de planes vacacionales personalizados en Colombia.
 
 ---
 
-## 2️⃣ Usuarios Principales
+## 1. ¿Qué Problema Resuelve?
 
-### Viajero / Usuario Final
+Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el tiquete, otra para el hotel, otra para las actividades. El resultado es desorden, tiempo perdido y gastos innecesarios.
 
-Busca destinos, organiza su plan vacacional, gestiona hospedaje, alimentación y actividades desde la plataforma.
-
-### Administrador del Sistema
-
-Gestiona el contenido de la plataforma, supervisa los planes creados y garantiza el correcto funcionamiento del aplicativo.
+**MAREVA** centraliza todo en un solo lugar: el usuario elige un destino, selecciona el paquete turístico, agrega servicios extra (buceo, kayak, senderismo nocturno…), aplica su seguro de viaje y confirma su reserva, sin salir de la plataforma. El administrador gestiona el catálogo desde el mismo sistema.
 
 ---
 
-## 3️⃣ Funcionalidades Principales
+## 2. Usuarios del Sistema
 
-* Registro e inicio de sesión de usuarios
-* Creación y gestión de planes vacacionales personalizados
-* Búsqueda y selección de hospedaje
-* Búsqueda y selección de opciones de alimentación
-* Búsqueda y selección de actividades turísticas
-* Visualización del plan vacacional completo
-* Estimación de costos del plan
+| Rol | Descripción |
+|---|---|
+| **Cliente / Viajero** | Navega destinos, reserva paquetes, gestiona su perfil y acumula insignias |
+| **Administrador** | Gestiona paquetes, proveedores, guías, promociones y audita el sistema |
 
 ---
 
-## 4️⃣ Metodología de Desarrollo
+## 3. Funcionalidades Principales
 
-### Scrum
-
-MAREVA puede presentar cambios en los requerimientos durante el desarrollo, por lo que Scrum permite adaptarse a esos cambios mediante sprints cortos de 2 a 4 semanas.
-
----
-
-## 5️⃣ Arquitectura
-
-### Arquitectura N-Capas
-
-METODOLOGÍA EN CAPAS
- 
-Estructura: Organiza el sistema en niveles independientes con funciones específicas.
- 
-- Capa de Presentación: Interfaz de usuario, donde se ingresan datos y se muestran resultados.
-- Capa de Negocio: Contiene reglas, lógica y procesos propios de la actividad turística.
-- Capa de Datos: Gestiona consultas, almacenamiento y conexión con la base de datos.
- 
-Ventajas:
- 
-- Separación de responsabilidades para mayor orden.
-- Fácil mantenimiento y actualización sin afectar todo el sistema.
-- Reutilización de código y mejor escalabilidad.
- 
-Aplicación en MAREVA:
-Cada capa se comunica solo con la inmediata superior o inferior, garantizando claridad y estabilidad en el funcionamiento.
- 
- La arquitectura en capas permite separar la lógica de negocio, presentación y acceso a datos, facilitando el mantenimiento y escalabilidad del sistema.
+- Registro e inicio de sesión (con bloqueo por intentos fallidos)
+- Catálogo de **20 paquetes turísticos** con filtro por categoría y búsqueda
+- Detalle del paquete con servicios incluidos y extras opcionales
+- Flujo de reserva con selección de viajeros, seguro y observaciones
+- Perfil de usuario con nivel de gamificación e insignias
+- Sistema de **referidos** entre clientes
+- **Lista de sueños** (ahorro programado hacia un paquete)
+- Favoritos, historial de búsqueda, notificaciones
+- **Encuestas de satisfacción** post-viaje
+- Auditoría de acciones del administrador
 
 ---
 
-## 6️⃣ Tecnologías
+## 4. Tecnologías Utilizadas
 
-### Backend
-
-* Flask (Python)
-
-### Base de Datos
-
-* PostgreSQL
-
-### Frontend
-
-* HTML
-* CSS
-* JavaScript
+| Capa | Tecnología |
+|---|---|
+| **Frontend** | HTML5 · CSS3 · JavaScript |
+| **Backend** | Python 3 · Flask |
+| **Base de Datos** | PostgreSQL |
+| **Patrón Backend** | Arquitectura N-Capas (Presentación → Negocio → Datos) |
+| **Patrón OOP** | Abstract Base Class + Factory Method (clases `Playa`, `Aventura`, `Ecoturismo`, `Cultural`) |
+| **Control de versiones** | Git / GitHub |
+| **Gestión del proyecto** | GitHub Projects (Scrum) |
 
 ---
 
-## 7️⃣ Integrantes
+## 5. Arquitectura — N-Capas
 
-* Nicoll Valeria Sabogal
-* Sofia Munevar
-* Laura Rubiano
-* Cesar Uzcategui
-* Andres Aroca
+```
+┌──────────────────────────────┐
+│   Capa de Presentación       │  HTML · CSS · JS  (templates Flask)
+├──────────────────────────────┤
+│   Capa de Negocio            │  Flask routes · Clases POO · Factory
+├──────────────────────────────┤
+│   Capa de Datos              │  Repositorios · Modelos · PostgreSQL
+└──────────────────────────────┘
+```
 
----
-
-## 8️⃣ Estado Actual del Proyecto
-
-✅ Requisitos funcionales y no funcionales
-✅ Historias de usuario
-✅ Modelo entidad-relación (MER)
-✅ Modelo lógico de base de datos
-✅ Prototipos HTML/CSS
-✅ Configuración inicial GitHub Projects
-✅ Repositorio colaborativo
-✅ Scripts SQL PostgreSQL
-
-🚧 En desarrollo:
-
-* Backend con Flask
-* Integración frontend + backend
-* Sistema de autenticación
-* Conexión a PostgreSQL
+Cada capa solo se comunica con la inmediatamente adyacente. Esto garantiza:
+- **Separación de responsabilidades** — los cambios en la BD no afectan la vista
+- **Mantenibilidad** — cada módulo puede actualizarse de forma independiente
+- **Escalabilidad** — nuevas funciones se agregan en la capa correcta sin romper las demás
 
 ---
 
-## 9️⃣ Bootcamp
+## 6. Base de Datos — Módulos
 
-SENA — Arquitectura de Software
-Fecha: 25 Abril 2026
+La base de datos final en PostgreSQL tiene **13 módulos** y más de **35 tablas**:
 
+| # | Módulo | Tablas principales |
+|---|---|---|
+| 1 | **Gamificación** | `nivel`, `insignia`, `cliente_insignia` |
+| 2 | **Clientes** | `cliente`, `referido` |
+| 3 | **Destinos** | `destino` |
+| 4 | **Proveedores** | `proveedor`, `metodo_pago_proveedor` |
+| 5 | **Guías Turísticos** | `guia_turistico` |
+| 6 | **Seguros** | `tipo_seguro`, `seguro`, `seguro_servicio` |
+| 7 | **Servicios** | `alojamiento`, `alimentacion`, `transporte`, `actividad_turistica` |
+| 8 | **Paquetes Turísticos** | `paquete_turistico`, `paquete_*` (4 tablas N:M), `servicio_extra` |
+| 9 | **Promociones** | `promocion`, `promocion_insignia`, `promocion_nivel` |
+| 10 | **Reservas** | `reserva`, `reserva_seguro`, `reserva_servicio_extra`, `viajero_reserva`, `itinerario_viaje`, `itinerario_actividad` |
+| 11 | **Funcionalidades Cliente** | `favoritos`, `lista_suenos`, `historial_busqueda`, `notificacion` |
+| 12 | **Encuestas** | `encuesta_pregunta`, `encuesta_respuesta` |
+| 13 | **Auditoría** | `auditoria_admin` |
+
+**Datos iniciales cargados:**
+- 4 niveles de gamificación: Explorador → Aventurero → Viajero Elite → Embajador
+- 5 insignias: Primera Aventura, Playero, Montañista, Viajero Frecuente, Referidor Estrella
+- 20 destinos colombianos
+- 20 paquetes turísticos
+- 5 administradores + 1 cliente de prueba (`yadira@test.co`)
+- 5 proveedores, 3 guías, 3 promociones, 6 encuestas base
+
+---
+
+## 7. Diagrama de Componentes
+
+El sistema sigue una arquitectura cliente-servidor donde:
+
+- El **navegador** consume las rutas Flask (`/`, `/paquetes`, `/login`, `/reserva/<slug>`, etc.)
+- El **backend Flask** contiene los controladores, servicios (POO con factory) y adaptadores
+- Los **repositorios** se conectan a **PostgreSQL** para persistir clientes, reservas y paquetes
+- Los **proveedores externos** (seguros, guías) son entidades de la BD, no servicios externos en esta versión
+
+---
+
+## 8. Patrón POO en el Backend
+
+`app.py` implementa **Abstract Base Class + Factory Method**:
+
+```python
+class PaqueteBase(ABC):
+    @abstractmethod
+    def calcular_precio_final(self): pass
+
+class Playa(PaqueteBase):
+    def calcular_precio_final(self): return self._data["precio"] * 1.10
+
+class Aventura(PaqueteBase):
+    def calcular_precio_final(self): return self._data["precio"] * 1.15
+
+class Ecoturismo(PaqueteBase):
+    def calcular_precio_final(self): return self._data["precio"] * 1.08
+
+class Cultural(PaqueteBase):
+    def calcular_precio_final(self): return self._data["precio"] * 0.95
+
+def factory_paquete(paquete_dict):
+    # retorna la subclase correcta según categoría
+```
+
+Cada categoría aplica un ajuste de precio diferente, y la factory decide qué clase instanciar sin que el resto del código lo sepa.
+
+---
+
+## 9. Rutas Flask Implementadas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/` | Página principal con 6 destacados |
+| GET | `/paquetes` | Catálogo completo con búsqueda |
+| GET | `/destinos` | Listado de los 20 destinos |
+| GET | `/detalle/<slug>` | Detalle de un paquete |
+| GET/POST | `/login` | Inicio de sesión |
+| GET/POST | `/registro` | Registro de nuevo usuario |
+| GET | `/reserva/<slug>` | Formulario de reserva (requiere login) |
+| POST | `/confirmar-reserva` | Procesa la reserva |
+| GET | `/perfil` | Perfil del usuario logueado |
+| GET | `/logout` | Cierra sesión |
+
+---
+
+## 10. Metodología de Desarrollo
+
+**Scrum** con sprints de 2 semanas, tablero en GitHub Projects.
+
+---
+
+## 11. Integrantes
+
+| Nombre | Rol |
+|---|---|
+| Nicoll Valeria Sabogal | Lider del proyecto |
+| Sofía Munevar | Analisis de requisitos |
+| Laura Rubiano |  |
+| César Uzcátegui | Desarrollo |
+| Andrés Aroca | Desarrollo |
+
+---
+
+## 12. Estado Actual del Proyecto
+
+✅ Requisitos funcionales y no funcionales  
+✅ Historias de usuario  
+✅ Modelo Entidad-Relación (MER) y modelo lógico  
+✅ Script SQL final PostgreSQL (13 módulos, 35+ tablas, datos iniciales)  
+✅ Prototipos HTML/CSS/JS funcionales  
+✅ Backend Flask con rutas y POO implementadas  
+✅ Sistema de sesiones (login/registro/logout)  
+✅ Catálogo de paquetes con Factory Method  
+✅ Repositorio colaborativo en GitHub  
+
+🚧 En desarrollo:  
+- Conexión real Flask ↔ PostgreSQL  
+- Sistema de autenticación con hash de contraseña  
+- Panel de administración  
+- Integración completa de reservas en BD  
+
+---
+
+## 13. Bootcamp
+
+**SENA — Arquitectura de Software**  
+Inicio: 25 de abril de 2026
