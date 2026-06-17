@@ -46,7 +46,24 @@ MAREVA puede presentar cambios en los requerimientos durante el desarrollo, por 
 
 ### Arquitectura N-Capas
 
-La arquitectura en capas permite separar la lógica de negocio, presentación y acceso a datos, facilitando el mantenimiento y escalabilidad del sistema.
+METODOLOGÍA EN CAPAS
+ 
+Estructura: Organiza el sistema en niveles independientes con funciones específicas.
+ 
+- Capa de Presentación: Interfaz de usuario, donde se ingresan datos y se muestran resultados.
+- Capa de Negocio: Contiene reglas, lógica y procesos propios de la actividad turística.
+- Capa de Datos: Gestiona consultas, almacenamiento y conexión con la base de datos.
+ 
+Ventajas:
+ 
+- Separación de responsabilidades para mayor orden.
+- Fácil mantenimiento y actualización sin afectar todo el sistema.
+- Reutilización de código y mejor escalabilidad.
+ 
+Aplicación en MAREVA:
+Cada capa se comunica solo con la inmediata superior o inferior, garantizando claridad y estabilidad en el funcionamiento.
+ 
+ La arquitectura en capas permite separar la lógica de negocio, presentación y acceso a datos, facilitando el mantenimiento y escalabilidad del sistema.
 
 ---
 
