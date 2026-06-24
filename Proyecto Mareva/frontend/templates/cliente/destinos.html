@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main>
+  <section class="page-hero">
+    <div class="container">
+      <p class="section-label">🗺️ Colombia entera</p>
+      <h1 class="section-title">Nuestros destinos</h1>
+      <p class="section-desc">20 destinos increíbles por todo el país</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-3">
+        {% for d in destinos %}
+        <article class="card">
+          <div class="card__img-wrap">
+            <div class="card__img--placeholder">{{ d.emoji }}</div>
+            <span class="card__badge badge badge-blue">{{ d.categoria }}</span>
+          </div>
+          <div class="card__body">
+            <div class="card__tag">{{ d.departamento }}</div>
+            <h3 class="card__title">{{ d.nombre_destino }}</h3>
+            <p class="card__desc">{{ d.descripcion }}</p>
+          </div>
+          <div class="card__footer">
+            <span class="text-muted" style="font-size:var(--text-xs)">{{ d.ciudad }}</span>
+            <a href="{{ url_for('paquetes') }}?q={{ d.nombre_destino }}" class="btn btn-outline btn-sm">Ver paquetes</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
