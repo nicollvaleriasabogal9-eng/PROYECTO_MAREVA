@@ -52,20 +52,61 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 
 ## 5. Arquitectura — N-Capas
 
+El sistema está dividido en **6 capas**, agrupadas en FrontEnd y BackEnd:
+
 ```
-┌──────────────────────────────┐
-│   Capa de Presentación       │  HTML · CSS · JS  (templates Flask)
-├──────────────────────────────┤
-│   Capa de Negocio            │  Flask routes · Clases POO · Factory
-├──────────────────────────────┤
-│   Capa de Datos              │  Repositorios · Modelos · PostgreSQL
-└──────────────────────────────┘
+╔══════════════════════════════════════════════════════╗
+║  FRONTEND                                            ║
+║  ┌───────────────────────────────────────────────┐  ║
+║  │  Capa de Presentación  │  HTML5 · CSS3 · JS   │  ║
+║  └───────────────────────────────────────────────┘  ║
+╠══════════════════════════════════════════════════════╣
+║  BACKEND                                             ║
+║  ┌───────────────────────────────────────────────┐  ║
+║  │  Capa de Aplicación    │  Flask (routes +     │  ║
+║  │                        │  controllers)        │  ║
+║  ├───────────────────────────────────────────────┤  ║
+║  │  Capa de Negocio       │  Python · Flask      │  ║
+║  │  (Services)            │                      │  ║
+║  ├───────────────────────────────────────────────┤  ║
+║  │  Capa de Datos         │  Python · POO        │  ║
+║  │  (Models)              │                      │  ║
+║  ├───────────────────────────────────────────────┤  ║
+║  │  Capa de Persistencia  │  PostgreSQL          │  ║
+║  │  (Repositories)        │                      │  ║
+║  ├───────────────────────────────────────────────┤  ║
+║  │  Servicios Externos    │  APIs de terceros    │  ║
+║  │  (Adapters)            │                      │  ║
+║  └───────────────────────────────────────────────┘  ║
+╚══════════════════════════════════════════════════════╝
 ```
 
-Cada capa solo se comunica con la inmediatamente adyacente. Esto garantiza:
-- **Separación de responsabilidades** — los cambios en la BD no afectan la vista
+### Descripción de cada capa
+
+| Capa | Tecnología | Responsabilidad |
+|---|---|---|
+| **Presentación** | HTML5 · CSS3 · JavaScript | Muestra la interfaz al usuario y gestiona la interacción visual |
+| **Aplicación** | Flask (routes · controllers) | Actúa como intermediaria entre el FrontEnd y la lógica de negocio. Define las URLs y recibe las solicitudes HTTP |
+| **Negocio (Services)** | Python · Flask | Contiene las reglas de negocio del sistema: validaciones, cálculos y procesamiento de información |
+| **Datos (Models)** | Python · POO | Representa las entidades de la base de datos, define atributos y relaciones entre tablas |
+| **Persistencia (Repositories)** | PostgreSQL | Se encarga de la comunicación directa con la base de datos: consultas, inserciones y actualizaciones |
+| **Servicios Externos (Adapters)** | APIs de terceros | Conectores con servicios externos. Actúan como intermediarios entre la aplicación y el mundo exterior |
+
+### ¿Por qué elegimos Arquitectura N-Capas?
+
+El equipo optó por esta arquitectura por dos razones fundamentales:
+
+**1. Modificabilidad sin efecto cascada**
+Al separar cada responsabilidad en su propia capa, cualquier cambio queda contenido sin propagarse al resto del sistema. Si se cambia PostgreSQL por otro motor de base de datos, solo se toca la capa de Persistencia. Si se rediseña la interfaz, la lógica de negocio y los repositorios permanecen intactos. Si se agrega un nuevo servicio externo, basta con crear un nuevo adapter sin modificar nada más. Esto fue clave para un equipo de 5 personas trabajando en paralelo: cada integrante podía modificar su módulo sin romper el trabajo de los demás.
+
+**2. Optimización y rendimiento del sistema**
+La separación de responsabilidades permite identificar y optimizar cada capa de forma independiente. Si hay lentitud en las consultas, se interviene únicamente en los repositorios sin tocar los servicios ni las rutas. Si hay un cuello de botella en la lógica de negocio, se refactoriza esa capa sin afectar la vista. Esto hace que el sistema sea más fácil de auditar, depurar y escalar a medida que crezca el catálogo de paquetes o la base de clientes.
+
+Esto garantiza:
+- **Separación de responsabilidades** — los cambios en la BD no afectan la vista ni los servicios
 - **Mantenibilidad** — cada módulo puede actualizarse de forma independiente
 - **Escalabilidad** — nuevas funciones se agregan en la capa correcta sin romper las demás
+- **Trabajo en equipo eficiente** — cada integrante trabaja sobre su capa sin generar conflictos
 
 ---
 
@@ -158,7 +199,7 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ## 10. Metodología de Desarrollo
 
-**Scrum** 
+**Scrum**
 
 ---
 
@@ -167,9 +208,9 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 | Nombre | Rol |
 |---|---|
 | Nicoll Valeria Sabogal | Lider del proyecto |
-| Sofía Munevar | Tester|
-| Laura Rubiano |Analisis de requisitos|
-| César Uzcátegui |Diseñadora UX/UI|
+| Sofía Munevar | Tester |
+| Laura Rubiano | Análisis de requisitos |
+| César Uzcátegui | Diseñadora UX/UI |
 | Andrés Aroca | Desarrollador |
 
 ---
