@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="auth-main">
+  <div class="auth-bg" aria-hidden="true">
+    <div class="auth-bg__blob auth-bg__blob--1"></div>
+    <div class="auth-bg__blob auth-bg__blob--2"></div>
+  </div>
+
+  <div class="registro-layout">
+    <div class="auth-card__header" style="margin-bottom:var(--space-6)">
+      <h1 class="auth-card__title text-display">Crear cuenta</h1>
+      <p class="auth-card__subtitle">Únete a MAREVA y empieza a explorar Colombia</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('registro') }}">
+      <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-4)">
+        <div class="form-group">
+          <label class="form-label">Nombres <span class="form-required">*</span></label>
+          <input type="text" name="nombre" class="form-input" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellidos <span class="form-required">*</span></label>
+          <input type="text" name="apellido" class="form-input" placeholder="Tu apellido" required>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:var(--space-4)">
+        <label class="form-label">Correo electrónico <span class="form-required">*</span></label>
+        <input type="email" name="correo" class="form-input" placeholder="tu@correo.com" required>
+      </div>
+
+      <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-6)">
+        <div class="form-group">
+          <label class="form-label">Contraseña <span class="form-required">*</span></label>
+          <input type="password" name="password" class="form-input" placeholder="Mínimo 8 caracteres" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar contraseña <span class="form-required">*</span></label>
+          <input type="password" name="confirmar" class="form-input" placeholder="Repite tu contraseña" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center">
+        Crear cuenta ✈
+      </button>
+    </form>
+
+    <p class="auth-card__footer">
+      ¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="form-link">Inicia sesión</a>
+    </p>
+  </div>
+</main>
+{% endblock %}
