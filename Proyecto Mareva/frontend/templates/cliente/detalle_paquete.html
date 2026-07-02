@@ -2,16 +2,22 @@
 
 {% block content %}
 
-  <div class="container">
+  <main>
+    <div>
+      <div class="card__img--placeholder" style="height: 200px;">
+        {{ paquete.emoji }}
+      </div>
+      <div class="section" style="display: flexbox; justify-content: center; align-items: center; text-align: center;">
+        <p class="section-label">🔍 Detalles Del Paquete</p>
+        <h2 class="">{{ paquete.nombre }}</h2>
+        <p class="">Precio del paquete: ${{ "{:,.0f}".format(paquete.precio) }}</p>
+        <p class="">Duracion: {{ paquete.duracion_dias }} días / {{ paquete.duracion_noches }} noches</p>
+        <p class="">Categoria: {{ paquete.categoria }}</p>
+        <p class="">{{ paquete.descripcion }}</p>
+        <a style="margin-top: 10px;" href="{{ url_for('reserva', slug=paquete.slug) }}" class="btn btn-primary btn-lg">Reservar ahora</a>
+      </div>
+    </div>
+  </main>
 
-    <h1>{{ paquete.nombre }}</h1>
-    <p>{{ paquete.duracion_dias }} días / {{ paquete.duracion_noches }} noches</p>
-    <p>{{ paquete.categoria }}</p>
-    <h2>${{ "{:,.0f}".format(paquete.precio) }}</h2>
-    <p>{{ paquete.descripcion }}</p>
-
-    <a href="{{ url_for('reserva', slug=paquete.slug) }}" class="btn btn-primary btn-lg">Reservar ahora</a>
-
-  </div>
 
 {% endblock %}
