@@ -47,6 +47,21 @@ DESTINOS = [
     {"nombre_destino":"Capurganá","departamento":"Chocó","ciudad":"Acandí","categoria":"playa","descripcion":"Pueblo caribeño sin carreteras, paraíso de buceadores.","emoji":"🐠"},
 ]
 
+INSIGNIAS = [
+    {"nombre":"Explorador","descripcion":"Has explorado 5 destinos diferentes.","icono":"🧭", "progreso":"2", "meta":"4"},
+    {"nombre":"Aventurero","descripcion":"Has reservado 3 paquetes de aventura.","icono":"🏔️", "progreso":"1", "meta":"3"},
+    {"nombre":"Cultural","descripcion":"Has visitado 4 destinos culturales.","icono":"🏛️", "progreso":"3", "meta":"4", },
+    {"nombre":"Amante del Mar","descripcion":"Has disfrutado de 3 paquetes de playa.","icono":"🏖️", "progreso":"2", "meta":"3"},
+    {"nombre":"Eco-Consciente","descripcion":"Has participado en 2 paquetes de ecoturismo.","icono":"🌿", "progreso":"1", "meta":"2"}
+]
+
+NIVELES = [
+    {"nivel":"Bronce","nombre":"Explorador", "experiencia":"0-400XP", "estado":"Bloqueado"},
+    {"nivel":"Plata","nombre":"Aventurero", "experiencia":"500-900XP", "estado":"Bloqueado"},
+    {"nivel":"Oro","nombre":"Experto", "experiencia":"1000-1500XP", "estado":"Bloqueado"},
+    {"nivel":"Diamante","nombre":"Profesional", "experiencia":"1600-2000XP", "estado":"Bloqueado"}
+]
+
 class PaqueteBase(ABC):
     def __init__(self, paquete_dict):
         self._data = paquete_dict
@@ -153,8 +168,16 @@ def login():
                 "nombre": "Yadira",
                 "apellido": "Narvaez",
                 "correo": correo,
-                "nivel": "Explorador",
-                "insignias": []
+                "nivel": {
+                    1:2,
+                    2:1,
+                    3:3
+                },
+                "insignias": {
+                    1:2,
+                    2:1,
+                    3:3,
+                }
             }
             next_url = request.args.get("next", url_for("inicio"))
             return redirect(next_url)
@@ -229,6 +252,18 @@ def perfil():
     if 'usuario' not in session:
         return redirect(url_for('login'))
     return render_template('/cliente/perfil.html', usuario=session['usuario'])
+
+@app.route('/insignias')
+def insignias():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    return render_template('/cliente/insignias.html', usuario=session['usuario'], insignias=INSIGNIAS)
+
+@app.route("/niveles")
+def niveles():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    return render_template('/cliente/niveles.html', usuario=session['usuario'])
 
 @app.route('/logout')
 def logout():
