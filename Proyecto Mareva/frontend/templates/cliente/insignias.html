@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <main>
+        <section class="page-hero">
+            <div class="container">
+                <p class="section-label">🏆 Insignias</p>
+                <h1 class="section-title">Tus logros</h1>
+                <p class="section-desc">¡Mira las insignias que has ganado y sigue desbloqueando más!</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Insignias Disponibles</h2>
+                <div class="grid-3">
+                    {% for insignia in insignias %}
+                    <article class="card">
+                        <div class="card__img-wrap">
+                            <div class="card__img--placeholder">{{ insignia.icono }}</div>
+                        </div>
+                        <div class="card__body">
+                            <div class="card__title">{{ insignia.nombre }}</div>
+                        <div class="card__title">{{ insignia.descripcion }}</div>
+                        <div class="card__footer">
+                            <div class="card__title">Progreso: {{ insignia.progreso }} / {{ insignia.meta }}</div>
+                        </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            
+    </main>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+    <section class="page-hero">
+            <div class="container">
+                <p class="section-label">🚀 Niveles</p>
+                <h1 class="section-title">Tus niveles</h1>
+                <p class="section-desc">¡Mira los niveles que has ganado y sigue desbloqueando más!</p>
+            </div>
+        </section>
+
+        <section class="section niveles-barra">
+    <div class="container">
+
+        <div class="nivel-info">
+            <h2 class="section-title">
+                Nivel Actual: <span class="gradient-text">Explorador</span>
+            </h2>
+        </div>
+
+        <div class="xp-bar">
+            <div class="xp-bar__fill" style="width: 0%;"></div>
+
+            <div class="xp-step">
+                <div class="xp-step__circle">🧭</div>
+                <span>Explorador</span>
+            </div>
+
+            <div class="xp-step">
+                <div class="xp-step__circle">🗺️</div>
+                <span>Aventurero</span>
+            </div>
+
+            <div class="xp-step">
+                <div class="xp-step__circle">🏔️</div>
+                <span>Expedicionario</span>
+            </div>
+
+            <div class="xp-step">
+                <div class="xp-step__circle">👑</div>
+                <span>Embajador</span>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+</main>
+{% endblock %}
