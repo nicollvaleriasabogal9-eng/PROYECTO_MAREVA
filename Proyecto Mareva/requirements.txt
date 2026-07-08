@@ -1,8 +1,1 @@
-#Para inicializar el sistema web primero crea un entorno virtual abriendo la terminal
-#python -m venv venv
-#luego instala los requerimientos con el siguiente comando:
-#pip install -r requirements.txt
-#luego de que instalen todos los requerimientos ejecuta el archivo inicial que se llama app.py
-#python ./frontend/app.py
-
 Flask==3.1.3
