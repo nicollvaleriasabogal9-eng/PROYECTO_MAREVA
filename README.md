@@ -20,8 +20,105 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 | **Administrador** | Gestiona paquetes, proveedores, guías, promociones y audita el sistema |
 
 ---
+## 3. Instalación y Ejecución del Proyecto
 
-## 3. Funcionalidades Principales
+### 1. Crear un entorno virtual
+
+Abre una terminal en la carpeta del proyecto y ejecuta:
+
+### Windows
+```bash
+python -m venv venv
+```
+
+### Linux / macOS
+```bash
+python3 -m venv venv
+```
+
+---
+
+### 2. Activar el entorno virtual
+
+### Windows (CMD)
+
+```bash
+venv\Scripts\activate
+```
+
+### Windows (PowerShell)
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+### Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+Cuando el entorno esté activo, verás el nombre `(venv)` al inicio de la terminal.
+
+---
+
+## 3. Instalar las dependencias
+
+Con el entorno virtual activado, instala todas las librerías necesarias:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Ejecutar la aplicación
+
+Inicia el servidor de Flask con:
+
+```bash
+python app.py
+```
+
+o, si el archivo principal tiene otro nombre:
+
+```bash
+python nombre_del_archivo.py
+```
+
+---
+
+## 5. Abrir el proyecto
+
+Una vez iniciado el servidor, abre tu navegador y visita:
+
+```
+http://127.0.0.1:5000/
+```
+
+---
+
+## Si ocurre algún error
+
+Verifica que:
+
+- Estás dentro del entorno virtual (`(venv)` aparece en la terminal).
+- Instalaste las dependencias con `requirements.txt`.
+- Tienes instalada una versión compatible de Python.
+- Estás ejecutando el archivo principal del proyecto.
+
+---
+
+## Desactivar el entorno virtual
+
+Cuando termines de trabajar, puedes salir del entorno virtual con:
+
+```bash
+deactivate
+```
+
+
+## 4. Funcionalidades Principales
 
 - Registro e inicio de sesión (con bloqueo por intentos fallidos)
 - Catálogo de **20 paquetes turísticos** con filtro por categoría y búsqueda
@@ -36,7 +133,7 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 
 ---
 
-## 4. Tecnologías Utilizadas
+## 5. Tecnologías Utilizadas
 
 | Capa | Tecnología |
 |---|---|
@@ -50,7 +147,7 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 
 ---
 
-## 5. Arquitectura — N-Capas
+## 6. Arquitectura — N-Capas
 
 El sistema está dividido en **6 capas**, agrupadas en FrontEnd y BackEnd:
 
@@ -110,7 +207,7 @@ Esto garantiza:
 
 ---
 
-## 6. Base de Datos — Módulos
+## 7. Base de Datos — Módulos
 
 La base de datos final en PostgreSQL tiene **13 módulos** y más de **35 tablas**:
 
@@ -140,7 +237,7 @@ La base de datos final en PostgreSQL tiene **13 módulos** y más de **35 tablas
 
 ---
 
-## 7. Diagrama de Componentes
+## 8. Diagrama de Componentes
 
 El sistema sigue una arquitectura cliente-servidor donde:
 
@@ -151,7 +248,7 @@ El sistema sigue una arquitectura cliente-servidor donde:
 
 ---
 
-## 8. Patrón POO en el Backend
+## 9. Patrón POO en el Backend
 
 `app.py` implementa **Abstract Base Class + Factory Method**:
 
@@ -180,7 +277,7 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 9. Rutas Flask Implementadas
+## 10. Rutas Flask Implementadas
 
 | Método | Ruta | Descripción |
 |---|---|---|
@@ -197,13 +294,13 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 10. Metodología de Desarrollo
+## 11. Metodología de Desarrollo
 
 **Scrum**
 
 ---
 
-## 11. Integrantes
+## 12. Integrantes
 
 | Nombre | Rol |
 |---|---|
@@ -215,7 +312,7 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 12. Estado Actual del Proyecto
+## 13. Estado Actual del Proyecto
 
 ✅ Requisitos funcionales y no funcionales  
 ✅ Historias de usuario  
@@ -235,7 +332,7 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 13. Bootcamp
+## 14. Bootcamp
 
 **SENA — Arquitectura de Software**  
 Inicio: 25 de abril de 2026
