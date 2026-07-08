@@ -22,7 +22,7 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 ---
 ## 3. Instalación y Ejecución del Proyecto
 
-### 1. Crear un entorno virtual
+###  Crear un entorno virtual
 
 Abre una terminal en la carpeta del proyecto y ejecuta:
 
@@ -38,7 +38,7 @@ python3 -m venv venv
 
 ---
 
-### 2. Activar el entorno virtual
+### Activar el entorno virtual
 
 ### Windows (CMD)
 
@@ -62,7 +62,7 @@ Cuando el entorno esté activo, verás el nombre `(venv)` al inicio de la termin
 
 ---
 
-## 3. Instalar las dependencias
+## Instalar las dependencias
 
 Con el entorno virtual activado, instala todas las librerías necesarias:
 
@@ -72,7 +72,7 @@ pip install -r requirements.txt
 
 ---
 
-## 4. Ejecutar la aplicación
+## Ejecutar la aplicación
 
 Inicia el servidor de Flask con:
 
@@ -88,7 +88,7 @@ python nombre_del_archivo.py
 
 ---
 
-## 5. Abrir el proyecto
+## Abrir el proyecto
 
 Una vez iniciado el servidor, abre tu navegador y visita:
 
