@@ -29,8 +29,8 @@
         <li><a href="{{ url_for('inicio') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
         <li><a href="{{ url_for('paquetes') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
         <li><a href="{{ url_for('destinos') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
-        <li><a href="{{ url_for('niveles') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Niveles</a></li>
-        <li><a href="{{ url_for('insignias') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Insignias</a></li>
+        <li><a href="{{ url_for('niveles') }}" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
+        <li><a href="{{ url_for('insignias') }}" class="{% if request.path == '/insignias'%}active{% endif %} navbar__link">Insignias</a></li>
       </ul>
 
 <div class="navbar__actions">
