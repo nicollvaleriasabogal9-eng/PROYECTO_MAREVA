@@ -168,16 +168,6 @@ def login():
                 "nombre": "Yadira",
                 "apellido": "Narvaez",
                 "correo": correo,
-                "nivel": {
-                    1:2,
-                    2:1,
-                    3:3
-                },
-                "insignias": {
-                    1:2,
-                    2:1,
-                    3:3,
-                }
             }
             next_url = request.args.get("next", url_for("inicio"))
             return redirect(next_url)
