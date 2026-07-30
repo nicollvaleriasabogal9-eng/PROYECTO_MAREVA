@@ -17,7 +17,7 @@
   <nav class="navbar">
     <div class="container navbar__inner">
 
-<a href="{{ url_for('inicio') }}" class="navbar__logo">
+<a href="" class="navbar__logo">
   <img src="{{ url_for('static', filename='img/logo_mareva.png') }}"
        alt="Logo MAREVA"
        class="navbar__logo-img"
@@ -26,22 +26,22 @@
 </a>
 
       <ul class="navbar__nav" id="mainNav">
-        <li><a href="{{ url_for('inicio') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
-        <li><a href="{{ url_for('paquetes') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
-        <li><a href="{{ url_for('destinos') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
-        <li><a href="{{ url_for('niveles') }}" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
-        <li><a href="{{ url_for('insignias') }}" class="{% if request.path == '/insignias'%}active{% endif %} navbar__link">Insignias</a></li>
+        <li><a href="" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
+        <li><a href="" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
+        <li><a href="" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
+        <li><a href="" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
+        <li><a href="" class="{% if request.path == '/insignias'%}active{% endif %} navbar__link">Insignias</a></li>
       </ul>
 
 <div class="navbar__actions">
   {% if session.get('usuario') %}
-    <a href="{{ url_for('perfil') }}" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:var(--space-2)">
+    <a href="" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:var(--space-2)">
       <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem">👤</span>
       {{ session['usuario']['nombre'] }}
     </a>
   {% else %}
-    <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
-    <a href="{{ url_for('registro') }}" class="btn btn-primary btn-sm">Registrarse</a>
+    <a href="{{ url_for('auth.mostrar_login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
+    <a href="" class="btn btn-primary btn-sm">Registrarse</a>
   {% endif %}
 </div>
 

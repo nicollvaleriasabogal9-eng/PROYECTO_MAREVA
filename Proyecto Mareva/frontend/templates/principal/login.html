@@ -77,7 +77,7 @@
             </div>
           {% endif %}
 
-          <form id="loginForm" method="POST" action="{{ url_for('login') }}" novalidate aria-label="Formulario de inicio de sesión">
+          <form id="loginForm" method="POST" action="{{ url_for('auth.funcion_login') }}" novalidate aria-label="Formulario de inicio de sesión">
 
             <div class="form-group" style="margin-bottom: var(--space-5);">
               <label class="form-label" for="correo">
@@ -192,7 +192,7 @@
 
           <p class="auth-card__footer">
             ¿No tienes cuenta?
-            <a href="{{ url_for('registro') }}" class="form-link">Regístrate gratis</a>
+            <a href="" class="form-link">Regístrate gratis</a>
           </p>
 
         </div>
