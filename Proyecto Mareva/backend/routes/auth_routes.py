@@ -3,15 +3,17 @@ from controllers.auth_controllers import AuthController
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route("/registro", methods=["POST"])
-def funcion_registro():
-    print("Se accedio al registro correcamente")
-    return AuthController.registrar_usuario()
+controller = AuthController()
 
 @auth_bp.route("/registro", methods=["GET"])
 def mostrar_registro():
     print("Se accedio al registro correcamente")
     return render_template("principal/registro.html")
+
+@auth_bp.route("/registro", methods=["POST"])
+def funcion_registro():
+    print("Se accedio al registro correcamente")
+    return controller.registrar_usuario()
 
 @auth_bp.route("/login", methods=["GET"])
 def mostrar_login():
@@ -21,6 +23,6 @@ def mostrar_login():
 @auth_bp.route("/login", methods=["POST"])
 def funcion_login():
     print("Se accedio al login correcamente")
-    return AuthController.iniciar_sesion()
+    return controller.iniciar_sesion()
 
 
