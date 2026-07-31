@@ -4,18 +4,23 @@ from services.auth_services import AuthServices
 
 class AuthController():
     
-    def registrar_usuario():
-        nombre = request.form.get["nombre"]
-        apellido = request.form.get["apellido"]
-        tipo_documento = request.form.get["tipo"]
-        numero_documento = request.form.get["numero"]
-        telefono = request.form.get["telefono"]
-        rol = request.form.get["rol"]
-        codigo = request.form.get["codigo"]
-        correo = request.form.get["correo"]
-        password = request.form.get["password"]
+    def __init__(self):
+        self.service = AuthServices()
+
+    def registrar_usuario(self):
+
+        nombre = request.form.get("nombre")
+        apellido = request.form.get("apellido")
+        tipo_documento = request.form.get("tipo")
+        numero_documento = request.form.get("numero")
+        telefono = request.form.get("telefono")
+        rol = request.form.get("rol")
+        codigo = request.form.get("codigo")
+        correo = request.form.get("correo")
+        password = request.form.get("password")
         print("Se tomaron los datos correctamente")
-        return AuthServices.enviar_usuario(
+        print(request.form)
+        return self.service.enviar_usuario(
             nombre,
             apellido,
             tipo_documento,
@@ -27,11 +32,16 @@ class AuthController():
             password
         )
     
-    def iniciar_sesion():
+    def iniciar_sesion(self):
+
         correo = request.form.get("correo")
         password = request.form.get("password")
+
         print("Se tomaron los datos correctamente")
-        return AuthServices.iniciar_sesion(
+        print(correo)
+        print(password)
+
+        return self.service.iniciar_sesion(
             correo,
             password
         )
