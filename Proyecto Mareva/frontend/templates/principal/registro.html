@@ -14,7 +14,7 @@
       <p class="auth-card__subtitle">Únete a MAREVA y empieza a explorar Colombia</p>
     </div>
 
-    <form method="POST" action="{{ url_for('registro') }}">
+    <form method="POST" action="{{ url_for('auth.funcion_registro') }}">
       <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-4)">
         <div class="form-group">
           <label class="form-label">Nombres <span class="form-required">*</span></label>
@@ -75,7 +75,7 @@
     </form>
 
     <p class="auth-card__footer">
-      ¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="form-link">Inicia sesión</a>
+      ¿Ya tienes cuenta? <a href="{{ url_for('auth.mostrar_login') }}" class="form-link">Inicia sesión</a>
     </p>
   </div>
 </main>

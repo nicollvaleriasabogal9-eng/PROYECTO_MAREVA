@@ -17,7 +17,7 @@
   <nav class="navbar">
     <div class="container navbar__inner">
 
-<a href="" class="navbar__logo">
+<a href="{{ url_for('home.home') }}" class="navbar__logo">
   <img src="{{ url_for('static', filename='img/logo_mareva.png') }}"
        alt="Logo MAREVA"
        class="navbar__logo-img"
@@ -26,8 +26,8 @@
 </a>
 
       <ul class="navbar__nav" id="mainNav">
-        <li><a href="" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
-        <li><a href="" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
+        <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
+        <li><a href="{{ url_for('paquetes.paquetes') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
         <li><a href="" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
         <li><a href="" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
         <li><a href="" class="{% if request.path == '/insignias'%}active{% endif %} navbar__link">Insignias</a></li>
@@ -41,7 +41,7 @@
     </a>
   {% else %}
     <a href="{{ url_for('auth.mostrar_login') }}" class="btn btn-outline btn-sm">Iniciar sesión</a>
-    <a href="" class="btn btn-primary btn-sm">Registrarse</a>
+    <a href="{{ url_for('auth.mostrar_registro') }}" class="btn btn-primary btn-sm">Registrarse</a>
   {% endif %}
 </div>
 
