@@ -10,10 +10,10 @@ def home():
 @home_bp.route("/perfil")
 def perfil(): 
     if 'usuario' not in session:
-        return redirect('home')
+        return redirect('home.home')
     return render_template("cliente/perfil.html")
 
 @home_bp.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('inicio'))
+    return redirect(url_for('home.home'))
