@@ -1,6 +1,5 @@
-from flask import redirect, url_for, request
+from flask import redirect, url_for, request, render_template, session
 from services.auth_services import AuthServices
-
 
 class AuthController():
     
@@ -37,11 +36,15 @@ class AuthController():
         correo = request.form.get("correo")
         password = request.form.get("password")
 
-        print("Se tomaron los datos correctamente")
-        print(correo)
-        print(password)
+        usuario = self.service.iniciar_sesion(correo, password)
 
-        return self.service.iniciar_sesion(
-            correo,
-            password
-        )
+        if usuario is None:
+            print("Usuario no encontrado")
+            return render_template("principal/login.html")
+        else:
+            session["usuario"] = {
+                "id": usuario.id,
+                "nombre": usuario.nombre,
+                "rol": usuario.rol
+            }
+            return redirect(url_for('home.home'))
