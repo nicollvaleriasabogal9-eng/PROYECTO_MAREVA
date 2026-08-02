@@ -6,6 +6,17 @@ class AuthRepository:
     def __init__(self):
         self.conexion = Conexion().obtener_conexion()
 
+    def guardar_usuario(self, nombre, apellido, tipo_documento, numero_documento, telefono, codigo, correo, password):
+        cursor = self.conexion.cursor()
+
+        cursor.execute("""INSERT INTO cliente(nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena)
+	                    VALUES (%s, %s, %s, %s, %s, %s, %s)""", (nombre, apellido, tipo_documento, numero_documento, telefono, correo, password))
+
+        self.conexion.commit()
+        cursor.close()
+
+        return True
+
     def buscar_por_correo(self, correo):
         cursor = self.conexion.cursor()
 
@@ -32,8 +43,6 @@ class AuthRepository:
         )
 
         cursor.close()
-
-        print(fila)
 
         return usuario
         
