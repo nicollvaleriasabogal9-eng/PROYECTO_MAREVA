@@ -35,7 +35,7 @@
 
 <div class="navbar__actions">
   {% if session.get('usuario') %}
-    <a href="" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:var(--space-2)">
+    <a href="{{url_for('home.perfil')}}" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:var(--space-2)">
       <span style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem">👤</span>
       {{ session['usuario']['nombre'] }}
     </a>

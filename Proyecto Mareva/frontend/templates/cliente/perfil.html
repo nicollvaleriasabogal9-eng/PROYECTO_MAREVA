@@ -13,13 +13,13 @@
 
       <aside class="perfil-sidebar">
         <div class="perfil-avatar">👤</div>
-        <h2 class="perfil-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</h2>
-        <p class="perfil-correo">{{ usuario.correo }}</p>
-        <span class="perfil-nivel">{{ usuario.nivel }}</span>
+        <h2 class="perfil-nombre">{{ session["usuario"]["nombre"] }} {{ session["usuario"]["apellido"] }}</h2>
+        <p class="perfil-correo">{{ session["usuario"]["correo"] }}</p>
+        <span class="perfil-nivel"></span>
 
         <div class="divider"></div>
 
-        <a href="{{ url_for('logout') }}" class="btn btn-outline" style="width:100%;justify-content:center">
+        <a href="{{ url_for('home.logout') }}" class="btn btn-outline" style="width:100%;justify-content:center">
           Cerrar sesión
         </a>
       </aside>
@@ -29,33 +29,33 @@
         <div class="perfil-card">
           <h3 class="perfil-card__title">🏆 Mis insignias</h3>
           <div class="insignias-grid">
-            {% for i in usuario.insignias %}
-              <span class="badge badge-blue">{{ i }}</span>
-            {% else %}
+            
+              <span class="badge badge-blue"></span>
+            
               <p class="text-muted">Aún no tienes insignias. ¡Haz tu primera reserva!</p>
-            {% endfor %}
+           
           </div>
         </div>
 
         <div class="perfil-card">
           <h3 class="perfil-card__title">📋 Última reserva</h3>
-          {% if usuario.get('ultima_reserva') %}
-            <p>{{ usuario.ultima_reserva }}</p>
-          {% else %}
-            <p class="text-muted">No tienes reservas aún. <a href="{{ url_for('paquetes') }}" class="form-link">Explorar paquetes</a></p>
-          {% endif %}
+         
+            <p></p>
+          
+            <p class="text-muted">No tienes reservas aún. <a href="" class="form-link">Explorar paquetes</a></p>
+          
         </div>
 
         <div class="perfil-card">
           <h3 class="perfil-card__title">👤 Información de cuenta</h3>
           <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}
+            <strong>Nombre:</strong> {{ session["usuario"]["nombre"] }} {{ session["usuario"]["apellido"] }}
           </p>
           <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Correo:</strong> {{ usuario.correo }}
+            <strong>Correo:</strong> {{ session["usuario"]["correo"] }}
           </p>
           <p style="font-size:var(--text-sm);color:var(--gray-600)">
-            <strong>Nivel:</strong> {{ usuario.nivel }}
+            <strong>Nivel:</strong>
           </p>
         </div>
 
