@@ -13,23 +13,30 @@ class AuthController():
         tipo_documento = request.form.get("tipo")
         numero_documento = request.form.get("numero")
         telefono = request.form.get("telefono")
-        rol = request.form.get("rol")
         codigo = request.form.get("codigo")
         correo = request.form.get("correo")
         password = request.form.get("password")
-        print("Se tomaron los datos correctamente")
-        print(request.form)
-        return self.service.enviar_usuario(
+
+        usuario = self.service.registrar_usuario(
             nombre,
             apellido,
             tipo_documento,
             numero_documento,
             telefono,
-            rol,
             codigo,
             correo,
             password
         )
+
+        if usuario is True:
+            print("EL usuario se creo correctamente")
+            return redirect(url_for('auth.mostrar_login'))
+        else:
+            print("El usuario no se creo correctamente")
+            render_template("principal/registro.html")
+        
+
+    
     
     def iniciar_sesion(self):
 
@@ -45,6 +52,10 @@ class AuthController():
             session["usuario"] = {
                 "id": usuario.id,
                 "nombre": usuario.nombre,
+                "apellido": usuario.apellido,
+                "correo": usuario.correo,
                 "rol": usuario.rol
             }
             return redirect(url_for('home.home'))
+
+    
