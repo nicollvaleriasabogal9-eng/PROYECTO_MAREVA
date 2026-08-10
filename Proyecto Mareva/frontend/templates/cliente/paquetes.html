@@ -75,7 +75,7 @@
         data-categoria="{{ p.categoria }}"
         data-precio="{{ p.precio }}"
         data-duracion="{% if p.duracion_dias <= 3 %}corto{% elif p.duracion_dias <= 7 %}medio{% else %}largo{% endif %}"
-        data-incluye="{{ ' '.join(p.incluye) }}">
+        data-incluye="{{ p.incluye }}">
 
         <div class="card__img-wrap">
           <div class="card__img--placeholder">{{ p.emoji }}</div>
@@ -85,11 +85,9 @@
           <div class="card__tag">{{ p.departamento }}</div>
           <h3 class="card__title">{{ p.nombre }}</h3>
           <p class="card__desc">{{ p.descripcion }}</p>
-          <a href="javascript:void(0);"
-          onclick="verDetalle('{{ p.nombre }}')"
-          class="btn btn-primary btn-sm">
-          Ver Detalles {{ p.emoji }}
-          </a>
+<a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">
+  Ver Detalles {{ p.emoji }}
+</a>
 
         <div class="card__footer">
           <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
