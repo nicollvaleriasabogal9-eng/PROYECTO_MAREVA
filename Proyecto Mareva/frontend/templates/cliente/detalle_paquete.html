@@ -14,7 +14,7 @@
         <p class="">Duracion: {{ paquete.duracion_dias }} días / {{ paquete.duracion_noches }} noches</p>
         <p class="">Categoria: {{ paquete.categoria }}</p>
         <p class="">{{ paquete.descripcion }}</p>
-        <a style="margin-top: 10px;" href="{{ url_for('reserva', slug=paquete.slug) }}" class="btn btn-primary btn-lg">Reservar ahora</a>
+        <a href="{{ url_for('reserva.mostrar_formulario', slug=paquete.slug) }}" class="btn btn-primary btn-lg">Reservar ahora</a>
       </div>
     </div>
   </main>
