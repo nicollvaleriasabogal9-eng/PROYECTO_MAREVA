@@ -13,9 +13,12 @@
       <h1 class="auth-card__title text-display">Crear cuenta</h1>
       <p class="auth-card__subtitle">Únete a MAREVA y empieza a explorar Colombia</p>
     </div>
-
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
     <form method="POST" action="{{ url_for('auth.funcion_registro') }}">
       <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-4)">
+
         <div class="form-group">
           <label class="form-label">Nombres <span class="form-required">*</span></label>
           <input type="text" name="nombre" class="form-input" placeholder="Tu nombre" required>
@@ -28,8 +31,18 @@
 
       <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-4)">
         <div class="form-group">
-          <label class="form-label">Tipo De Documento <span class="form-required">*</span></label>
-          <input type="text" name="tipo" class="form-input" placeholder="Tipo de documento" required>
+          <label class="form-label">Tipo de documento *</label>
+          <select name="tipo" class="form-input" required>
+            <option value="" disabled selected>Seleccione</option>
+            <option value="CC">Cédula de ciudadanía</option>
+            <option value="TI">Tarjeta de identidad</option>
+            <option value="CE">Cédula de extranjería</option>
+            <option value="PA">Pasaporte</option>
+            <option value="PEP">PEP</option>
+            <option value="PPT">PPT</option>
+            <option value="RC">Registro civil</option>
+          </select>
+
         </div>
         <div class="form-group">
           <label class="form-label">Numero de documento <span class="form-required">*</span></label>
@@ -39,9 +52,10 @@
 
       <div class="grid-2" style="gap:var(--space-4);margin-bottom:var(--space-4)">
         <div class="form-group">
-          <label class="form-label">Telefono <span class="form-required">*</span></label>
-          <input type="text" name="telefono" class="form-input" placeholder="Tipo de documento" required>
-        </div>
+        <label class="form-label">Teléfono *</label>
+        <input type="tel" id="telefono" class="form-input" placeholder="Número de teléfono" required>
+        <input type="hidden" id="telefono_completo" name="telefono">
+      </div>
 
       <div class="form-group" style="margin-bottom:var(--space-4)">
         <label class="form-label">Codico de referido</label>
@@ -68,4 +82,5 @@
     </p>
   </div>
 </main>
+<script src="{{ url_for('static', filename='js/registro.js') }}"></script>
 {% endblock %}
