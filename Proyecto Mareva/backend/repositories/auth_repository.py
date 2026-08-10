@@ -1,49 +1,105 @@
 from config.conexion import Conexion
 from models.cliente import Cliente
+from werkzeug.security import generate_password_hash
+from psycopg.errors import UniqueViolation
+
 
 class AuthRepository:
 
     def __init__(self):
         self.conexion = Conexion().obtener_conexion()
-
+    # Guarda un nuevo usuario en la base de datos
     def guardar_usuario(self, nombre, apellido, tipo_documento, numero_documento, telefono, codigo, correo, password):
-        cursor = self.conexion.cursor()
+        cursor = self.conexion.cursor() 
+        password_hash = generate_password_hash(password)# encripta la contraseña antes de guardarla en la base de datos
 
-        cursor.execute("""INSERT INTO cliente(nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena)
-	                    VALUES (%s, %s, %s, %s, %s, %s, %s)""", (nombre, apellido, tipo_documento, numero_documento, telefono, correo, password))
+        try:
+            cursor.execute("""INSERT INTO cliente(nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                            (nombre, apellido, tipo_documento, numero_documento, telefono, correo, password_hash))
 
-        self.conexion.commit()
-        cursor.close()
+            self.conexion.commit()
+            cursor.close()
+            return {"ok": True}
 
-        return True
+        except UniqueViolation as e:
+            self.conexion.rollback()
+            cursor.close()
+            # Manejo de errores de violación de unicidad para correo y número de documento
+            mensaje = str(e)
+            if "cliente_correo_key" in mensaje:
+                return {"ok": False, "campo": "correo", "error": "Ese correo ya está registrado."}
+            elif "cliente_numero_documento_key" in mensaje:
+                return {"ok": False, "campo": "numero_documento", "error": "Ese número de documento ya está registrado."}
+            else:
+                return {"ok": False, "campo": None, "error": "Ya existe un usuario con esos datos."}
 
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return {"ok": False, "campo": None, "error": "No fue posible completar el registro. Intenta de nuevo."}
+    # Busca un usuario por su correo electrónico y devuelve un objeto Cliente si se encuentra, o None si no se encuentra
     def buscar_por_correo(self, correo):
         cursor = self.conexion.cursor()
 
-        cursor.execute("SELECT * FROM cliente WHERE correo = %s", (correo,))
+        try:
+            cursor.execute("SELECT * FROM cliente WHERE correo = %s", (correo,))
+            fila = cursor.fetchone()
+            cursor.close()
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
 
-        fila = cursor.fetchone()
+        if fila is None:
+            return None
 
         usuario = Cliente(
-            fila[0], #usuario.id
-            fila[1], #usuario.nombre y asi con todos los demas
-            fila[2],
-            fila[3],
-            fila[4],
-            fila[5],
-            fila[6],
-            fila[7],
-            fila[8],
-            fila[9],
-            fila[10],
-            fila[11],
-            fila[12],
-            fila[13],
-            fila[14]
+            fila[0], # id_cliente
+            fila[1], # nombre
+            fila[2], # apellido
+            fila[3], # tipo_documento
+            fila[4], # numero_documento
+            fila[5], # telefono
+            fila[6], # correo
+            fila[7], # contrasena
+            fila[8], # rol
+            fila[9], # codigo_referido
+            fila[10], # fecha_registro
+            fila[11], # estado
+            fila[12], # intentos_fallidos
+            fila[13], # bloqueado_hasta
+            fila[14]  # id_nivel
         )
 
-        cursor.close()
-
         return usuario
-        
-        
+    # Obtiene la contraseña de un usuario por su correo electrónico
+    def obtener_password_por_correo(self, correo):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("SELECT contrasena FROM cliente WHERE correo = %s", (correo,))
+            fila = cursor.fetchone()
+            cursor.close()
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
+
+        if fila is None:
+            return None
+
+        return fila[0]
+    # Obtiene todos los IDs y contraseñas de los usuarios en la base de datos
+    def obtener_todos_id_password(self):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("SELECT id, contrasena FROM cliente")
+            filas = cursor.fetchall()
+            cursor.close()
+            return filas
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return []
