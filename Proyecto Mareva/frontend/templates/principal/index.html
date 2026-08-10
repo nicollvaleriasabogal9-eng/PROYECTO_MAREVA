@@ -44,6 +44,8 @@
     <div class="section-header">
       <p class="section-label">✨ Destacados</p>
       <h2 class="section-title">Paquetes populares</h2>
+      <div class="grid-3" id="destacadosGrid">
+    </div>
     </div>
 
     <div class="filtros">
@@ -53,6 +55,26 @@
       <button class="filtro-btn" onclick="filtrarPaquetes('ecoturismo')">Ecoturismo</button>
       <button class="filtro-btn" onclick="filtrarPaquetes('playa')">Playa</button>
     </div>
+
+    {% for p in destacados %}
+      <article class="card" data-categoria="{{ p.categoria }}">
+        <div class="card__img-wrap">
+          <div class="card__img--placeholder">{{ p.emoji }}</div>
+          <span class="card__badge badge badge-blue">{{ p.categoria }}</span>
+        </div>
+        <div class="card__body">
+          <div class="card__tag">{{ p.departamento }}</div>
+          <h3 class="card__title">{{ p.nombre }}</h3>
+          <p class="card__desc">{{ p.descripcion }}</p>
+        </div>
+        <div class="card__footer">
+          <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
+          <a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">Ver detalles</a>
+        </div>
+      </article>
+      {% else %}
+      <p class="text-muted">Aún no hay paquetes destacados disponibles.</p>
+      {% endfor %}
 
     
 
