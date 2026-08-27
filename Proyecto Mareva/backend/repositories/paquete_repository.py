@@ -3,14 +3,14 @@ from config.conexion import Conexion
 COLUMNAS_PAQUETE = [
     "id_paquete", "nombre", "slug", "descripcion", "precio",
     "duracion_dias", "duracion_noches", "cupos_totales", "cupos_disponibles",
-    "fecha_inicio", "fecha_fin", "emoji", "estado", "id_destino", "id_guia",
+    "fecha_inicio", "fecha_fin", "imagen_url", "estado", "id_destino", "id_guia",
     "categoria", "nombre_destino", "departamento"
 ]
 
 QUERY_BASE = """
     SELECT p.id_paquete, p.nombre, p.slug, p.descripcion, p.precio,
            p.duracion_dias, p.duracion_noches, p.cupos_totales, p.cupos_disponibles,
-           p.fecha_inicio, p.fecha_fin, p.emoji, p.estado, p.id_destino, p.id_guia,
+           p.fecha_inicio, p.fecha_fin, p.imagen_url, p.estado, p.id_destino, p.id_guia,
            d.categoria, d.nombre_destino, d.departamento
       FROM paquete_turistico p
       JOIN destino d ON d.id_destino = p.id_destino
