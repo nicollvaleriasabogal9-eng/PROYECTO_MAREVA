@@ -78,7 +78,9 @@
         data-incluye="{{ p.incluye }}">
 
         <div class="card__img-wrap">
-          <div class="card__img--placeholder">{{ p.emoji }}</div>
+          <div class="card__img--placeholder">
+            <img src="{{ url_for('static', filename=p.imagen_url) }}" alt="{ p.nombre }">
+          </div>
         </div>
 
         <div class="card__body">
