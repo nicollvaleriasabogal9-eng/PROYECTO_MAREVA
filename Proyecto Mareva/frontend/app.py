@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from abc import ABC, abstractmethod
+import psycopg2
 
 PAQUETES = [
     {"slug":"cartagena-magica","nombre":"Cartagena Mágica","categoria":"playa","precio":1850000,"duracion_dias":5,"duracion_noches":4,"descripcion":"Descubre la ciudad amurallada con playas privadas e historia colonial.","emoji":"🏰","destino":"Cartagena","departamento":"Bolívar","incluye":["alojamiento","transporte","guia"],"servicios_extra":[{"nombre":"Snorkel en Islas del Rosario","precio":180000},{"nombre":"Foto profesional en la Muralla","precio":120000}]},
@@ -48,18 +49,18 @@ DESTINOS = [
 ]
 
 INSIGNIAS = [
-    {"nombre":"Explorador","descripcion":"Has explorado 5 destinos diferentes.","icono":"🧭", "progreso":"2", "meta":"4"},
-    {"nombre":"Aventurero","descripcion":"Has reservado 3 paquetes de aventura.","icono":"🏔️", "progreso":"1", "meta":"3"},
-    {"nombre":"Cultural","descripcion":"Has visitado 4 destinos culturales.","icono":"🏛️", "progreso":"3", "meta":"4", },
-    {"nombre":"Amante del Mar","descripcion":"Has disfrutado de 3 paquetes de playa.","icono":"🏖️", "progreso":"2", "meta":"3"},
-    {"nombre":"Eco-Consciente","descripcion":"Has participado en 2 paquetes de ecoturismo.","icono":"🌿", "progreso":"1", "meta":"2"}
+    {"nombre":"Explorador","descripcion":"Has explorado 5 destinos diferentes.","icono":"🧭","progreso":"2","meta":"4"},
+    {"nombre":"Aventurero","descripcion":"Has reservado 3 paquetes de aventura.","icono":"🏔️","progreso":"1","meta":"3"},
+    {"nombre":"Cultural","descripcion":"Has visitado 4 destinos culturales.","icono":"🏛️","progreso":"3","meta":"4"},
+    {"nombre":"Amante del Mar","descripcion":"Has disfrutado de 3 paquetes de playa.","icono":"🏖️","progreso":"2","meta":"3"},
+    {"nombre":"Eco-Consciente","descripcion":"Has participado en 2 paquetes de ecoturismo.","icono":"🌿","progreso":"1","meta":"2"}
 ]
 
 NIVELES = [
-    {"nivel":"Bronce","nombre":"Explorador", "experiencia":"0-400XP", "estado":"Bloqueado"},
-    {"nivel":"Plata","nombre":"Aventurero", "experiencia":"500-900XP", "estado":"Bloqueado"},
-    {"nivel":"Oro","nombre":"Experto", "experiencia":"1000-1500XP", "estado":"Bloqueado"},
-    {"nivel":"Diamante","nombre":"Profesional", "experiencia":"1600-2000XP", "estado":"Bloqueado"}
+    {"nivel":"Bronce","nombre":"Explorador","experiencia":"0-400XP","estado":"Bloqueado"},
+    {"nivel":"Plata","nombre":"Aventurero","experiencia":"500-900XP","estado":"Bloqueado"},
+    {"nivel":"Oro","nombre":"Experto","experiencia":"1000-1500XP","estado":"Bloqueado"},
+    {"nivel":"Diamante","nombre":"Profesional","experiencia":"1600-2000XP","estado":"Bloqueado"}
 ]
 
 class PaqueteBase(ABC):
@@ -116,34 +117,43 @@ def factory_paquete(paquete_dict):
 def obtener_paquetes_poo():
     return [factory_paquete(p) for p in PAQUETES]
 
+
 def paquetes_con_precio_poo():
     paquetes_obj = obtener_paquetes_poo()
 
     return [
-    {
-        "slug": p._data["slug"],
-        "nombre": p.get_nombre(),
-        "categoria": p.get_categoria(),
-        "precio": p.get_precio(),
-        "precio_final": p.calcular_precio_final(),
-        "emoji": p._data["emoji"],
-        "departamento": p._data["departamento"],
-        "descripcion": p._data["descripcion"],
-        "duracion_dias": p._data["duracion_dias"],
-        "incluye": p._data["incluye"]
-    }
-    for p in paquetes_obj
-]
+        {
+            "slug": p._data["slug"],
+            "nombre": p.get_nombre(),
+            "categoria": p.get_categoria(),
+            "precio": p.get_precio(),
+            "precio_final": p.calcular_precio_final(),
+            "emoji": p._data["emoji"],
+            "departamento": p._data["departamento"],
+            "descripcion": p._data["descripcion"],
+            "duracion_dias": p._data["duracion_dias"],
+            "incluye": p._data["incluye"]
+        }
+        for p in paquetes_obj
+    ]
+
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 app.secret_key = "mareva_secret_2026"
 
+
 @app.route("/")
 def inicio():
     destacados = PAQUETES[:6]
     reserva_confirmada = session.pop("ultima_reserva", None)
-    return render_template("/principal/index.html", destacados=destacados, reserva_confirmada=reserva_confirmada)
+
+    return render_template(
+        "/principal/index.html",
+        destacados=destacados,
+        reserva_confirmada=reserva_confirmada
+    )
+
 
 @app.route("/paquetes")
 def paquetes():
@@ -157,26 +167,43 @@ def paquetes():
         paquetes=paquetes_poo
     )
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+
         correo = request.form.get("correo")
         password = request.form.get("password")
-        # Usuario de prueba 
+
         if correo == "yadira@test.co" and password == "cliente_prueba":
+
             session["usuario"] = {
                 "nombre": "Yadira",
                 "apellido": "Narvaez",
                 "correo": correo,
+                "nivel": "Explorador",
+                "insignias": []
             }
-            next_url = request.args.get("next", url_for("inicio"))
+
+            next_url = request.args.get(
+                "next",
+                url_for("inicio")
+            )
+
             return redirect(next_url)
-        return render_template("login.html", error="Correo o contraseña incorrectos.")
+
+        return render_template(
+            "login.html",
+            error="Correo o contraseña incorrectos."
+        )
+
     return render_template("/principal/login.html")
+
 
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     if request.method == "POST":
+
         session["usuario"] = {
             "nombre": request.form.get("nombre"),
             "apellido": request.form.get("apellido"),
@@ -184,81 +211,180 @@ def registro():
             "nivel": "Explorador",
             "insignias": []
         }
+
         return redirect(url_for("inicio"))
+
     return render_template("/principal/registro.html")
+
 
 @app.route('/destinos')
 def destinos():
-    return render_template('/cliente/destinos.html', destinos=DESTINOS)
+    return render_template(
+        '/cliente/destinos.html',
+        destinos=DESTINOS
+    )
+
 
 @app.route('/detalle')
 def detalle_paquete():
+
     paquete_recibido = request.args.get('nombre')
 
     if not paquete_recibido:
         return redirect(url_for('paquetes'))
-    
+
     paquete_buscado = paquete_recibido.lower().strip()
 
     paquete = None
 
     for p in PAQUETES:
-        nombre_paquete = p.get('nombre', '').lower()
-        slug_paquete = p.get('slug', '').lower()
 
-        if paquete_buscado == slug_paquete or paquete_buscado == nombre_paquete or paquete_buscado in nombre_paquete:
+        nombre_paquete = p.get(
+            'nombre',
+            ''
+        ).lower()
+
+        slug_paquete = p.get(
+            'slug',
+            ''
+        ).lower()
+
+        if (
+            paquete_buscado == slug_paquete
+            or paquete_buscado == nombre_paquete
+            or paquete_buscado in nombre_paquete
+        ):
             paquete = p
             break
 
     if not paquete:
         return redirect(url_for('paquetes'))
 
-    return render_template('/cliente/detalle_paquete.html', paquete=paquete)
+    return render_template(
+        '/cliente/detalle_paquete.html',
+        paquete=paquete
+    )
+
 
 @app.route('/reserva/<slug>')
 def reserva(slug):
+
     if 'usuario' not in session:
-        return redirect(url_for('login') + f'?next=/reserva/{slug}')
-    paquete = next((p for p in PAQUETES if p['slug'] == slug), None)
+        return redirect(
+            url_for('login') +
+            f'?next=/reserva/{slug}'
+        )
+
+    paquete = next(
+        (
+            p for p in PAQUETES
+            if p['slug'] == slug
+        ),
+        None
+    )
+
     if not paquete:
         return redirect(url_for('paquetes'))
-    return render_template('/cliente/reserva.html', paquete=paquete)
+
+    return render_template(
+        '/cliente/reserva.html',
+        paquete=paquete
+    )
+
 
 @app.route('/confirmar-reserva', methods=['POST'])
 def confirmar_reserva():
+
     if 'usuario' not in session:
         return redirect(url_for('login'))
+
     datos = request.form
-    session['ultima_reserva'] = {
-        'paquete': datos.get('paquete'),
+
+    slug = datos.get('paquete')
+
+    paquete = next(
+        (
+            p for p in PAQUETES
+            if p['slug'] == slug
+        ),
+        None
+    )
+
+    if not paquete:
+        return redirect(url_for('paquetes'))
+
+    usuario = session['usuario']
+
+    usuario['ultima_reserva'] = {
+        'paquete': slug,
+        'nombre_paquete': paquete['nombre'],
+        'destino': paquete['destino'],
+        'fecha_inicio': datos.get('fecha_inicio'),
+        'fecha_regreso': datos.get('fecha_regreso'),
+        'dias': datos.get('dias'),
         'adultos': datos.get('adultos'),
         'menores': datos.get('menores'),
         'bebes': datos.get('bebes'),
+        'mascotas': datos.get('mascotas'),
+        'plan': datos.get('plan'),
+        'extras': datos.getlist('extras'),
+        'notas': datos.get('notas')
     }
-    return redirect(url_for('inicio'))
+
+    session['usuario'] = usuario
+
+    session['ultima_reserva'] = {
+        'paquete': paquete['nombre'],
+        'destino': paquete['destino'],
+        'fecha_inicio': datos.get('fecha_inicio'),
+        'fecha_regreso': datos.get('fecha_regreso')
+    }
+
+    return redirect(url_for('perfil'))
+
 
 @app.route('/perfil')
 def perfil():
+
     if 'usuario' not in session:
         return redirect(url_for('login'))
-    return render_template('/cliente/perfil.html', usuario=session['usuario'])
+
+    return render_template(
+        '/cliente/perfil.html',
+        usuario=session['usuario']
+    )
+
 
 @app.route('/insignias')
 def insignias():
+
     if 'usuario' not in session:
         return redirect(url_for('login'))
-    return render_template('/cliente/insignias.html', usuario=session['usuario'], insignias=INSIGNIAS)
+
+    return render_template(
+        '/cliente/insignias.html',
+        usuario=session['usuario'],
+        insignias=INSIGNIAS
+    )
+
 
 @app.route("/niveles")
 def niveles():
+
     if 'usuario' not in session:
         return redirect(url_for('login'))
-    return render_template('/cliente/niveles.html', usuario=session['usuario'])
+
+    return render_template(
+        '/cliente/niveles.html',
+        usuario=session['usuario']
+    )
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('inicio'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
