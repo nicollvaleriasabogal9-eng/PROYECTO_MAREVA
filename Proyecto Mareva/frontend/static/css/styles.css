@@ -626,3 +626,113 @@ footer {
     justify-content: center;
   }
 }
+
+/* RESERVA EN PERFIL */
+
+.reserva-perfil {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.reserva-perfil__icon {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  border-radius: var(--radius-md);
+  font-size: var(--text-xl);
+}
+
+.reserva-perfil__info h4 {
+  font-size: var(--text-lg);
+  color: var(--gray-800);
+  margin-bottom: var(--space-2);
+}
+
+.reserva-perfil__info p {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  margin-bottom: var(--space-1);
+}
+
+.reserva-vacia {
+  text-align: center;
+  padding: var(--space-8);
+  background: var(--gray-100);
+  border: 1px dashed var(--gray-200);
+  border-radius: var(--radius-lg);
+}
+
+.reserva-vacia__icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.reserva-vacia h4 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
+}
+
+
+/* FECHAS DE RESERVA */
+
+.reserva-fechas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.form-input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.form-input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+}
+
+.form-input[type="date"]:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(74,108,247,.12);
+}
+
+.fecha-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(74,108,247,.08);
+  border: 1px solid rgba(74,108,247,.15);
+  border-radius: var(--radius-md);
+  color: var(--blue);
+  font-size: var(--text-sm);
+}
+
+.fecha-regreso {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  cursor: not-allowed !important;
+}
+
+@media (max-width: 768px) {
+
+  .reserva-fechas {
+    grid-template-columns: 1fr;
+  }
+
+  .reserva-perfil {
+    flex-direction: column;
+  }
+
+}
