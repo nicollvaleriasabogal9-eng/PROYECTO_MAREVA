@@ -1,0 +1,569 @@
+BEGIN;
+
+----- MÓDULO 1: GAMIFICACIÓN — NIVELES -----
+CREATE TABLE nivel (
+    id_nivel             SERIAL PRIMARY KEY,
+    nombre               VARCHAR(50)   NOT NULL,
+    min_monto            NUMERIC(12,2) NOT NULL DEFAULT 0,
+    min_reservas         INT           NOT NULL DEFAULT 0,
+    descripcion          TEXT,
+    porcentaje_descuento NUMERIC(5,2)  DEFAULT 0
+);
+
+----- MÓDULO 2: CLIENTES Y REFERIDOS -----
+CREATE TABLE cliente (
+    id_cliente        SERIAL PRIMARY KEY,
+    nombre            VARCHAR(50)  NOT NULL,
+    apellido          VARCHAR(50)  NOT NULL,
+    tipo_documento    VARCHAR(30)  NOT NULL,
+    numero_documento  VARCHAR(30)  NOT NULL UNIQUE,
+    telefono          VARCHAR(20),
+    correo            VARCHAR(100) NOT NULL UNIQUE,
+    contrasena        VARCHAR(255) NOT NULL,
+    rol               VARCHAR(20)  NOT NULL DEFAULT 'cliente',
+    codigo_referido   VARCHAR(20)  UNIQUE,
+    fecha_registro    DATE         NOT NULL DEFAULT CURRENT_DATE,
+    estado            BOOLEAN      NOT NULL DEFAULT TRUE,
+    intentos_fallidos INT          NOT NULL DEFAULT 0,
+    bloqueado_hasta   TIMESTAMP,
+    id_nivel          INT REFERENCES nivel(id_nivel),
+
+    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente'))
+);
+
+CREATE TABLE referido (
+    id_referido         SERIAL PRIMARY KEY,
+    fecha_referido      DATE        NOT NULL DEFAULT CURRENT_DATE,
+    puntos_ganados      INT         NOT NULL DEFAULT 0,
+    estado              VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    id_referidor        INT NOT NULL REFERENCES cliente(id_cliente),
+    id_referido_cliente INT NOT NULL REFERENCES cliente(id_cliente),
+
+    UNIQUE (id_referidor, id_referido_cliente),
+    CONSTRAINT chk_referido_estado CHECK (estado IN ('pendiente','completado','cancelado')),
+    CONSTRAINT chk_no_autoreferido CHECK (id_referidor <> id_referido_cliente)
+);
+
+----- MÓDULO 3: DESTINOS -----
+CREATE TABLE destino (
+    id_destino      SERIAL PRIMARY KEY,
+    nombre_destino  VARCHAR(100) NOT NULL,
+    departamento    VARCHAR(100),
+    ciudad          VARCHAR(100),
+    categoria       VARCHAR(50),
+    descripcion     TEXT,
+    atracciones     TEXT,
+    docs_requeridos TEXT,
+    estado          BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+----- MÓDULO 4: PROVEEDORES Y SUS POLÍTICAS -----
+CREATE TABLE proveedor (
+    id_proveedor                 SERIAL PRIMARY KEY,
+    nombre                       VARCHAR(100) NOT NULL,
+    nit                          VARCHAR(30),
+    tipo_empresa                 VARCHAR(50)  NOT NULL, -- Aerolínea, Hotel, Operador Local, etc.
+    descripcion                  TEXT,
+    politica_reembolso_general   TEXT,        -- Resumen/Condiciones contractuales generales
+    regla_retracto_desistimiento TEXT,        -- Normativa de ley (Aerocivil / Retracto 48h / Desistimiento 24h)
+    gastos_gestion_agencia       NUMERIC(10,2) DEFAULT 0, -- Tarifa fija o base de gestión de la agencia
+    porcentaje_gestion_agencia   NUMERIC(5,2)  DEFAULT 0, -- % por intermediación administrativa
+    direccion                    VARCHAR(200),
+    ciudad                       VARCHAR(100),
+    telefono                     VARCHAR(20),
+    correo                       VARCHAR(100),
+    nombre_contacto              VARCHAR(100),
+    telefono_contacto            VARCHAR(20),
+    correo_contacto              VARCHAR(100),
+    estado                       BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT chk_tipo_empresa CHECK (
+        tipo_empresa IN ('Aerolínea', 'Hotel', 'Operador Local', 'Transporte Terrestre', 'Restaurante', 'Otro')
+    )
+);
+
+CREATE TABLE metodo_pago_proveedor (
+    id_metodo_proveedor SERIAL PRIMARY KEY,
+    id_proveedor        INT NOT NULL REFERENCES proveedor(id_proveedor) ON DELETE CASCADE,
+    tipo_metodo         VARCHAR(50)  NOT NULL,
+    entidad             VARCHAR(100),
+    titular             VARCHAR(150),
+    numero_referencia   VARCHAR(100),
+    instrucciones       TEXT,
+
+    CONSTRAINT chk_tipo_metodo CHECK (
+        tipo_metodo IN ('cuenta_bancaria','nequi','daviplata','efectivo','tarjeta','otro')
+    )
+);
+
+----- MÓDULO 5: GUÍAS TURÍSTICOS -----
+CREATE TABLE guia_turistico (
+    id_guia      SERIAL PRIMARY KEY,
+    nombre       VARCHAR(50)  NOT NULL,
+    apellido     VARCHAR(50)  NOT NULL,
+    idiomas      VARCHAR(200),
+    especialidad VARCHAR(200),
+    telefono     VARCHAR(20),
+    correo       VARCHAR(100),
+    estado       BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+----- MÓDULO 6: SEGUROS -----
+CREATE TABLE tipo_seguro (
+    id_tipo_seguro   SERIAL PRIMARY KEY,
+    nombre           VARCHAR(100) NOT NULL,
+    descripcion      TEXT,
+    cobertura_general TEXT
+);
+
+CREATE TABLE seguro (
+    id_seguro      SERIAL PRIMARY KEY,
+    id_tipo_seguro INT NOT NULL REFERENCES tipo_seguro(id_tipo_seguro),
+    nombre         VARCHAR(100)  NOT NULL,
+    cobertura      TEXT          NOT NULL,
+    precio         NUMERIC(10,2) NOT NULL DEFAULT 0,
+    es_obligatorio BOOLEAN       NOT NULL DEFAULT FALSE,
+    descripcion    TEXT,
+    estado         BOOLEAN       NOT NULL DEFAULT TRUE
+);
+
+----- MÓDULO 7: SERVICIOS Y SUS CONDICIONES ESPECÍFICAS -----
+
+-- 7.1 Alojamiento (Hoteles)
+CREATE TABLE alojamiento (
+    id_alojamiento         SERIAL PRIMARY KEY,
+    nombre                 VARCHAR(100) NOT NULL,
+    tipo_alojamiento       VARCHAR(50),
+    ciudad                 VARCHAR(100),
+    direccion              VARCHAR(200),
+    servicios              TEXT,
+    tipo_tarifa            VARCHAR(30)  DEFAULT 'flexible', -- 'flexible', 'promocional', 'no_reembolsable'
+    horas_cancelacion_libre INT          DEFAULT 48,         -- Ventana (ej. 24, 48, 72 hrs antes)
+    penalidad_cancelacion_tardia VARCHAR(100) DEFAULT '1_noche', -- '1_noche', 'totalidad', 'porcentaje'
+    politica_no_show       VARCHAR(100) DEFAULT 'cobro_primera_noche',
+    politica_reembolso     TEXT,
+    id_proveedor           INT REFERENCES proveedor(id_proveedor),
+
+    CONSTRAINT chk_alojamiento_tarifa CHECK (tipo_tarifa IN ('flexible', 'promocional', 'no_reembolsable'))
+);
+
+-- 7.2 Alimentación / Restaurantes
+CREATE TABLE alimentacion (
+    id_alimentacion          SERIAL PRIMARY KEY,
+    restaurante              VARCHAR(100),
+    tipo_comida              VARCHAR(100),
+    tipo_servicio            VARCHAR(50), -- 'individual', 'grupo', 'evento'
+    incluye_bebidas          BOOLEAN       NOT NULL DEFAULT FALSE,
+    precio                   NUMERIC(10,2),
+    horas_limite_cancelacion INT          DEFAULT 48, -- Horas límite para grupos/eventos
+    politica_no_show         VARCHAR(100) DEFAULT 'no_reembolsable',
+    politica_reembolso       TEXT,
+    id_proveedor             INT REFERENCES proveedor(id_proveedor)
+);
+
+-- 7.3 Transporte (Aéreo y Terrestre)
+CREATE TABLE transporte (
+    id_transporte             SERIAL PRIMARY KEY,
+    tipo                      VARCHAR(50), -- 'Aéreo', 'Terrestre', 'Marítimo'
+    empresa                   VARCHAR(100),
+    ruta                      VARCHAR(200),
+    capacidad                 INT,
+    hora_salida               TIME,
+    hora_regreso              TIME,
+    fecha_inicio              DATE,
+    fecha_fin                 DATE,
+    tipo_tarifa               VARCHAR(30)   DEFAULT 'economica', -- 'economica', 'promocional', 'flexible', 'ejecutiva'
+    es_reembolsable           BOOLEAN       DEFAULT FALSE,
+    penalidad_cambio_dinero   NUMERIC(10,2) DEFAULT 0, -- Penalidad fija en $ por reprogramar
+    porcentaje_retencion_ley  NUMERIC(5,2)  DEFAULT 10.00, -- Máximo 10% según retracto/desistimiento
+    politica_reembolso        TEXT,
+    id_proveedor              INT REFERENCES proveedor(id_proveedor),
+
+    CONSTRAINT chk_transporte_tarifa CHECK (tipo_tarifa IN ('economica', 'promocional', 'flexible', 'ejecutiva'))
+);
+
+-- 7.4 Actividades Turísticas y Tours (Escalas de Días)
+CREATE TABLE actividad_turistica (
+    id_actividad               SERIAL PRIMARY KEY,
+    nombre                     VARCHAR(100) NOT NULL,
+    tipo                       VARCHAR(100),
+    duracion_horas             NUMERIC(4,1),
+    costo                      NUMERIC(10,2),
+    es_grupo_privado           BOOLEAN DEFAULT FALSE,
+    pct_penalidad_mas_15dias   NUMERIC(5,2) DEFAULT 5.00,   -- Ej: 5% a 10% gastos admin
+    pct_penalidad_7_a_14dias   NUMERIC(5,2) DEFAULT 25.00,  -- Ej: 25% a 50%
+    pct_penalidad_3_a_6dias    NUMERIC(5,2) DEFAULT 75.00,  -- Ej: 75%
+    pct_penalidad_menos_48h    NUMERIC(5,2) DEFAULT 100.00, -- Ej: 100% / No-Show
+    politica_reembolso         TEXT,
+    id_destino                 INT REFERENCES destino(id_destino),
+    id_guia                    INT REFERENCES guia_turistico(id_guia),
+    id_proveedor               INT REFERENCES proveedor(id_proveedor)
+);
+
+-- 7.5 Seguro de Servicios
+CREATE TABLE seguro_servicio (
+    id_seguro_servicio SERIAL PRIMARY KEY,
+    id_seguro          INT NOT NULL REFERENCES seguro(id_seguro) ON DELETE CASCADE,
+    id_alojamiento     INT REFERENCES alojamiento(id_alojamiento)     ON DELETE CASCADE,
+    id_alimentacion    INT REFERENCES alimentacion(id_alimentacion)   ON DELETE CASCADE,
+    id_transporte      INT REFERENCES transporte(id_transporte)       ON DELETE CASCADE,
+    id_actividad       INT REFERENCES actividad_turistica(id_actividad) ON DELETE CASCADE,
+
+    CONSTRAINT chk_solo_un_servicio CHECK (
+        (id_alojamiento  IS NOT NULL)::INT +
+        (id_alimentacion IS NOT NULL)::INT +
+        (id_transporte   IS NOT NULL)::INT +
+        (id_actividad    IS NOT NULL)::INT = 1
+    ),
+    UNIQUE (id_seguro, id_alojamiento),
+    UNIQUE (id_seguro, id_alimentacion),
+    UNIQUE (id_seguro, id_transporte),
+    UNIQUE (id_seguro, id_actividad)
+);
+
+----- MÓDULO 8: PAQUETES TURÍSTICOS -----
+CREATE TABLE paquete_turistico (
+    id_paquete        SERIAL PRIMARY KEY,
+    nombre            VARCHAR(100)  NOT NULL,
+    slug              VARCHAR(100)  NOT NULL UNIQUE,
+    descripcion       TEXT,
+    precio            NUMERIC(10,2) NOT NULL,
+    duracion_dias     INT,
+    duracion_noches   INT,
+    cupos_totales     INT           NOT NULL DEFAULT 0,
+    cupos_disponibles INT           NOT NULL DEFAULT 0,
+    fecha_inicio      DATE,
+    fecha_fin         DATE,
+    personalizable    BOOLEAN       NOT NULL DEFAULT FALSE,
+    estado            VARCHAR(20)   NOT NULL DEFAULT 'activo',
+    id_destino        INT REFERENCES destino(id_destino),
+    id_guia           INT REFERENCES guia_turistico(id_guia),
+
+    CONSTRAINT chk_paquete_estado CHECK (estado IN ('activo','suspendido')),
+    CONSTRAINT chk_cupos CHECK (cupos_disponibles <= cupos_totales)
+);
+
+CREATE TABLE paquete_transporte (
+    id_paquete    INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    id_transporte INT NOT NULL REFERENCES transporte(id_transporte),
+    PRIMARY KEY (id_paquete, id_transporte)
+);
+
+CREATE TABLE paquete_alojamiento (
+    id_paquete     INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    id_alojamiento INT NOT NULL REFERENCES alojamiento(id_alojamiento),
+    PRIMARY KEY (id_paquete, id_alojamiento)
+);
+
+CREATE TABLE paquete_alimentacion (
+    id_paquete      INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    id_alimentacion INT NOT NULL REFERENCES alimentacion(id_alimentacion),
+    PRIMARY KEY (id_paquete, id_alimentacion)
+);
+
+CREATE TABLE paquete_actividad (
+    id_paquete   INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    id_actividad INT NOT NULL REFERENCES actividad_turistica(id_actividad),
+    PRIMARY KEY (id_paquete, id_actividad)
+);
+
+CREATE TABLE servicio_extra (
+    id_servicio_extra SERIAL PRIMARY KEY,
+    nombre            VARCHAR(100)  NOT NULL,
+    precio            NUMERIC(10,2) NOT NULL,
+    descripcion       TEXT,
+    estado            BOOLEAN       NOT NULL DEFAULT TRUE,
+    id_paquete        INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
+);
+
+----- MÓDULO 9: TEMPORADAS -----
+CREATE TABLE temporada (
+    id_temporada SERIAL PRIMARY KEY,
+    nombre       VARCHAR(100) NOT NULL,
+    categoria    VARCHAR(50),
+    descripcion  TEXT,
+    fecha_inicio DATE         NOT NULL,
+    fecha_fin    DATE         NOT NULL,
+    estado       BOOLEAN      NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT chk_temporada_fechas CHECK (fecha_fin >= fecha_inicio)
+);
+
+CREATE TABLE temporada_paquete (
+    id_temporada INT NOT NULL REFERENCES temporada(id_temporada)         ON DELETE CASCADE,
+    id_paquete   INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    PRIMARY KEY (id_temporada, id_paquete)
+);
+
+----- MÓDULO 10: RESERVAS Y PERSONALIZACIÓN -----
+CREATE TABLE reserva (
+    id_reserva          SERIAL PRIMARY KEY,
+    codigo_unico        VARCHAR(30)   NOT NULL UNIQUE,
+    fecha_reserva       DATE          NOT NULL DEFAULT CURRENT_DATE,
+    fecha_viaje         DATE,
+    estado              VARCHAR(30)   NOT NULL DEFAULT 'solicitada',
+    valor_referencial   NUMERIC(12,2),
+    cant_adultos        INT           NOT NULL DEFAULT 1,
+    cant_menores        INT           NOT NULL DEFAULT 0,
+    observaciones       TEXT,
+    metodo_contacto     VARCHAR(30),
+    guia_pdf            VARCHAR(255),
+    metodo_pago         VARCHAR(50),
+    motivo_cancelacion  TEXT,
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente),
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete),
+
+    CONSTRAINT chk_reserva_estado 
+        CHECK (estado IN ('solicitada', 'pendiente_pago', 'confirmada', 'en_proceso', 'completada', 'cancelada')),
+    CONSTRAINT chk_cant_adultos CHECK (cant_adultos >= 1),
+    CONSTRAINT chk_cant_menores CHECK (cant_menores >= 0)
+);
+
+CREATE TABLE personalizacion_reserva (
+    id_personalizacion SERIAL PRIMARY KEY,
+    id_reserva         INT         NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    tipo_componente    VARCHAR(30) NOT NULL,
+    id_componente      INT,
+    accion             VARCHAR(20) NOT NULL,
+    precio_ajuste      NUMERIC(10,2) DEFAULT 0,
+    fecha              TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observacion        TEXT,
+
+    CONSTRAINT chk_personalizacion_accion
+        CHECK (accion IN ('agregar', 'eliminar', 'modificar')),
+    CONSTRAINT chk_personalizacion_tipo
+        CHECK (tipo_componente IN ('alojamiento', 'alimentacion', 'transporte', 'actividad', 'servicio_extra'))
+);
+
+CREATE TABLE reserva_seguro (
+    id_reserva_seguro  SERIAL PRIMARY KEY,
+    id_reserva         INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    id_seguro          INT NOT NULL REFERENCES seguro(id_seguro)  ON DELETE CASCADE,
+    precio_aplicado    NUMERIC(10,2) NOT NULL,
+    fecha_contratacion DATE          NOT NULL DEFAULT CURRENT_DATE,
+    UNIQUE (id_reserva, id_seguro)
+);
+
+CREATE TABLE reserva_servicio_extra (
+    id_reserva        INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    id_servicio_extra INT NOT NULL REFERENCES servicio_extra(id_servicio_extra),
+    PRIMARY KEY (id_reserva, id_servicio_extra)
+);
+
+CREATE TABLE viajero_reserva (
+    id_viajero       SERIAL PRIMARY KEY,
+    nombre           VARCHAR(50) NOT NULL,
+    apellido         VARCHAR(50) NOT NULL,
+    tipo_documento   VARCHAR(30) NOT NULL,
+    numero_documento VARCHAR(30) NOT NULL,
+    id_reserva       INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+
+CREATE TABLE itinerario_viaje (
+    id_itinerario    SERIAL PRIMARY KEY,
+    origen           VARCHAR(100),
+    destino          VARCHAR(100),
+    fecha_salida     DATE,
+    fecha_regreso    DATE,
+    hora_salida      TIME,
+    hora_regreso     TIME,
+    medio_transporte VARCHAR(50),
+    id_reserva       INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+
+CREATE TABLE itinerario_actividad (
+    id_itin_actividad  SERIAL PRIMARY KEY,
+    dia                INT,
+    hora_inicio        TIME,
+    lugar              VARCHAR(200),
+    descripcion        TEXT,
+    costos_adicionales NUMERIC(10,2) DEFAULT 0,
+    id_actividad       INT REFERENCES actividad_turistica(id_actividad),
+    id_reserva         INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
+);
+
+----- MÓDULO 11: FUNCIONALIDADES DEL CLIENTE -----
+CREATE TABLE favoritos (
+    id_favorito    SERIAL PRIMARY KEY,
+    fecha_agregado DATE NOT NULL DEFAULT CURRENT_DATE,
+    id_cliente     INT NOT NULL REFERENCES cliente(id_cliente)           ON DELETE CASCADE,
+    id_paquete     INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    UNIQUE (id_cliente, id_paquete)
+);
+
+CREATE TABLE lista_suenos (
+    id_sueno            SERIAL PRIMARY KEY,
+    fecha_inicio_ahorro DATE,
+    meta_semanal        NUMERIC(10,2),
+    meta_mensual        NUMERIC(10,2),
+    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente)           ON DELETE CASCADE,
+    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    UNIQUE (id_cliente, id_paquete)
+);
+
+CREATE TABLE historial_busqueda (
+    id_busqueda     SERIAL PRIMARY KEY,
+    destino_buscado VARCHAR(100),
+    filtros         JSONB,
+    fecha_busqueda  TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_cliente      INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
+);
+
+CREATE TABLE notificacion (
+    id_notificacion SERIAL PRIMARY KEY,
+    tipo            VARCHAR(50),
+    mensaje         TEXT,
+    fecha           TIMESTAMP NOT NULL DEFAULT NOW(),
+    leida           BOOLEAN   NOT NULL DEFAULT FALSE,
+    id_cliente      INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
+);
+
+----- MÓDULO 12: ENCUESTAS DE SATISFACCIÓN -----
+CREATE TABLE encuesta_pregunta (
+    id_pregunta    SERIAL PRIMARY KEY,
+    texto          TEXT        NOT NULL,
+    tipo_respuesta VARCHAR(50) NOT NULL,
+    orden          INT         NOT NULL,
+    estado         BOOLEAN     NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE encuesta_respuesta (
+    id_respuesta      SERIAL PRIMARY KEY,
+    id_pregunta       INT NOT NULL REFERENCES encuesta_pregunta(id_pregunta) ON DELETE CASCADE,
+    id_reserva        INT NOT NULL REFERENCES reserva(id_reserva)            ON DELETE CASCADE,
+    id_cliente        INT NOT NULL REFERENCES cliente(id_cliente)            ON DELETE CASCADE,
+    respuesta_texto   TEXT,
+    respuesta_numero  INT,
+    fecha             TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (id_pregunta, id_reserva, id_cliente)
+);
+
+----- MÓDULO 13: ADMINISTRACIÓN Y AUDITORÍA -----
+CREATE TABLE auditoria_admin (
+    id_auditoria SERIAL PRIMARY KEY,
+    accion       VARCHAR(100) NOT NULL,
+    descripcion  TEXT,
+    fecha        TIMESTAMP NOT NULL DEFAULT NOW(),
+    id_admin     INT NOT NULL REFERENCES cliente(id_cliente)
+);
+
+----- ÍNDICES DE OPTIMIZACIÓN -----
+CREATE INDEX idx_cliente_correo      ON cliente(correo);
+CREATE INDEX idx_cliente_documento   ON cliente(numero_documento);
+CREATE INDEX idx_cliente_nivel       ON cliente(id_nivel);
+CREATE INDEX idx_reserva_cliente     ON reserva(id_cliente);
+CREATE INDEX idx_reserva_paquete     ON reserva(id_paquete);
+CREATE INDEX idx_reserva_estado      ON reserva(estado);
+CREATE INDEX idx_reserva_fecha_viaje ON reserva(fecha_viaje);
+CREATE INDEX idx_paquete_destino     ON paquete_turistico(id_destino);
+CREATE INDEX idx_paquete_estado      ON paquete_turistico(estado);
+CREATE INDEX idx_paquete_fecha       ON paquete_turistico(fecha_inicio);
+CREATE INDEX idx_seguro_servicio     ON seguro_servicio(id_seguro);
+CREATE INDEX idx_reserva_seguro      ON reserva_seguro(id_reserva);
+CREATE INDEX idx_metodo_proveedor    ON metodo_pago_proveedor(id_proveedor);
+CREATE INDEX idx_historial_cliente   ON historial_busqueda(id_cliente);
+CREATE INDEX idx_notif_cliente       ON notificacion(id_cliente);
+CREATE INDEX idx_favoritos_cliente   ON favoritos(id_cliente);
+CREATE INDEX idx_auditoria_admin     ON auditoria_admin(id_admin);
+CREATE INDEX idx_personaliz_reserva ON personalizacion_reserva(id_reserva);
+
+COMMIT;
+
+
+
+INSERT INTO nivel (nombre, min_monto, min_reservas, descripcion, porcentaje_descuento) VALUES
+('Explorador', 0.00, 0, 'Nivel inicial para nuevos viajeros', 0.00),
+('Aventurero', 2000000.00, 2, 'Viajeros con experiencia previa', 5.00),
+('Viajero Elite', 6000000.00, 5, 'Acceso a promociones y descuentos especiales', 10.00),
+('Embajador', 15000000.00, 10, 'El nivel de fidelización más alto de MAREVA', 15.00);
+
+-- 1. CLIENTE (Sin FKs obligatorias) - 10 registros
+INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, rol, codigo_referido, id_nivel) VALUES
+('Cesar', 'Uzcategui', 'CC', '1000000001', '3100000001', 'cesar@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
+('Andres', 'Aroca', 'CC', '1000000002', '3100000002', 'andres@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
+('Laura', 'Rubiano', 'CC', '1000000003', '3100000003', 'laura@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
+('Sofia', 'Munevar', 'CC', '1000000004', '3100000004', 'sofia@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
+('Nicoll', 'Sabogal', 'CC', '1000000005', '3100000005', 'nicoll@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
+('Yadira', 'Narvaez', 'CC', '2000000001', '3200000001', 'yadira@test.co', 'cliente_pass1', 'cliente', 'YN20261', 1),
+('Carlos', 'Mendoza', 'CC', '2000000002', '3200000002', 'carlos.m@test.co', 'cliente_pass2', 'cliente', 'CM20262', 2),
+('Mariana', 'Gomez', 'CC', '2000000003', '3200000003', 'mariana.g@test.co', 'cliente_pass3', 'cliente', 'MG20263', 3),
+('Jorge', 'Torres', 'CE', '2000000004', '3200000004', 'jorge.t@test.co', 'cliente_pass4', 'cliente', 'JT20264', 1),
+('Daniela', 'Rios', 'CC', '2000000005', '3200000005', 'daniela.r@test.co', 'cliente_pass5', 'cliente', 'DR20265', 2);
+
+-- 2. DESTINO - 10 registros
+INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones) VALUES
+('Cartagena de Indias', 'Bolívar', 'Cartagena', 'playa', 'Ciudad amurallada histórica y playas', 'Ciudad Amurallada, Castillo San Felipe'),
+('Medellín', 'Antioquia', 'Medellín', 'ciudad', 'Ciudad de la eterna primavera e innovación', 'El Poblado, Comuna 13, Parque Arví'),
+('Guatapé', 'Antioquia', 'Guatapé', 'aventura', 'Pueblo de zócalos y majestuoso embalse', 'Piedra del Peñol, Embalse de Guatapé'),
+('San Andrés', 'San Andrés', 'San Andrés', 'playa', 'Mar de los siete colores en el Caribe', 'Johnny Cay, Hoyo Soplador, El Acuario'),
+('Parque Tayrona', 'Magdalena', 'Santa Marta', 'playa', 'Naturaleza salvaje y selva tropical', 'Cabo San Juan, Playa Cristal'),
+('Valle del Cocora', 'Quindío', 'Salento', 'montaña', 'Hogar de las palmas de cera', 'Salento, Miradores, Fincas Cafeteras'),
+('Barichara', 'Santander', 'Barichara', 'cultural', 'Pueblo patrimonio de arquitectura colonial', 'Camino Real, Capilla Santa Bárbara'),
+('Leticia', 'Amazonas', 'Leticia', 'aventura', 'Puerta de entrada a la Amazonía', 'Isla de los Micos, Parque Amacayacu'),
+('Caño Cristales', 'Meta', 'La Macarena', 'aventura', 'El río de los cinco colores', 'Río Caño Cristales, Pozos Naturales'),
+('Eje Cafetero', 'Quindío', 'Armenia', 'cultural', 'Paisaje Cultural Cafetero de Colombia', 'Parque del Café, Panaca, Fincas');
+
+-- 3. PROVEEDOR - 10 registros
+INSERT INTO proveedor (nombre, nit, tipo_empresa, descripcion, politica_reembolso_general, regla_retracto_desistimiento, gastos_gestion_agencia, porcentaje_gestion_agencia, direccion, ciudad, telefono, correo, nombre_contacto, telefono_contacto, correo_contacto) VALUES
+('Avianca', '860002964-4', 'Aerolínea', 'Transporte aéreo nacional e internacional', 'Tarifas según clase comprada', 'Retracto 48h / Desistimiento 24h con retención 10%', 50000.00, 5.00, 'Calle 26 # 103-09', 'Bogotá', '6014138000', 'contacto@avianca.com', 'Carlos Reyes', '3009876543', 'creyes@avianca.com'),
+('LATAM Airlines', '899999035-1', 'Aerolínea', 'Aerolínea con rutas nacionales en Colombia', 'Políticas estandarizadas por tipo de billete', 'Aplica normativa Aerocivil para retracto', 50000.00, 5.00, 'Carrera 10 # 97-13', 'Bogotá', '6015185800', 'ventas@latam.com', 'Andrea Ruiz', '3118765432', 'aruiz@latam.com'),
+('Hotel Las Américas', '800100200-1', 'Hotel', 'Resort 5 estrellas frente al mar', 'Cancelación gratuita hasta 48h antes', 'No aplica ley de retracto aéreo', 30000.00, 3.00, 'Anillo Vial Sector Cielo Mar', 'Cartagena', '6056543210', 'reservas@lasamericas.co', 'María Torres', '3001234567', 'mtorres@lasamericas.co'),
+('Decameron Colombia', '800112233-5', 'Hotel', 'Cadena de hoteles todo incluido', 'Cancelación con penalidad dentro de los 7 días', 'Sujeto a contrato interno', 40000.00, 4.00, 'Avenida Colombia # 1-19', 'San Andrés', '6085121212', 'reservas@decameron.co', 'Ana Gómez', '3152345678', 'agomez@decameron.co'),
+('CocoraTours', '900567890-3', 'Operador Local', 'Tours guiados y transporte en Quindío', 'Escala de penalidades según anticipación', 'Sin retracto automatizado', 15000.00, 2.00, 'Calle 6 # 4-12', 'Salento', '3145678901', 'info@cocoratours.co', 'Juliana Ríos', '3145678901', 'jrios@cocoratours.co'),
+('Ecoturismo Tayrona', '900345678-2', 'Operador Local', 'Guía y logística en el Parque Tayrona', 'Cancelaciones según días de aviso previo', 'N/A', 20000.00, 2.50, 'Carrera 1 # 12-05', 'Santa Marta', '3123456789', 'info@ecotayrona.co', 'Pedro Silva', '3123456789', 'psilva@ecotayrona.co'),
+('Expreso Bolivariano', '860000120-9', 'Transporte Terrestre', 'Transporte de pasajeros por carretera', 'Tiquetes modificables con penalidad', 'Retracto conforme a la SIC', 10000.00, 1.50, 'Terminal de Transportes', 'Bogotá', '6014241100', 'servicio@bolivariano.com.co', 'Gonzalo Peña', '3105554433', 'gpena@bolivariano.com'),
+('Restaurante Andrés Carne de Res', '800054321-7', 'Restaurante', 'Gastronomía y entretenimiento', 'Reservas grupales requieren anticipo', 'No reembolsable No-Show', 10000.00, 1.00, 'Calle 3 # 11A-56', 'Chia', '6018612222', 'eventos@andrescarnederes.com', 'Lina Morales', '3169998877', 'lmorales@andres.com'),
+('Amazonas Expedition', '900888777-4', 'Operador Local', 'Excursiones en selva profunda', 'Reembolsos graduados hasta 15 días antes', 'No retracto', 25000.00, 3.50, 'Calle 8 # 9-40', 'Leticia', '3132221100', 'contacto@amazonasexp.co', 'Samuel Chipana', '3132221100', 'schipana@amazonasexp.co'),
+('Transportes Marítimos del Caribe', '800777666-0', 'Transporte Terrestre', 'Lanchas y traslados insulares', 'No reembolsable por condiciones de clima', 'N/A', 10000.00, 2.00, 'Muelle La Bodeguita', 'Cartagena', '6056641122', 'reservas@maritimoscaribe.co', 'Hernán Polo', '3014443322', 'hpolo@maritimoscaribe.co');
+
+-- 4. GUIA_TURISTICO - 10 registros
+INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo) VALUES
+('Andrés', 'Herrera', 'Español, Inglés', 'Historia colonial y playas', '3100001111', 'andres.guia@mareva.co'),
+('Valentina', 'López', 'Español, Inglés, Francés', 'Ecoturismo y senderismo', '3100002222', 'valentina.guia@mareva.co'),
+('Miguel', 'Castillo', 'Español', 'Deportes extremos y aventura', '3100003333', 'miguel.guia@mareva.co'),
+('Claudia', 'Morales', 'Español, Alemán', 'Cultura e historia regional', '3100004444', 'claudia.guia@mareva.co'),
+('Esteban', 'Suarez', 'Español, Inglés', 'Fotografía de naturaleza', '3100005555', 'esteban.guia@mareva.co'),
+('Diana', 'Pérez', 'Español, Italiano', 'Gastronomía local', '3100006666', 'diana.guia@mareva.co'),
+('Felipe', 'Castro', 'Español, Portugués', 'Rutas de alta montaña', '3100007777', 'felipe.guia@mareva.co'),
+('Lucía', 'Navarro', 'Español, Inglés', 'Arqueología y etnografía', '3100008888', 'lucia.guia@mareva.co'),
+('Oscar', 'Vargas', 'Español', 'Navegación y buceo básico', '3100009999', 'oscar.guia@mareva.co'),
+('Ximena', 'Rojas', 'Español, Inglés', 'Avistamiento de aves', '3100001010', 'ximena.guia@mareva.co');
+
+-- 5. TIPO_SEGURO - 10 registros
+INSERT INTO tipo_seguro (nombre, descripcion, cobertura_general) VALUES
+('Responsabilidad Civil Aérea', 'Cobertura exigida por normativa aeronáutica', 'Daños a pasajeros durante vuelos'),
+('Responsabilidad Civil Hotelera', 'Seguro obligatorio en instalaciones hoteleras', 'Accidentes e incidentes dentro del hotel'),
+('Responsabilidad Civil Transporte', 'Seguro de accidentes para vehículos de transporte', 'Pasajeros en tránsito terrestre o marítimo'),
+('Responsabilidad Civil Guiado', 'Seguro de accidentes durante tours guiados', 'Cobertura para actividades al aire libre'),
+('Asistencia Médica Básica', 'Atención médica de urgencia nacional', 'Consulta médica y medicamentos básicos'),
+('Asistencia Médica Integral', 'Cobertura médica completa y hospitalización', 'Hospitalización, cirugía y traslados'),
+('Cancelación de Viaje', 'Protección ante cancelación por imprevistos', 'Reembolso de gastos no disfrutados'),
+('Pérdida de Equipaje', 'Indemnización por extravío o daño de maletas', 'Equipaje documentado en transporte'),
+('Seguro Deportes Extremos', 'Cobertura para actividades de alto riesgo', 'Rescate y atención especializada'),
+('Seguro Multiriesgo Premium', 'Protección total combinada para el viajero', 'Salud, equipaje, cancelación y accidentes');
+
+-- 6. TEMPORADA - 10 registros
+INSERT INTO temporada (nombre, categoria, descripcion, fecha_inicio, fecha_fin) VALUES
+('Vacaciones Mitad de Año 2026', 'Alta', 'Periodo escolar de junio y julio', '2026-06-15', '2026-07-31'),
+('Semana Santa 2026', 'Alta', 'Semana mayor de receso', '2026-03-29', '2026-04-05'),
+('Receso Escolar Octubre 2026', 'Media', 'Semana de receso estudiantil', '2026-10-05', '2026-10-12'),
+('Fin de Año y Reyes 2026', 'Alta', 'Temporada navideña y vacaciones de enero', '2026-12-15', '2027-01-15'),
+('Temporada Baja Bógotá / Interior', 'Baja', 'Meses de menor afluencia turística', '2026-02-01', '2026-03-15'),
+('Temporada Baja Caribe', 'Baja', 'Periodo entre temporadas altas', '2026-08-15', '2026-09-30'),
+('Fiestas del Mar Santa Marta', 'Media', 'Eventos culturales y festivos locales', '2026-07-24', '2026-07-29'),
+('Feria de las Flores Medellín', 'Alta', 'Festividad principal de Antioquia', '2026-08-01', '2026-08-10'),
+('Temporada Avistamiento de Ballenas', 'Media', 'Temporada natural en el Pacífico', '2026-07-15', '2026-10-31'),
+('Feria de Cali', 'Alta', 'Festividades de fin de año en Cali', '2026-12-25', '2026-12-30');
+
+-- 7. ENCUESTA_PREGUNTA - 10 registros
+INSERT INTO encuesta_pregunta (texto, tipo_respuesta, orden) VALUES
+('¿Cómo califica la atención de la agencia MAREVA?', 'Puntuacion', 1),
+('¿El paquete cumplió con las expectativas descritas?', 'Puntuacion', 2),
+('¿Cómo evalúa la calidad del transporte proporcionado?', 'Puntuacion', 3),
+('¿El servicio de alojamiento cumplió con los estándares?', 'Puntuacion', 4),
+('¿Cómo califica el desempeño de los guías turísticos?', 'Puntuacion', 5),
+('¿Las actividades programadas se realizaron a tiempo?', 'Si_No', 6),
+('¿Recomendaría a MAREVA a sus familiares o amigos?', 'Si_No', 7),
+('¿Qué aspectos considera que podemos mejorar en el servicio?', 'Texto', 8),
+('¿Cómo califica la relación precio-calidad del paquete?', 'Puntuacion', 9),
+('¿Volvería a reservar sus próximas vacaciones con nosotros?', 'Si_No', 10);
