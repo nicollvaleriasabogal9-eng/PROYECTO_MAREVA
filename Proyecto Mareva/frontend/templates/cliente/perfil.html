@@ -3,65 +3,194 @@
 {% block content %}
 
 <main class="perfil-main">
+
   <div class="container">
 
-    <a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">
+    <a
+      href="javascript:history.back()"
+      class="btn btn-ghost btn-sm"
+      style="margin-bottom:var(--space-4)"
+    >
       ← Volver
     </a>
 
     <div class="perfil-layout">
 
       <aside class="perfil-sidebar">
-        <div class="perfil-avatar">👤</div>
-        <h2 class="perfil-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</h2>
-        <p class="perfil-correo">{{ usuario.correo }}</p>
-        <span class="perfil-nivel">{{ usuario.nivel }}</span>
+
+        <div class="perfil-avatar">
+          👤
+        </div>
+
+        <h2 class="perfil-nombre">
+          {{ usuario.nombre }} {{ usuario.apellido }}
+        </h2>
+
+        <p class="perfil-correo">
+          {{ usuario.correo }}
+        </p>
+
+        <span class="perfil-nivel">
+          {{ usuario.nivel }}
+        </span>
 
         <div class="divider"></div>
 
-        <a href="{{ url_for('logout') }}" class="btn btn-outline" style="width:100%;justify-content:center">
+        <a
+          href="{{ url_for('logout') }}"
+          class="btn btn-outline"
+          style="width:100%;justify-content:center"
+        >
           Cerrar sesión
         </a>
+
       </aside>
 
       <div class="perfil-content">
 
         <div class="perfil-card">
-          <h3 class="perfil-card__title">🏆 Mis insignias</h3>
+
+          <h3 class="perfil-card__title">
+            🏆 Mis insignias
+          </h3>
+
           <div class="insignias-grid">
+
             {% for i in usuario.insignias %}
-              <span class="badge badge-blue">{{ i }}</span>
+
+              <span class="badge badge-blue">
+                {{ i }}
+              </span>
+
             {% else %}
-              <p class="text-muted">Aún no tienes insignias. ¡Haz tu primera reserva!</p>
+
+              <p class="text-muted">
+                Aún no tienes insignias. ¡Haz tu primera reserva!
+              </p>
+
             {% endfor %}
+
           </div>
+
         </div>
 
         <div class="perfil-card">
-          <h3 class="perfil-card__title">📋 Última reserva</h3>
+
+          <h3 class="perfil-card__title">
+            ✈️ Mi reserva
+          </h3>
+
           {% if usuario.get('ultima_reserva') %}
-            <p>{{ usuario.ultima_reserva }}</p>
+
+            <div class="reserva-perfil">
+
+              <div class="reserva-perfil__icon">
+                ✈️
+              </div>
+
+              <div class="reserva-perfil__info">
+
+                <h4>
+                  Tienes una reserva
+                </h4>
+
+                <p>
+                  <strong>
+                    {{ usuario.ultima_reserva.nombre_paquete }}
+                  </strong>
+                </p>
+
+                <p>
+                  📍 Destino:
+                  {{ usuario.ultima_reserva.destino }}
+                </p>
+
+                <p>
+                  📅 Viaje:
+                  {{ usuario.ultima_reserva.fecha_inicio }}
+                  al
+                  {{ usuario.ultima_reserva.fecha_regreso }}
+                </p>
+
+                <p>
+                  👥
+                  {{ usuario.ultima_reserva.adultos }}
+                  adulto(s),
+                  {{ usuario.ultima_reserva.menores }}
+                  menor(es),
+                  {{ usuario.ultima_reserva.bebes }}
+                  bebé(s)
+                </p>
+
+              </div>
+
+            </div>
+
           {% else %}
-            <p class="text-muted">No tienes reservas aún. <a href="{{ url_for('paquetes') }}" class="form-link">Explorar paquetes</a></p>
+
+            <div class="reserva-vacia">
+
+              <div class="reserva-vacia__icon">
+                🧳
+              </div>
+
+              <h4>
+                No tienes reservas aún
+              </h4>
+
+              <p class="text-muted">
+                Explora nuestros paquetes y realiza tu primera reserva.
+              </p>
+
+              <a
+                href="{{ url_for('paquetes') }}"
+                class="btn btn-primary"
+                style="margin-top:var(--space-4)"
+              >
+                Explorar paquetes ✈️
+              </a>
+
+            </div>
+
           {% endif %}
+
         </div>
 
         <div class="perfil-card">
-          <h3 class="perfil-card__title">👤 Información de cuenta</h3>
-          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}
+
+          <h3 class="perfil-card__title">
+            👤 Información de cuenta
+          </h3>
+
+          <p
+            style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)"
+          >
+            <strong>Nombre:</strong>
+            {{ usuario.nombre }} {{ usuario.apellido }}
           </p>
-          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Correo:</strong> {{ usuario.correo }}
+
+          <p
+            style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)"
+          >
+            <strong>Correo:</strong>
+            {{ usuario.correo }}
           </p>
-          <p style="font-size:var(--text-sm);color:var(--gray-600)">
-            <strong>Nivel:</strong> {{ usuario.nivel }}
+
+          <p
+            style="font-size:var(--text-sm);color:var(--gray-600)"
+          >
+            <strong>Nivel:</strong>
+            {{ usuario.nivel }}
           </p>
+
         </div>
 
       </div>
+
     </div>
+
   </div>
+
 </main>
 
 {% endblock %}
