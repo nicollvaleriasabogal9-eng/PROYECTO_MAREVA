@@ -77,52 +77,92 @@
         <div class="perfil-card">
 
           <h3 class="perfil-card__title">
-            ✈️ Mi reserva
+            ✈️ Mis reservas
           </h3>
 
-          {% if usuario.get('ultima_reserva') %}
+          <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:var(--space-4);margin-bottom:var(--space-6)">
 
-            <div class="reserva-perfil">
+            <strong>
+              Tienes {{ cantidad_reservas }} reserva{% if cantidad_reservas != 1 %}s{% endif %}
+            </strong>
 
-              <div class="reserva-perfil__icon">
-                ✈️
-              </div>
+          </div>
 
-              <div class="reserva-perfil__info">
+          {% if reservas %}
 
-                <h4>
-                  Tienes una reserva
-                </h4>
+            <div style="display:flex;flex-direction:column;gap:var(--space-5)">
 
-                <p>
-                  <strong>
-                    {{ usuario.ultima_reserva.nombre_paquete }}
-                  </strong>
-                </p>
+              {% for reserva in reservas %}
 
-                <p>
-                  📍 Destino:
-                  {{ usuario.ultima_reserva.destino }}
-                </p>
+                <div
+                  class="reserva-perfil"
+                  style="border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:var(--space-5)"
+                >
 
-                <p>
-                  📅 Viaje:
-                  {{ usuario.ultima_reserva.fecha_inicio }}
-                  al
-                  {{ usuario.ultima_reserva.fecha_regreso }}
-                </p>
+                  <div class="reserva-perfil__icon">
+                    ✈️
+                  </div>
 
-                <p>
-                  👥
-                  {{ usuario.ultima_reserva.adultos }}
-                  adulto(s),
-                  {{ usuario.ultima_reserva.menores }}
-                  menor(es),
-                  {{ usuario.ultima_reserva.bebes }}
-                  bebé(s)
-                </p>
+                  <div class="reserva-perfil__info">
 
-              </div>
+                    <h4>
+                      {{ reserva.nombre_paquete }}
+                    </h4>
+
+                    <p>
+                      <strong>
+                        Código:
+                      </strong>
+                      {{ reserva.codigo_unico }}
+                    </p>
+
+                    <p>
+                      📍 Destino:
+                      {{ reserva.destino }}
+                    </p>
+
+                    <p>
+                      📅 Viaje:
+                      {{ reserva.fecha_viaje.strftime('%d/%m/%Y') if reserva.fecha_viaje else 'No definida' }}
+                      al
+                      {{ reserva.fecha_regreso.strftime('%d/%m/%Y') if reserva.fecha_regreso else 'No definida' }}
+                    </p>
+
+                    <p>
+                      👥
+                      {{ reserva.adultos }}
+                      adulto(s),
+                      {{ reserva.menores }}
+                      menor(es)
+                    </p>
+
+                    <p>
+                      💰
+                      <strong>
+                        ${{ "{:,.0f}".format(reserva.valor_total) }}
+                      </strong>
+                    </p>
+
+                    <p>
+                      📌 Estado:
+                      <strong>
+                        {{ reserva.estado }}
+                      </strong>
+                    </p>
+
+                    {% if reserva.observaciones %}
+
+                    <p>
+                      📝 {{ reserva.observaciones }}
+                    </p>
+
+                    {% endif %}
+
+                  </div>
+
+                </div>
+
+              {% endfor %}
 
             </div>
 
@@ -162,23 +202,17 @@
             👤 Información de cuenta
           </h3>
 
-          <p
-            style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)"
-          >
+          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
             <strong>Nombre:</strong>
             {{ usuario.nombre }} {{ usuario.apellido }}
           </p>
 
-          <p
-            style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)"
-          >
+          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
             <strong>Correo:</strong>
             {{ usuario.correo }}
           </p>
 
-          <p
-            style="font-size:var(--text-sm);color:var(--gray-600)"
-          >
+          <p style="font-size:var(--text-sm);color:var(--gray-600)">
             <strong>Nivel:</strong>
             {{ usuario.nivel }}
           </p>
@@ -194,3 +228,4 @@
 </main>
 
 {% endblock %}
+
