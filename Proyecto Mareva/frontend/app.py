@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 import psycopg2
+import uuid
 
 PAQUETES = [
     {"slug":"cartagena-magica","nombre":"Cartagena Mágica","categoria":"playa","precio":1850000,"duracion_dias":5,"duracion_noches":4,"descripcion":"Descubre la ciudad amurallada con playas privadas e historia colonial.","emoji":"🏰","destino":"Cartagena","departamento":"Bolívar","incluye":["alojamiento","transporte","guia"],"servicios_extra":[{"nombre":"Snorkel en Islas del Rosario","precio":180000},{"nombre":"Foto profesional en la Muralla","precio":120000}]},
@@ -80,26 +82,21 @@ class PaqueteBase(ABC):
     def calcular_precio_final(self):
         pass
 
-
 class Playa(PaqueteBase):
     def calcular_precio_final(self):
         return self._data["precio"] * 1.10
-
 
 class Aventura(PaqueteBase):
     def calcular_precio_final(self):
         return self._data["precio"] * 1.15
 
-
 class Ecoturismo(PaqueteBase):
     def calcular_precio_final(self):
         return self._data["precio"] * 1.08
 
-
 class Cultural(PaqueteBase):
     def calcular_precio_final(self):
         return self._data["precio"] * 0.95
-
 
 def factory_paquete(paquete_dict):
     categoria = paquete_dict["categoria"]
@@ -113,10 +110,8 @@ def factory_paquete(paquete_dict):
     else:
         return Cultural(paquete_dict)
 
-
 def obtener_paquetes_poo():
     return [factory_paquete(p) for p in PAQUETES]
-
 
 def paquetes_con_precio_poo():
     paquetes_obj = obtener_paquetes_poo()
@@ -137,11 +132,115 @@ def paquetes_con_precio_poo():
         for p in paquetes_obj
     ]
 
-
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 app.secret_key = "mareva_secret_2026"
 
+DB_CONFIG = {
+    "host": "localhost",
+    "port": 5432,
+    "database": "MAREVA",
+    "user": "postgres",
+    "password": "1234"
+}
+
+def obtener_conexion():
+    return psycopg2.connect(**DB_CONFIG)
+
+def obtener_paquete_bd(slug):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT
+            id_paquete,
+            nombre,
+            slug,
+            descripcion,
+            precio,
+            duracion_dias,
+            duracion_noches,
+            cupos_totales,
+            cupos_disponibles,
+            fecha_inicio,
+            fecha_fin,
+            personalizable,
+            estado
+        FROM paquete_turistico
+        WHERE slug = %s
+    """, (slug,))
+
+    fila = cursor.fetchone()
+
+    if not fila:
+        cursor.close()
+        conexion.close()
+        return None
+
+    paquete = {
+        "id_paquete": fila[0],
+        "nombre": fila[1],
+        "slug": fila[2],
+        "descripcion": fila[3],
+        "precio": float(fila[4]),
+        "duracion_dias": fila[5],
+        "duracion_noches": fila[6],
+        "cupos_totales": fila[7],
+        "cupos_disponibles": fila[8],
+        "fecha_inicio": fila[9],
+        "fecha_fin": fila[10],
+        "personalizable": fila[11],
+        "estado": fila[12],
+        "servicios_extra": []
+    }
+
+    cursor.execute("""
+        SELECT
+            id_servicio_extra,
+            nombre,
+            precio,
+            descripcion
+        FROM servicio_extra
+        WHERE id_paquete = %s
+          AND estado = TRUE
+        ORDER BY id_servicio_extra
+    """, (fila[0],))
+
+    extras = cursor.fetchall()
+
+    for extra in extras:
+        paquete["servicios_extra"].append({
+            "id_servicio_extra": extra[0],
+            "nombre": extra[1],
+            "precio": float(extra[2]),
+            "descripcion": extra[3]
+        })
+
+    cursor.close()
+    conexion.close()
+
+    return paquete
+
+def obtener_id_cliente(correo):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT id_cliente
+        FROM cliente
+        WHERE correo = %s
+          AND estado = TRUE
+    """, (correo,))
+
+    fila = cursor.fetchone()
+
+    cursor.close()
+    conexion.close()
+
+    return fila[0] if fila else None
+
+def generar_codigo_reserva():
+    return "MAR-" + uuid.uuid4().hex[:10].upper()
 
 @app.route("/")
 def inicio():
@@ -154,11 +253,9 @@ def inicio():
         reserva_confirmada=reserva_confirmada
     )
 
-
 @app.route("/paquetes")
 def paquetes():
     query = request.args.get("q", "")
-
     paquetes_poo = paquetes_con_precio_poo()
 
     return render_template(
@@ -167,7 +264,6 @@ def paquetes():
         paquetes=paquetes_poo
     )
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -175,12 +271,33 @@ def login():
         correo = request.form.get("correo")
         password = request.form.get("password")
 
-        if correo == "yadira@test.co" and password == "cliente_prueba":
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+            SELECT
+                id_cliente,
+                nombre,
+                apellido,
+                correo,
+                contrasena
+            FROM cliente
+            WHERE correo = %s
+              AND estado = TRUE
+        """, (correo,))
+
+        cliente = cursor.fetchone()
+
+        cursor.close()
+        conexion.close()
+
+        if cliente and cliente[4] == password:
 
             session["usuario"] = {
-                "nombre": "Yadira",
-                "apellido": "Narvaez",
-                "correo": correo,
+                "id_cliente": cliente[0],
+                "nombre": cliente[1],
+                "apellido": cliente[2],
+                "correo": cliente[3],
                 "nivel": "Explorador",
                 "insignias": []
             }
@@ -199,23 +316,77 @@ def login():
 
     return render_template("/principal/login.html")
 
-
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     if request.method == "POST":
 
-        session["usuario"] = {
-            "nombre": request.form.get("nombre"),
-            "apellido": request.form.get("apellido"),
-            "correo": request.form.get("correo"),
-            "nivel": "Explorador",
-            "insignias": []
-        }
+        nombre = request.form.get("nombre")
+        apellido = request.form.get("apellido")
+        correo = request.form.get("correo")
+        password = request.form.get("password")
+        tipo_documento = request.form.get("tipo_documento", "CC")
+        numero_documento = request.form.get("numero_documento")
 
-        return redirect(url_for("inicio"))
+        if not numero_documento:
+            return render_template(
+                "/principal/registro.html",
+                error="El número de documento es obligatorio."
+            )
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO cliente
+                (
+                    nombre,
+                    apellido,
+                    tipo_documento,
+                    numero_documento,
+                    correo,
+                    contrasena,
+                    rol
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, 'cliente')
+                RETURNING id_cliente
+            """, (
+                nombre,
+                apellido,
+                tipo_documento,
+                numero_documento,
+                correo,
+                password
+            ))
+
+            id_cliente = cursor.fetchone()[0]
+
+            conexion.commit()
+
+            session["usuario"] = {
+                "id_cliente": id_cliente,
+                "nombre": nombre,
+                "apellido": apellido,
+                "correo": correo,
+                "nivel": "Explorador",
+                "insignias": []
+            }
+
+            return redirect(url_for("inicio"))
+
+        except Exception:
+            conexion.rollback()
+
+            return render_template(
+                "/principal/registro.html",
+                error="No fue posible crear la cuenta. Verifica que el correo y documento no estén registrados."
+            )
+
+        finally:
+            cursor.close()
+            conexion.close()
 
     return render_template("/principal/registro.html")
-
 
 @app.route('/destinos')
 def destinos():
@@ -223,7 +394,6 @@ def destinos():
         '/cliente/destinos.html',
         destinos=DESTINOS
     )
-
 
 @app.route('/detalle')
 def detalle_paquete():
@@ -234,20 +404,11 @@ def detalle_paquete():
         return redirect(url_for('paquetes'))
 
     paquete_buscado = paquete_recibido.lower().strip()
-
     paquete = None
 
     for p in PAQUETES:
-
-        nombre_paquete = p.get(
-            'nombre',
-            ''
-        ).lower()
-
-        slug_paquete = p.get(
-            'slug',
-            ''
-        ).lower()
+        nombre_paquete = p.get('nombre', '').lower()
+        slug_paquete = p.get('slug', '').lower()
 
         if (
             paquete_buscado == slug_paquete
@@ -265,7 +426,6 @@ def detalle_paquete():
         paquete=paquete
     )
 
-
 @app.route('/reserva/<slug>')
 def reserva(slug):
 
@@ -275,22 +435,25 @@ def reserva(slug):
             f'?next=/reserva/{slug}'
         )
 
-    paquete = next(
-        (
-            p for p in PAQUETES
-            if p['slug'] == slug
-        ),
-        None
-    )
+    paquete = obtener_paquete_bd(slug)
 
     if not paquete:
         return redirect(url_for('paquetes'))
+
+    if paquete["estado"] != "activo":
+        return redirect(url_for('paquetes'))
+
+    if paquete["cupos_disponibles"] <= 0:
+        return render_template(
+            '/cliente/reserva.html',
+            paquete=paquete,
+            error="Este paquete no tiene cupos disponibles."
+        )
 
     return render_template(
         '/cliente/reserva.html',
         paquete=paquete
     )
-
 
 @app.route('/confirmar-reserva', methods=['POST'])
 def confirmar_reserva():
@@ -302,46 +465,253 @@ def confirmar_reserva():
 
     slug = datos.get('paquete')
 
-    paquete = next(
-        (
-            p for p in PAQUETES
-            if p['slug'] == slug
-        ),
-        None
-    )
+    adultos = int(datos.get('adultos') or 0)
+    menores = int(datos.get('menores') or 0)
+    bebes = int(datos.get('bebes') or 0)
+
+    if adultos < 1 or menores < 0 or bebes < 0:
+        return redirect(url_for('reserva', slug=slug))
+
+    cantidad_viajeros = adultos + menores + bebes
+
+    fecha_inicio_texto = datos.get('fecha_inicio')
+    dias = int(datos.get('dias') or 0)
+
+    if not fecha_inicio_texto or dias < 1:
+        return redirect(url_for('reserva', slug=slug))
+
+    try:
+        fecha_inicio = datetime.strptime(
+            fecha_inicio_texto,
+            "%Y-%m-%d"
+        ).date()
+    except ValueError:
+        return redirect(url_for('reserva', slug=slug))
+
+    paquete = obtener_paquete_bd(slug)
 
     if not paquete:
         return redirect(url_for('paquetes'))
 
-    usuario = session['usuario']
+    if paquete["estado"] != "activo":
+        return redirect(url_for('paquetes'))
 
-    usuario['ultima_reserva'] = {
-        'paquete': slug,
-        'nombre_paquete': paquete['nombre'],
-        'destino': paquete['destino'],
-        'fecha_inicio': datos.get('fecha_inicio'),
-        'fecha_regreso': datos.get('fecha_regreso'),
-        'dias': datos.get('dias'),
-        'adultos': datos.get('adultos'),
-        'menores': datos.get('menores'),
-        'bebes': datos.get('bebes'),
-        'mascotas': datos.get('mascotas'),
-        'plan': datos.get('plan'),
-        'extras': datos.getlist('extras'),
-        'notas': datos.get('notas')
-    }
+    if paquete["fecha_inicio"] and fecha_inicio < paquete["fecha_inicio"]:
+        return render_template(
+            '/cliente/reserva.html',
+            paquete=paquete,
+            error="La fecha seleccionada es anterior a las fechas permitidas para este paquete."
+        )
 
-    session['usuario'] = usuario
+    fecha_regreso = fecha_inicio + timedelta(days=dias - 1)
 
-    session['ultima_reserva'] = {
-        'paquete': paquete['nombre'],
-        'destino': paquete['destino'],
-        'fecha_inicio': datos.get('fecha_inicio'),
-        'fecha_regreso': datos.get('fecha_regreso')
-    }
+    if paquete["fecha_fin"] and fecha_regreso > paquete["fecha_fin"]:
+        return render_template(
+            '/cliente/reserva.html',
+            paquete=paquete,
+            error="La fecha de regreso supera la fecha máxima disponible para este paquete."
+        )
 
-    return redirect(url_for('perfil'))
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
 
+    try:
+        cursor.execute("""
+            SELECT
+                id_paquete,
+                precio,
+                cupos_disponibles,
+                fecha_inicio,
+                fecha_fin
+            FROM paquete_turistico
+            WHERE slug = %s
+              AND estado = 'activo'
+            FOR UPDATE
+        """, (slug,))
+
+        paquete_bd = cursor.fetchone()
+
+        if not paquete_bd:
+            conexion.rollback()
+            return redirect(url_for('paquetes'))
+
+        id_paquete = paquete_bd[0]
+        precio_paquete = float(paquete_bd[1])
+        cupos_disponibles = paquete_bd[2]
+        fecha_inicio_bd = paquete_bd[3]
+        fecha_fin_bd = paquete_bd[4]
+
+        if fecha_inicio_bd and fecha_inicio < fecha_inicio_bd:
+            conexion.rollback()
+
+            return render_template(
+                '/cliente/reserva.html',
+                paquete=paquete,
+                error="La fecha seleccionada no está disponible."
+            )
+
+        if fecha_fin_bd and fecha_regreso > fecha_fin_bd:
+            conexion.rollback()
+
+            return render_template(
+                '/cliente/reserva.html',
+                paquete=paquete,
+                error="La fecha de regreso no está dentro del periodo disponible."
+            )
+
+        if cantidad_viajeros > cupos_disponibles:
+            conexion.rollback()
+
+            return render_template(
+                '/cliente/reserva.html',
+                paquete=paquete,
+                error=f"Solo quedan {cupos_disponibles} cupos disponibles."
+            )
+
+        nombres_extras = datos.getlist("extras")
+
+        total_extras = 0
+        ids_extras = []
+
+        if nombres_extras:
+            cursor.execute("""
+                SELECT
+                    id_servicio_extra,
+                    nombre,
+                    precio
+                FROM servicio_extra
+                WHERE id_paquete = %s
+                  AND estado = TRUE
+                  AND nombre = ANY(%s)
+            """, (id_paquete, nombres_extras))
+
+            extras_bd = cursor.fetchall()
+
+            for extra in extras_bd:
+                ids_extras.append(extra[0])
+                total_extras += float(extra[2])
+
+        valor_paquete = precio_paquete * cantidad_viajeros
+        valor_total = valor_paquete + total_extras
+
+        correo = session["usuario"]["correo"]
+        id_cliente = obtener_id_cliente(correo)
+
+        if not id_cliente:
+            conexion.rollback()
+
+            return redirect(url_for('logout'))
+
+        codigo = generar_codigo_reserva()
+
+        cursor.execute("""
+            INSERT INTO reserva
+            (
+                codigo_unico,
+                fecha_viaje,
+                estado,
+                valor_referencial,
+                cant_adultos,
+                cant_menores,
+                observaciones,
+                id_cliente,
+                id_paquete
+            )
+            VALUES
+            (
+                %s,
+                %s,
+                'solicitada',
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+            RETURNING id_reserva
+        """, (
+            codigo,
+            fecha_inicio,
+            valor_total,
+            adultos,
+            menores,
+            datos.get("notas"),
+            id_cliente,
+            id_paquete
+        ))
+
+        id_reserva = cursor.fetchone()[0]
+
+        for id_extra in ids_extras:
+            cursor.execute("""
+                INSERT INTO reserva_servicio_extra
+                (
+                    id_reserva,
+                    id_servicio_extra
+                )
+                VALUES (%s, %s)
+            """, (
+                id_reserva,
+                id_extra
+            ))
+
+        cursor.execute("""
+            UPDATE paquete_turistico
+            SET cupos_disponibles = cupos_disponibles - %s
+            WHERE id_paquete = %s
+              AND cupos_disponibles >= %s
+        """, (
+            cantidad_viajeros,
+            id_paquete,
+            cantidad_viajeros
+        ))
+
+        if cursor.rowcount != 1:
+            conexion.rollback()
+
+            return render_template(
+                '/cliente/reserva.html',
+                paquete=paquete,
+                error="Los cupos cambiaron mientras realizabas la reserva. Intenta nuevamente."
+            )
+
+        conexion.commit()
+
+        session["ultima_reserva"] = {
+            "codigo": codigo,
+            "paquete": paquete["nombre"],
+            "destino": next(
+                (
+                    p["destino"]
+                    for p in PAQUETES
+                    if p["slug"] == slug
+                ),
+                paquete["nombre"]
+            ),
+            "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
+            "fecha_regreso": fecha_regreso.strftime("%Y-%m-%d"),
+            "adultos": adultos,
+            "menores": menores,
+            "bebes": bebes,
+            "viajeros": cantidad_viajeros,
+            "valor_total": valor_total
+        }
+
+        return redirect(url_for('perfil'))
+
+    except Exception:
+        conexion.rollback()
+
+        return render_template(
+            '/cliente/reserva.html',
+            paquete=paquete,
+            error="No fue posible guardar la reserva. Verifica la conexión con PostgreSQL."
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
 
 @app.route('/perfil')
 def perfil():
@@ -349,11 +719,83 @@ def perfil():
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
+    id_cliente = session["usuario"].get("id_cliente")
+
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT
+            r.id_reserva,
+            r.codigo_unico,
+            r.fecha_reserva,
+            r.fecha_viaje,
+            r.estado,
+            r.valor_referencial,
+            r.cant_adultos,
+            r.cant_menores,
+            r.observaciones,
+            p.nombre,
+            p.slug,
+            p.duracion_dias,
+            d.nombre AS destino
+        FROM reserva r
+        INNER JOIN paquete_turistico p
+            ON r.id_paquete = p.id_paquete
+        LEFT JOIN destino d
+            ON p.id_destino = d.id_destino
+        WHERE r.id_cliente = %s
+        ORDER BY r.id_reserva DESC
+    """, (id_cliente,))
+
+    filas = cursor.fetchall()
+
+    reservas = []
+
+    for fila in filas:
+        fecha_regreso = None
+
+        if fila[3] and fila[11]:
+            fecha_regreso = fila[3] + timedelta(
+                days=fila[11] - 1
+            )
+
+        reservas.append({
+            "id_reserva": fila[0],
+            "codigo_unico": fila[1],
+            "fecha_reserva": fila[2],
+            "fecha_viaje": fila[3],
+            "fecha_regreso": fecha_regreso,
+            "estado": fila[4],
+            "valor_total": float(fila[5] or 0),
+            "adultos": fila[6],
+            "menores": fila[7],
+            "observaciones": fila[8],
+            "nombre_paquete": fila[9],
+            "slug": fila[10],
+            "duracion_dias": fila[11],
+            "destino": fila[12] or "Destino no especificado"
+        })
+
+    cursor.close()
+    conexion.close()
+
+    usuario = session["usuario"].copy()
+
+    usuario["reservas"] = reservas
+    usuario["cantidad_reservas"] = len(reservas)
+
+    if reservas:
+        usuario["ultima_reserva"] = reservas[0]
+    else:
+        usuario.pop("ultima_reserva", None)
+
     return render_template(
         '/cliente/perfil.html',
-        usuario=session['usuario']
+        usuario=usuario,
+        reservas=reservas,
+        cantidad_reservas=len(reservas)
     )
-
 
 @app.route('/insignias')
 def insignias():
@@ -367,7 +809,6 @@ def insignias():
         insignias=INSIGNIAS
     )
 
-
 @app.route("/niveles")
 def niveles():
 
@@ -379,12 +820,10 @@ def niveles():
         usuario=session['usuario']
     )
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('inicio'))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
