@@ -1,83 +1,343 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const fechaInicio = document.querySelector('input[name="fecha_inicio"]');
-    const diasInput = document.querySelector('input[name="dias"]');
-    const fechaRegreso = document.querySelector('input[name="fecha_regreso"]');
-    const textoRegreso = document.getElementById("fecha-regreso-texto");
+    const fechaInicio = document.getElementById("fecha_inicio");
+    const fechaRegreso = document.getElementById("fecha_regreso");
+    const fechaRegresoTexto = document.getElementById("fecha-regreso-texto");
+    const dias = document.getElementById("dias");
 
-    if (!fechaInicio || !diasInput) {
-        return;
+    const adultos = document.getElementById("adultos");
+    const menores = document.getElementById("menores");
+    const bebes = document.getElementById("bebes");
+
+    const precioPaqueteElement = document.getElementById("precio-paquete");
+    const cantidadViajerosElement = document.getElementById("cantidad-viajeros");
+    const precioExtrasElement = document.getElementById("precio-extras");
+    const valorTotalElement = document.getElementById("valor-total");
+
+    const extras = document.querySelectorAll(".extra-checkbox");
+    const formulario = document.getElementById("form-reserva");
+
+    function formatearPrecio(valor) {
+        return "$" + Math.round(valor).toLocaleString("es-CO");
     }
 
-    const hoy = new Date();
+    function obtenerFechaRegreso() {
 
-    const año = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, "0");
-    const dia = String(hoy.getDate()).padStart(2, "0");
+        if (!fechaInicio.value) {
+            return null;
+        }
 
-    const fechaMinima = `${año}-${mes}-${dia}`;
+        const fecha = new Date(
+            fechaInicio.value + "T00:00:00"
+        );
 
-    fechaInicio.min = fechaMinima;
+        fecha.setDate(
+            fecha.getDate() + duracionPaquete - 1
+        );
+
+        return fecha;
+    }
 
     function formatearFecha(fecha) {
-        return fecha.toLocaleDateString("es-CO", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-        });
+
+        const año = fecha.getFullYear();
+
+        const mes = String(
+            fecha.getMonth() + 1
+        ).padStart(2, "0");
+
+        const dia = String(
+            fecha.getDate()
+        ).padStart(2, "0");
+
+        return {
+            fechaISO: `${año}-${mes}-${dia}`,
+            fechaTexto: `${dia}/${mes}/${año}`
+        };
     }
 
     function calcularFechaRegreso() {
 
-        if (!fechaInicio.value || !diasInput.value) {
-            return;
+        if (!fechaInicio.value) {
+
+            fechaRegreso.value = "";
+
+            fechaRegresoTexto.textContent =
+                "📅 Selecciona tu fecha de inicio";
+
+            return true;
         }
 
-        const dias = parseInt(diasInput.value);
+        const fecha = obtenerFechaRegreso();
 
-        if (isNaN(dias) || dias < 1) {
-            return;
+        if (!fecha) {
+            return false;
         }
 
-        const inicio = new Date(fechaInicio.value + "T00:00:00");
+        const resultado = formatearFecha(fecha);
 
-        const regreso = new Date(inicio);
-        regreso.setDate(regreso.getDate() + dias);
+        fechaRegreso.value = resultado.fechaISO;
 
-        const añoRegreso = regreso.getFullYear();
-        const mesRegreso = String(regreso.getMonth() + 1).padStart(2, "0");
-        const diaRegreso = String(regreso.getDate()).padStart(2, "0");
+        fechaRegresoTexto.textContent =
+            `📅 Regreso: ${resultado.fechaTexto}`;
 
-        const fechaRegresoCalculada =
-            `${añoRegreso}-${mesRegreso}-${diaRegreso}`;
+        if (
+            fechaInicio.max &&
+            resultado.fechaISO > fechaInicio.max
+        ) {
 
-        if (fechaRegreso) {
-            fechaRegreso.value = fechaRegresoCalculada;
+            fechaRegresoTexto.textContent =
+                "⚠️ La fecha de regreso supera el periodo disponible.";
+
+            fechaRegreso.value = "";
+
+            return false;
         }
 
-        if (textoRegreso) {
-            textoRegreso.textContent =
-                "📅 Regreso: " + formatearFecha(regreso);
+        return true;
+    }
+
+    function calcularTotal() {
+
+        const cantidadAdultos =
+            Math.max(parseInt(adultos.value) || 0, 0);
+
+        const cantidadMenores =
+            Math.max(parseInt(menores.value) || 0, 0);
+
+        const cantidadBebes =
+            Math.max(parseInt(bebes.value) || 0, 0);
+
+        const viajeros =
+            cantidadAdultos +
+            cantidadMenores +
+            cantidadBebes;
+
+        let totalExtras = 0;
+
+        extras.forEach(function (extra) {
+
+            if (extra.checked) {
+
+                totalExtras +=
+                    Number(extra.dataset.precio) || 0;
+            }
+
+        });
+
+        const valorPaquete =
+            precioPaquete * viajeros;
+
+        const valorTotal =
+            valorPaquete + totalExtras;
+
+        precioPaqueteElement.textContent =
+            formatearPrecio(valorPaquete);
+
+        cantidadViajerosElement.textContent =
+            viajeros;
+
+        precioExtrasElement.textContent =
+            formatearPrecio(totalExtras);
+
+        valorTotalElement.textContent =
+            formatearPrecio(valorTotal);
+
+        if (viajeros > cuposDisponibles) {
+
+            cantidadViajerosElement.style.color = "red";
+            valorTotalElement.style.color = "red";
+
+        } else {
+
+            cantidadViajerosElement.style.color = "";
+            valorTotalElement.style.color = "";
         }
     }
 
-    fechaInicio.addEventListener("change", function () {
+    function validarViajeros() {
 
-        if (this.value < fechaMinima) {
-            this.value = fechaMinima;
+        let valorAdultos =
+            parseInt(adultos.value);
+
+        let valorMenores =
+            parseInt(menores.value);
+
+        let valorBebes =
+            parseInt(bebes.value);
+
+        if (
+            isNaN(valorAdultos) ||
+            valorAdultos < 1
+        ) {
+            adultos.value = 1;
         }
 
-        calcularFechaRegreso();
-    });
-
-    diasInput.addEventListener("input", function () {
-
-        if (this.value < 1) {
-            this.value = 1;
+        if (
+            isNaN(valorMenores) ||
+            valorMenores < 0
+        ) {
+            menores.value = 0;
         }
 
-        calcularFechaRegreso();
+        if (
+            isNaN(valorBebes) ||
+            valorBebes < 0
+        ) {
+            bebes.value = 0;
+        }
+
+        calcularTotal();
+    }
+
+    function configurarFechaMaxima() {
+
+        if (!fechaInicio.max) {
+            return;
+        }
+
+        const fechaMaxima = new Date(
+            fechaInicio.max + "T00:00:00"
+        );
+
+        fechaMaxima.setDate(
+            fechaMaxima.getDate() -
+            duracionPaquete +
+            1
+        );
+
+        const resultado =
+            formatearFecha(fechaMaxima);
+
+        fechaInicio.max =
+            resultado.fechaISO;
+    }
+
+    fechaInicio.addEventListener(
+        "change",
+        calcularFechaRegreso
+    );
+
+    adultos.addEventListener(
+        "input",
+        validarViajeros
+    );
+
+    menores.addEventListener(
+        "input",
+        validarViajeros
+    );
+
+    bebes.addEventListener(
+        "input",
+        validarViajeros
+    );
+
+    extras.forEach(function (extra) {
+
+        extra.addEventListener(
+            "change",
+            calcularTotal
+        );
+
     });
+
+    formulario.addEventListener(
+        "submit",
+        function (evento) {
+
+            const cantidadAdultos =
+                parseInt(adultos.value) || 0;
+
+            const cantidadMenores =
+                parseInt(menores.value) || 0;
+
+            const cantidadBebes =
+                parseInt(bebes.value) || 0;
+
+            const viajeros =
+                cantidadAdultos +
+                cantidadMenores +
+                cantidadBebes;
+
+            if (cantidadAdultos < 1) {
+
+                evento.preventDefault();
+
+                alert(
+                    "Debe haber al menos 1 adulto."
+                );
+
+                adultos.value = 1;
+
+                calcularTotal();
+
+                return;
+            }
+
+            if (
+                cantidadMenores < 0 ||
+                cantidadBebes < 0
+            ) {
+
+                evento.preventDefault();
+
+                alert(
+                    "Las cantidades no pueden ser negativas."
+                );
+
+                validarViajeros();
+
+                return;
+            }
+
+            if (viajeros > cuposDisponibles) {
+
+                evento.preventDefault();
+
+                alert(
+                    "No puedes reservar " +
+                    viajeros +
+                    " viajeros. Solo hay " +
+                    cuposDisponibles +
+                    " cupos disponibles."
+                );
+
+                return;
+            }
+
+            if (!fechaInicio.value) {
+
+                evento.preventDefault();
+
+                alert(
+                    "Selecciona una fecha de viaje."
+                );
+
+                return;
+            }
+
+            if (!calcularFechaRegreso()) {
+
+                evento.preventDefault();
+
+                alert(
+                    "La fecha de regreso está fuera del periodo permitido."
+                );
+
+                return;
+            }
+
+            dias.value = duracionPaquete;
+        }
+    );
+
+    dias.value = duracionPaquete;
+    dias.readOnly = true;
+
+    configurarFechaMaxima();
 
     calcularFechaRegreso();
+    calcularTotal();
+
 });
