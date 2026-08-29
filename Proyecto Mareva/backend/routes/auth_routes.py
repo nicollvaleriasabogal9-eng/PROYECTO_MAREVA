@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from controllers.auth_controllers import AuthController
 
 auth_bp = Blueprint('auth', __name__)
@@ -15,6 +15,7 @@ def mostrar_registro():
 @auth_bp.route("/registro", methods=["POST"])
 def funcion_registro():
     print("Se accedio al POST del registro correctamente")
+    print("DATOS RECIBIDOS:", request.form)
     return controller.registrar_usuario()
 
 #Muestra el formulario de login

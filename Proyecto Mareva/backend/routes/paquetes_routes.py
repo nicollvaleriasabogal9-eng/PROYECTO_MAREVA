@@ -15,8 +15,6 @@ def requiere_admin(f):
         return f(*args, **kwargs)
     return wrapper
 
-
-
 #Funciones para el catálogo de paquetes 
 @paquetes_bp.route("/paquetes")
 def listar_catalogo():
