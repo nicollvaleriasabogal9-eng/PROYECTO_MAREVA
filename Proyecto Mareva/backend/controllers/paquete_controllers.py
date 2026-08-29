@@ -21,7 +21,7 @@ class PaqueteController:
     #Listado de paquetes para administradores
     def panel_admin(self):
         paquetes = self.service.listar_todos_admin()
-        return render_template("admin/paquetes.html", paquetes=paquetes)
+        return render_template("cliente/paquetes.html", paquetes=paquetes)
     #Mostrar formulario para crear un paquete
     def mostrar_form_crear(self):
         datos = self.service.datos_formulario()
