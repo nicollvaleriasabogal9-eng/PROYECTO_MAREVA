@@ -3,7 +3,6 @@ import unicodedata
 from repositories.paquete_repository import PaqueteRepository
 from models.paquete import factory_paquete
 
-
 class PaqueteService:
 
     def __init__(self):
@@ -58,5 +57,3 @@ class PaqueteService:
         texto = texto.lower().strip()
         return re.sub(r"[^a-z0-9]+", "-", texto).strip("-")
     
-    def obtener_disponibilidad(self, id_paquete):
-        return self.repo.obtener_disponibilidad(id_paquete)
