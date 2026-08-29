@@ -16,8 +16,10 @@
       <div class="grid-3">
         {% for d in destinos %}
         <article class="card">
-          <div class="card__img-wrap">
-            <div class="card__img--placeholder">{{ d.emoji }}</div>
+          <div class="">
+            <div class="">
+              <img src="{{ url_for('static', filename=d.imagen_principal) }}" alt="{{  d.nombre_destino }}">
+            </div>
             <span class="card__badge badge badge-blue">{{ d.categoria }}</span>
           </div>
           <div class="card__body">
@@ -27,7 +29,7 @@
           </div>
           <div class="card__footer">
             <span class="text-muted" style="font-size:var(--text-xs)">{{ d.ciudad }}</span>
-            <a href="{{ url_for('paquetes') }}?q={{ d.nombre_destino }}" class="btn btn-outline btn-sm">Ver paquetes</a>
+            <a href="{{ url_for('paquetes.listar_catalogo') }}?q={{ d.nombre_destino }}" class="btn btn-outline btn-sm">Ver paquetes</a>
           </div>
         </article>
         {% endfor %}

@@ -77,8 +77,8 @@
         data-duracion="{% if p.duracion_dias <= 3 %}corto{% elif p.duracion_dias <= 7 %}medio{% else %}largo{% endif %}"
         data-incluye="{{ p.incluye }}">
 
-        <div class="card__img-wrap">
-          <div class="card__img--placeholder">
+        <div class="">
+          <div class="">
             <img src="{{ url_for('static', filename=p.imagen_url) }}" alt="{ p.nombre }">
           </div>
         </div>
@@ -87,16 +87,34 @@
           <div class="card__tag">{{ p.departamento }}</div>
           <h3 class="card__title">{{ p.nombre }}</h3>
           <p class="card__desc">{{ p.descripcion }}</p>
-<a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">
-  Ver Detalles {{ p.emoji }}
-</a>
+          <a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">
+          Ver Detalles
+          </a>
+          
+          {% if session.get("usuario") and session["usuario"].get("rol") == "admin" %}
 
-        <div class="card__footer">
-          <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
-        </div>
+            <div class="admin-actions">
 
+            <a href="{{ url_for('paquetes.mostrar_form_editar', id_paquete=p.id_paquete) }}"class="btn btn-sm">Editar</a>
+
+            {% if p.estado == "activo" %}
+                <form action="{{ url_for('paquetes.suspender', id_paquete=p.id_paquete) }}"method="POST">
+                    <button type="submit" class="btn btn-sm">Suspender</button>
+                </form>
+            {% else %}
+                <form action="{{ url_for('paquetes.activar', id_paquete=p.id_paquete) }}" method="POST">
+                    <button type="submit" class="btn btn-sm">Activar</button>
+                </form>
+            {% endif %}
+
+            </div>
+
+            <div class="card__footer">
+              <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
+            </div>
+          {% endif %}
       </article>
-      {% endfor %}
+    {% endfor %}
 
     </div>
 
