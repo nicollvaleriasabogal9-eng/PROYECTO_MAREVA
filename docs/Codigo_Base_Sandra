@@ -1,478 +1,282 @@
-BEGIN;
 
------ MÓDULO 1: GAMIFICACIÓN — NIVELES -----
+-- 1. TIPOS ENUM PERSONALIZADOS
+CREATE TYPE categoria_destino AS ENUM ('playa', 'ciudad', 'aventura', 'montaña', 'cultural');
+CREATE TYPE categoria_temporada AS ENUM ('Alta', 'Media', 'Baja');
+CREATE TYPE tipo_respuesta_encuesta AS ENUM ('Puntuacion', 'Si_No', 'Texto');
+CREATE TYPE tipo_documento_enum AS ENUM ('CC', 'CE', 'Pasaporte', 'TI', 'NIT');
+CREATE TYPE rol_usuario AS ENUM ('admin', 'cliente', 'guia', 'proveedor');
+CREATE TYPE estado_usuario AS ENUM ('activo', 'inactivo');
+CREATE TYPE estado_contratacion_enum AS ENUM ('Pendiente', 'Aceptado', 'Rechazado');
+CREATE TYPE estado_paquete_enum AS ENUM ('activo', 'inactivo', 'agotado');
+CREATE TYPE tipo_componente_enum AS ENUM ('Alojamiento', 'Transporte', 'Alimentacion', 'Actividad');
+CREATE TYPE estado_reserva_enum AS ENUM ('Pendiente de pago', 'Confirmada', 'Cancelada', 'Completada');
+
+
 CREATE TABLE nivel (
-    id_nivel             SERIAL PRIMARY KEY,
-    nombre               VARCHAR(50)   NOT NULL,
-    min_monto            NUMERIC(12,2) NOT NULL DEFAULT 0,
-    min_reservas         INT           NOT NULL DEFAULT 0,
-    descripcion          TEXT,
-    porcentaje_descuento NUMERIC(5,2)  DEFAULT 0
+    id_nivel SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    min_monto DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    min_reservas INT NOT NULL DEFAULT 0,
+    descripcion TEXT,
+    porcentaje_descuento DECIMAL(5,2) NOT NULL DEFAULT 0.00
 );
 
------ MÓDULO 2: CLIENTES Y REFERIDOS -----
-CREATE TABLE cliente (
-    id_cliente        SERIAL PRIMARY KEY,
-    nombre            VARCHAR(50)  NOT NULL,
-    apellido          VARCHAR(50)  NOT NULL,
-    tipo_documento    VARCHAR(30)  NOT NULL,
-    numero_documento  VARCHAR(30)  NOT NULL UNIQUE,
-    telefono          VARCHAR(20),
-    correo            VARCHAR(100) NOT NULL UNIQUE,
-    contrasena        VARCHAR(255) NOT NULL,
-    rol               VARCHAR(20)  NOT NULL DEFAULT 'cliente',
-    codigo_referido   VARCHAR(20)  UNIQUE,
-    fecha_registro    DATE         NOT NULL DEFAULT CURRENT_DATE,
-    estado            BOOLEAN      NOT NULL DEFAULT TRUE,
-    intentos_fallidos INT          NOT NULL DEFAULT 0,
-    bloqueado_hasta   TIMESTAMP,
-    id_nivel          INT REFERENCES nivel(id_nivel),
-
-    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente'))
-);
-
-CREATE TABLE referido (
-    id_referido         SERIAL PRIMARY KEY,
-    fecha_referido      DATE        NOT NULL DEFAULT CURRENT_DATE,
-    puntos_ganados      INT         NOT NULL DEFAULT 0,
-    estado              VARCHAR(20) NOT NULL DEFAULT 'pendiente',
-    id_referidor        INT NOT NULL REFERENCES cliente(id_cliente),
-    id_referido_cliente INT NOT NULL REFERENCES cliente(id_cliente),
-
-    UNIQUE (id_referidor, id_referido_cliente),
-    CONSTRAINT chk_referido_estado CHECK (estado IN ('pendiente','completado','cancelado')),
-    CONSTRAINT chk_no_autoreferido CHECK (id_referidor <> id_referido_cliente)
-);
-
------ MÓDULO 3: DESTINOS -----
 CREATE TABLE destino (
-    id_destino      SERIAL PRIMARY KEY,
-    nombre_destino  VARCHAR(100) NOT NULL,
-    departamento    VARCHAR(100),
-    ciudad          VARCHAR(100),
-    categoria       VARCHAR(50),
-    descripcion     TEXT,
-    atracciones     TEXT,
-    docs_requeridos TEXT,
-    imagen_principal VARCHAR(255),
-    estado          BOOLEAN NOT NULL DEFAULT TRUE
+    id_destino SERIAL PRIMARY KEY,
+    nombre_destino VARCHAR(100) NOT NULL,
+    departamento VARCHAR(100) NOT NULL,
+    ciudad VARCHAR(100) NOT NULL,
+    categoria categoria_destino NOT NULL,
+    descripcion TEXT,
+    atracciones TEXT,
+    imagen_principal VARCHAR(255) NOT NULL,
+    estado BOOLEAN DEFAULT TRUE
 );
 
------ MÓDULO 4: PROVEEDORES Y SUS POLÍTICAS -----
-CREATE TABLE proveedor (
-    id_proveedor                 SERIAL PRIMARY KEY,
-    nombre                       VARCHAR(100) NOT NULL,
-    nit                          VARCHAR(30),
-    tipo_empresa                 VARCHAR(50)  NOT NULL, -- Aerolínea, Hotel, Operador Local, etc.
-    descripcion                  TEXT,
-    politica_reembolso_general   TEXT,        -- Resumen/Condiciones contractuales generales
-    regla_retracto_desistimiento TEXT,        -- Normativa de ley (Aerocivil / Retracto 48h / Desistimiento 24h)
-    gastos_gestion_agencia       NUMERIC(10,2) DEFAULT 0, -- Tarifa fija o base de gestión de la agencia
-    porcentaje_gestion_agencia   NUMERIC(5,2)  DEFAULT 0, -- % por intermediación administrativa
-    direccion                    VARCHAR(200),
-    ciudad                       VARCHAR(100),
-    telefono                     VARCHAR(20),
-    correo                       VARCHAR(100),
-    nombre_contacto              VARCHAR(100),
-    telefono_contacto            VARCHAR(20),
-    correo_contacto              VARCHAR(100),
-    estado                       BOOLEAN NOT NULL DEFAULT TRUE,
-
-    CONSTRAINT chk_tipo_empresa CHECK (
-        tipo_empresa IN ('Aerolínea', 'Hotel', 'Operador Local', 'Transporte Terrestre', 'Restaurante', 'Otro')
-    )
+CREATE TABLE temporada (
+    id_temporada SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    categoria categoria_temporada NOT NULL,
+    descripcion TEXT,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estado BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE metodo_pago_proveedor (
-    id_metodo_proveedor SERIAL PRIMARY KEY,
-    id_proveedor        INT NOT NULL REFERENCES proveedor(id_proveedor) ON DELETE CASCADE,
-    tipo_metodo         VARCHAR(50)  NOT NULL,
-    entidad             VARCHAR(100),
-    titular             VARCHAR(150),
-    numero_referencia   VARCHAR(100),
-    instrucciones       TEXT,
-
-    CONSTRAINT chk_tipo_metodo CHECK (
-        tipo_metodo IN ('cuenta_bancaria','nequi','daviplata','efectivo','tarjeta','otro')
-    )
-);
-
------ MÓDULO 5: GUÍAS TURÍSTICOS -----
-CREATE TABLE guia_turistico (
-    id_guia      SERIAL PRIMARY KEY,
-    nombre       VARCHAR(50)  NOT NULL,
-    apellido     VARCHAR(50)  NOT NULL,
-    idiomas      VARCHAR(200),
-    especialidad VARCHAR(200),
-    telefono     VARCHAR(20),
-    correo       VARCHAR(100),
-    estado       BOOLEAN NOT NULL DEFAULT TRUE
-);
-
------ MÓDULO 6: SEGUROS -----
 CREATE TABLE tipo_seguro (
-    id_tipo_seguro   SERIAL PRIMARY KEY,
-    nombre           VARCHAR(100) NOT NULL,
-    descripcion      TEXT,
+    id_tipo_seguro SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
     cobertura_general TEXT
 );
 
-CREATE TABLE seguro (
-    id_seguro      SERIAL PRIMARY KEY,
-    id_tipo_seguro INT NOT NULL REFERENCES tipo_seguro(id_tipo_seguro),
-    nombre         VARCHAR(100)  NOT NULL,
-    cobertura      TEXT          NOT NULL,
-    precio         NUMERIC(10,2) NOT NULL DEFAULT 0,
-    es_obligatorio BOOLEAN       NOT NULL DEFAULT FALSE,
-    descripcion    TEXT,
-    estado         BOOLEAN       NOT NULL DEFAULT TRUE
+CREATE TABLE encuesta_pregunta (
+    id_pregunta SERIAL PRIMARY KEY,
+    texto TEXT NOT NULL,
+    tipo_respuesta tipo_respuesta_encuesta NOT NULL,
+    orden INT NOT NULL,
+    estado BOOLEAN DEFAULT TRUE
 );
 
------ MÓDULO 7: SERVICIOS Y SUS CONDICIONES ESPECÍFICAS -----
-
--- 7.1 Alojamiento (Hoteles)
-CREATE TABLE alojamiento (
-    id_alojamiento         SERIAL PRIMARY KEY,
-    nombre                 VARCHAR(100) NOT NULL,
-    tipo_alojamiento       VARCHAR(50),
-    ciudad                 VARCHAR(100),
-    direccion              VARCHAR(200),
-    servicios              TEXT,
-    tipo_tarifa            VARCHAR(30)  DEFAULT 'flexible', -- 'flexible', 'promocional', 'no_reembolsable'
-    horas_cancelacion_libre INT          DEFAULT 48,         -- Ventana (ej. 24, 48, 72 hrs antes)
-    penalidad_cancelacion_tardia VARCHAR(100) DEFAULT '1_noche', -- '1_noche', 'totalidad', 'porcentaje'
-    politica_no_show       VARCHAR(100) DEFAULT 'cobro_primera_noche',
-    politica_reembolso     TEXT,
-    id_proveedor           INT REFERENCES proveedor(id_proveedor),
-
-    CONSTRAINT chk_alojamiento_tarifa CHECK (tipo_tarifa IN ('flexible', 'promocional', 'no_reembolsable'))
+CREATE TABLE usuario (
+    id_usuario SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    tipo_documento tipo_documento_enum NOT NULL,
+    numero_documento VARCHAR(20) NOT NULL UNIQUE,
+    telefono VARCHAR(20) NOT NULL,
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    rol rol_usuario NOT NULL DEFAULT 'cliente',
+    codigo_referido VARCHAR(20) NULL,
+    acepta_terminos BOOLEAN NOT NULL DEFAULT TRUE,
+    intentos_fallidos INT DEFAULT 0,
+    bloqueado_hasta TIMESTAMP NULL,
+    token_recuperacion VARCHAR(255) NULL,
+    expiracion_token TIMESTAMP NULL,
+    estado estado_usuario DEFAULT 'activo',
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_nivel INT DEFAULT 1,
+    CONSTRAINT fk_usuario_nivel FOREIGN KEY (id_nivel) REFERENCES nivel(id_nivel) ON DELETE SET NULL
 );
 
--- 7.2 Alimentación / Restaurantes
-CREATE TABLE alimentacion (
-    id_alimentacion          SERIAL PRIMARY KEY,
-    restaurante              VARCHAR(100),
-    tipo_comida              VARCHAR(100),
-    tipo_servicio            VARCHAR(50), -- 'individual', 'grupo', 'evento'
-    incluye_bebidas          BOOLEAN       NOT NULL DEFAULT FALSE,
-    precio                   NUMERIC(10,2),
-    horas_limite_cancelacion INT          DEFAULT 48, -- Horas límite para grupos/eventos
-    politica_no_show         VARCHAR(100) DEFAULT 'no_reembolsable',
-    politica_reembolso       TEXT,
-    id_proveedor             INT REFERENCES proveedor(id_proveedor)
+CREATE TABLE guia_turistico (
+    id_guia SERIAL PRIMARY KEY,
+    id_usuario INT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    idiomas VARCHAR(150) NOT NULL,
+    especialidad VARCHAR(100) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
+    CONSTRAINT fk_guia_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );
 
--- 7.3 Transporte (Aéreo y Terrestre)
-CREATE TABLE transporte (
-    id_transporte             SERIAL PRIMARY KEY,
-    tipo                      VARCHAR(50), -- 'Aéreo', 'Terrestre', 'Marítimo'
-    empresa                   VARCHAR(100),
-    ruta                      VARCHAR(200),
-    capacidad                 INT,
-    hora_salida               TIME,
-    hora_regreso              TIME,
-    fecha_inicio              DATE,
-    fecha_fin                 DATE,
-    tipo_tarifa               VARCHAR(30)   DEFAULT 'economica', -- 'economica', 'promocional', 'flexible', 'ejecutiva'
-    es_reembolsable           BOOLEAN       DEFAULT FALSE,
-    penalidad_cambio_dinero   NUMERIC(10,2) DEFAULT 0, -- Penalidad fija en $ por reprogramar
-    porcentaje_retencion_ley  NUMERIC(5,2)  DEFAULT 10.00, -- Máximo 10% según retracto/desistimiento
-    politica_reembolso        TEXT,
-    id_proveedor              INT REFERENCES proveedor(id_proveedor),
-
-    CONSTRAINT chk_transporte_tarifa CHECK (tipo_tarifa IN ('economica', 'promocional', 'flexible', 'ejecutiva'))
+CREATE TABLE proveedor (
+    id_proveedor SERIAL PRIMARY KEY,
+    id_usuario INT NULL UNIQUE,
+    nombre VARCHAR(150) NOT NULL,
+    nit VARCHAR(20) NOT NULL UNIQUE,
+    tipo_empresa VARCHAR(50) NOT NULL,
+    descripcion TEXT,
+    politica_reembolso_general TEXT,
+    regla_retracto_desistimiento TEXT,
+    gastos_gestion_agencia DECIMAL(12,2) DEFAULT 0.00,
+    porcentaje_gestion_agencia DECIMAL(5,2) DEFAULT 0.00,
+    direccion VARCHAR(150),
+    ciudad VARCHAR(100),
+    telefono VARCHAR(20),
+    correo VARCHAR(100),
+    nombre_contacto VARCHAR(100),
+    telefono_contacto VARCHAR(20),
+    correo_contacto VARCHAR(100),
+    estado_contratacion estado_contratacion_enum DEFAULT 'Aceptado',
+    contrato_firmado BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_proveedor_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );
 
--- 7.4 Actividades Turísticas y Tours (Escalas de Días)
-CREATE TABLE actividad_turistica (
-    id_actividad               SERIAL PRIMARY KEY,
-    nombre                     VARCHAR(100) NOT NULL,
-    tipo                       VARCHAR(100),
-    duracion_horas             NUMERIC(4,1),
-    costo                      NUMERIC(10,2),
-    es_grupo_privado           BOOLEAN DEFAULT FALSE,
-    pct_penalidad_mas_15dias   NUMERIC(5,2) DEFAULT 5.00,   -- Ej: 5% a 10% gastos admin
-    pct_penalidad_7_a_14dias   NUMERIC(5,2) DEFAULT 25.00,  -- Ej: 25% a 50%
-    pct_penalidad_3_a_6dias    NUMERIC(5,2) DEFAULT 75.00,  -- Ej: 75%
-    pct_penalidad_menos_48h    NUMERIC(5,2) DEFAULT 100.00, -- Ej: 100% / No-Show
-    politica_reembolso         TEXT,
-    id_destino                 INT REFERENCES destino(id_destino),
-    id_guia                    INT REFERENCES guia_turistico(id_guia),
-    id_proveedor               INT REFERENCES proveedor(id_proveedor)
+CREATE TABLE paquete_turistico (
+    id_paquete SERIAL PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    slug VARCHAR(150) NOT NULL UNIQUE,
+    imagen_url VARCHAR(255) NOT NULL,
+    descripcion TEXT NOT NULL,
+    precio DECIMAL(12,2) NOT NULL,
+    duracion_dias INT NOT NULL,
+    duracion_noches INT NOT NULL,
+    cupos_totales INT NOT NULL,
+    cupos_disponibles INT NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    imagen_principal VARCHAR(255) NOT NULL,
+    documentos_requeridos TEXT,
+    personalizable BOOLEAN DEFAULT FALSE,
+    incluye_seguro BOOLEAN DEFAULT FALSE,
+    detalle_seguro TEXT,
+    estado estado_paquete_enum DEFAULT 'activo',
+    id_destino INT NOT NULL,
+    id_guia INT,
+    id_temporada INT,
+    CONSTRAINT fk_paquete_destino FOREIGN KEY (id_destino) REFERENCES destino(id_destino) ON DELETE CASCADE,
+    CONSTRAINT fk_paquete_guia FOREIGN KEY (id_guia) REFERENCES guia_turistico(id_guia) ON DELETE SET NULL,
+    CONSTRAINT fk_paquete_temporada FOREIGN KEY (id_temporada) REFERENCES temporada(id_temporada) ON DELETE SET NULL
 );
 
--- 7.5 Seguro de Servicios
-CREATE TABLE seguro_servicio (
-    id_seguro_servicio SERIAL PRIMARY KEY,
-    id_seguro          INT NOT NULL REFERENCES seguro(id_seguro) ON DELETE CASCADE,
-    id_alojamiento     INT REFERENCES alojamiento(id_alojamiento)     ON DELETE CASCADE,
-    id_alimentacion    INT REFERENCES alimentacion(id_alimentacion)   ON DELETE CASCADE,
-    id_transporte      INT REFERENCES transporte(id_transporte)       ON DELETE CASCADE,
-    id_actividad       INT REFERENCES actividad_turistica(id_actividad) ON DELETE CASCADE,
-
-    CONSTRAINT chk_solo_un_servicio CHECK (
-        (id_alojamiento  IS NOT NULL)::INT +
-        (id_alimentacion IS NOT NULL)::INT +
-        (id_transporte   IS NOT NULL)::INT +
-        (id_actividad    IS NOT NULL)::INT = 1
-    ),
-    UNIQUE (id_seguro, id_alojamiento),
-    UNIQUE (id_seguro, id_alimentacion),
-    UNIQUE (id_seguro, id_transporte),
-    UNIQUE (id_seguro, id_actividad)
-);
-
------ MÓDULO 8: PAQUETES TURÍSTICOS -----
-CCREATE TABLE paquete_turistico (
-    id_paquete        SERIAL PRIMARY KEY,
-    nombre            VARCHAR(100)  NOT NULL,
-    slug              VARCHAR(100)  NOT NULL UNIQUE,
-    imagen_url        VARCHAR(255),
-    imagen_principal  VARCHAR(255), -- <--- Columna agregada
-    descripcion       TEXT,
-    precio            NUMERIC(10,2) NOT NULL,
-    duracion_dias     INT,
-    duracion_noches   INT,
-    cupos_totales     INT           NOT NULL DEFAULT 0,
-    cupos_disponibles INT           NOT NULL DEFAULT 0,
-    fecha_inicio      DATE,
-    fecha_fin         DATE,
-    personalizable    BOOLEAN       NOT NULL DEFAULT FALSE,
-    estado            VARCHAR(20)   NOT NULL DEFAULT 'activo',
-    id_destino        INT REFERENCES destino(id_destino),
-    id_guia           INT REFERENCES guia_turistico(id_guia),
-
-    CONSTRAINT chk_paquete_estado CHECK (estado IN ('activo','suspendido')),
-    CONSTRAINT chk_cupos CHECK (cupos_disponibles <= cupos_totales)
-);
-
-CREATE TABLE paquete_transporte (
-    id_paquete    INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    id_transporte INT NOT NULL REFERENCES transporte(id_transporte),
-    PRIMARY KEY (id_paquete, id_transporte)
-);
-
-CREATE TABLE paquete_alojamiento (
-    id_paquete     INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    id_alojamiento INT NOT NULL REFERENCES alojamiento(id_alojamiento),
-    PRIMARY KEY (id_paquete, id_alojamiento)
-);
-
-CREATE TABLE paquete_alimentacion (
-    id_paquete      INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    id_alimentacion INT NOT NULL REFERENCES alimentacion(id_alimentacion),
-    PRIMARY KEY (id_paquete, id_alimentacion)
-);
-
-CREATE TABLE paquete_actividad (
-    id_paquete   INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    id_actividad INT NOT NULL REFERENCES actividad_turistica(id_actividad),
-    PRIMARY KEY (id_paquete, id_actividad)
+CREATE TABLE paquete_componente (
+    id_componente SERIAL PRIMARY KEY,
+    id_paquete INT NOT NULL,
+    id_proveedor INT NOT NULL,
+    tipo_componente tipo_componente_enum NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    costo_deducible DECIMAL(12,2) DEFAULT 0.00,
+    CONSTRAINT fk_pc_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    CONSTRAINT fk_pc_proveedor FOREIGN KEY (id_proveedor) REFERENCES proveedor(id_proveedor) ON DELETE CASCADE
 );
 
 CREATE TABLE servicio_extra (
     id_servicio_extra SERIAL PRIMARY KEY,
-    nombre            VARCHAR(100)  NOT NULL,
-    precio            NUMERIC(10,2) NOT NULL,
-    descripcion       TEXT,
-    estado            BOOLEAN       NOT NULL DEFAULT TRUE,
-    id_paquete        INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
+    id_paquete INT NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(12,2) NOT NULL,
+    estado BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_se_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
------ MÓDULO 9: TEMPORADAS -----
-CREATE TABLE temporada (
-    id_temporada SERIAL PRIMARY KEY,
-    nombre       VARCHAR(100) NOT NULL,
-    categoria    VARCHAR(50),
-    descripcion  TEXT,
-    fecha_inicio DATE         NOT NULL,
-    fecha_fin    DATE         NOT NULL,
-    estado       BOOLEAN      NOT NULL DEFAULT TRUE,
-
-    CONSTRAINT chk_temporada_fechas CHECK (fecha_fin >= fecha_inicio)
+CREATE TABLE itinerario_dia (
+    id_itinerario SERIAL PRIMARY KEY,
+    id_paquete INT NOT NULL,
+    dia_numero INT NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    descripcion TEXT NOT NULL,
+    horarios VARCHAR(100),
+    CONSTRAINT fk_itinerario_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
-CREATE TABLE temporada_paquete (
-    id_temporada INT NOT NULL REFERENCES temporada(id_temporada)         ON DELETE CASCADE,
-    id_paquete   INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    PRIMARY KEY (id_temporada, id_paquete)
+CREATE TABLE pregunta_frecuente (
+    id_faq SERIAL PRIMARY KEY,
+    id_paquete INT NOT NULL,
+    pregunta TEXT NOT NULL,
+    respuesta TEXT NOT NULL,
+    CONSTRAINT fk_faq_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
------ MÓDULO 10: RESERVAS Y PERSONALIZACIÓN -----
+CREATE TABLE promocion (
+    id_promocion SERIAL PRIMARY KEY,
+    id_paquete INT NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    porcentaje_descuento DECIMAL(5,2) NOT NULL,
+    fecha_inicio TIMESTAMP NOT NULL,
+    fecha_fin TIMESTAMP NOT NULL,
+    id_nivel_minimo INT DEFAULT 1,
+    estado BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_promocion_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
+    CONSTRAINT fk_promocion_nivel FOREIGN KEY (id_nivel_minimo) REFERENCES nivel(id_nivel) ON DELETE SET NULL
+);
+
 CREATE TABLE reserva (
-    id_reserva          SERIAL PRIMARY KEY,
-    codigo_unico        VARCHAR(30)   NOT NULL UNIQUE,
-    fecha_reserva       DATE          NOT NULL DEFAULT CURRENT_DATE,
-    fecha_viaje         DATE,
-    estado              VARCHAR(30)   NOT NULL DEFAULT 'solicitada',
-    valor_referencial   NUMERIC(12,2),
-    cant_adultos        INT           NOT NULL DEFAULT 1,
-    cant_menores        INT           NOT NULL DEFAULT 0,
-    observaciones       TEXT,
-    metodo_contacto     VARCHAR(30),
-    guia_pdf            VARCHAR(255),
-    metodo_pago         VARCHAR(50),
-    motivo_cancelacion  TEXT,
-    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente),
-    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete),
-
-    CONSTRAINT chk_reserva_estado 
-        CHECK (estado IN ('solicitada', 'pendiente_pago', 'confirmada', 'en_proceso', 'completada', 'cancelada')),
-    CONSTRAINT chk_cant_adultos CHECK (cant_adultos >= 1),
-    CONSTRAINT chk_cant_menores CHECK (cant_menores >= 0)
+    id_reserva SERIAL PRIMARY KEY,
+    codigo_reserva VARCHAR(20) NOT NULL UNIQUE,
+    id_usuario INT NOT NULL,
+    id_paquete INT NOT NULL,
+    fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cantidad_adultos INT NOT NULL DEFAULT 1,
+    cantidad_menores INT NOT NULL DEFAULT 0,
+    monto_total DECIMAL(12,2) NOT NULL,
+    metodo_pago_informativo VARCHAR(50),
+    politica_no_reembolso_aceptada BOOLEAN NOT NULL DEFAULT FALSE,
+    estado estado_reserva_enum DEFAULT 'Pendiente de pago',
+    justificacion_cambio TEXT,
+    CONSTRAINT fk_reserva_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_reserva_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
-CREATE TABLE personalizacion_reserva (
-    id_personalizacion SERIAL PRIMARY KEY,
-    id_reserva         INT         NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
-    tipo_componente    VARCHAR(30) NOT NULL,
-    id_componente      INT,
-    accion             VARCHAR(20) NOT NULL,
-    precio_ajuste      NUMERIC(10,2) DEFAULT 0,
-    fecha              TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    observacion        TEXT,
-
-    CONSTRAINT chk_personalizacion_accion
-        CHECK (accion IN ('agregar', 'eliminar', 'modificar')),
-    CONSTRAINT chk_personalizacion_tipo
-        CHECK (tipo_componente IN ('alojamiento', 'alimentacion', 'transporte', 'actividad', 'servicio_extra'))
+CREATE TABLE viajero (
+    id_viajero SERIAL PRIMARY KEY,
+    id_reserva INT NOT NULL,
+    nombre_completo VARCHAR(150) NOT NULL,
+    tipo_documento tipo_documento_enum NOT NULL,
+    numero_documento VARCHAR(20) NOT NULL,
+    es_menor BOOLEAN DEFAULT FALSE,
+    CONSTRAINT fk_viajero_reserva FOREIGN KEY (id_reserva) REFERENCES reserva(id_reserva) ON DELETE CASCADE
 );
 
-CREATE TABLE reserva_seguro (
-    id_reserva_seguro  SERIAL PRIMARY KEY,
-    id_reserva         INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
-    id_seguro          INT NOT NULL REFERENCES seguro(id_seguro)  ON DELETE CASCADE,
-    precio_aplicado    NUMERIC(10,2) NOT NULL,
-    fecha_contratacion DATE          NOT NULL DEFAULT CURRENT_DATE,
-    UNIQUE (id_reserva, id_seguro)
+CREATE TABLE reserva_personalizacion (
+    id_reserva INT NOT NULL,
+    id_componente_eliminado INT NULL,
+    id_servicio_extra_agregado INT NULL,
+    precio_ajustado DECIMAL(12,2) NOT NULL,
+    CONSTRAINT fk_rp_reserva FOREIGN KEY (id_reserva) REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    CONSTRAINT fk_rp_componente FOREIGN KEY (id_componente_eliminado) REFERENCES paquete_componente(id_componente) ON DELETE SET NULL,
+    CONSTRAINT fk_rp_extra FOREIGN KEY (id_servicio_extra_agregado) REFERENCES servicio_extra(id_servicio_extra) ON DELETE SET NULL
 );
 
-CREATE TABLE reserva_servicio_extra (
-    id_reserva        INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
-    id_servicio_extra INT NOT NULL REFERENCES servicio_extra(id_servicio_extra),
-    PRIMARY KEY (id_reserva, id_servicio_extra)
+CREATE TABLE lista_favoritos (
+    id_usuario INT NOT NULL,
+    id_paquete INT NOT NULL,
+    fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_usuario, id_paquete),
+    CONSTRAINT fk_fav_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_fav_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
-CREATE TABLE viajero_reserva (
-    id_viajero       SERIAL PRIMARY KEY,
-    nombre           VARCHAR(50) NOT NULL,
-    apellido         VARCHAR(50) NOT NULL,
-    tipo_documento   VARCHAR(30) NOT NULL,
-    numero_documento VARCHAR(30) NOT NULL,
-    id_reserva       INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
-);
-
-CREATE TABLE itinerario_viaje (
-    id_itinerario    SERIAL PRIMARY KEY,
-    origen           VARCHAR(100),
-    destino          VARCHAR(100),
-    fecha_salida     DATE,
-    fecha_regreso    DATE,
-    hora_salida      TIME,
-    hora_regreso     TIME,
-    medio_transporte VARCHAR(50),
-    id_reserva       INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
-);
-
-CREATE TABLE itinerario_actividad (
-    id_itin_actividad  SERIAL PRIMARY KEY,
-    dia                INT,
-    hora_inicio        TIME,
-    lugar              VARCHAR(200),
-    descripcion        TEXT,
-    costos_adicionales NUMERIC(10,2) DEFAULT 0,
-    id_actividad       INT REFERENCES actividad_turistica(id_actividad),
-    id_reserva         INT NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE
-);
-
------ MÓDULO 11: FUNCIONALIDADES DEL CLIENTE -----
-CREATE TABLE favoritos (
-    id_favorito    SERIAL PRIMARY KEY,
-    fecha_agregado DATE NOT NULL DEFAULT CURRENT_DATE,
-    id_cliente     INT NOT NULL REFERENCES cliente(id_cliente)           ON DELETE CASCADE,
-    id_paquete     INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    UNIQUE (id_cliente, id_paquete)
-);
-
-CREATE TABLE lista_suenos (
-    id_sueno            SERIAL PRIMARY KEY,
-    fecha_inicio_ahorro DATE,
-    meta_semanal        NUMERIC(10,2),
-    meta_mensual        NUMERIC(10,2),
-    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente)           ON DELETE CASCADE,
-    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE,
-    UNIQUE (id_cliente, id_paquete)
-);
-
-CREATE TABLE historial_busqueda (
-    id_busqueda     SERIAL PRIMARY KEY,
-    destino_buscado VARCHAR(100),
-    filtros         JSONB,
-    fecha_busqueda  TIMESTAMP NOT NULL DEFAULT NOW(),
-    id_cliente      INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
-);
-
-CREATE TABLE notificacion (
-    id_notificacion SERIAL PRIMARY KEY,
-    tipo            VARCHAR(50),
-    mensaje         TEXT,
-    fecha           TIMESTAMP NOT NULL DEFAULT NOW(),
-    leida           BOOLEAN   NOT NULL DEFAULT FALSE,
-    id_cliente      INT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE
-);
-
------ MÓDULO 12: ENCUESTAS DE SATISFACCIÓN -----
-CREATE TABLE encuesta_pregunta (
-    id_pregunta    SERIAL PRIMARY KEY,
-    texto          TEXT        NOT NULL,
-    tipo_respuesta VARCHAR(50) NOT NULL,
-    orden          INT         NOT NULL,
-    estado         BOOLEAN     NOT NULL DEFAULT TRUE
+CREATE TABLE contador_suenos (
+    id_sueno SERIAL PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_paquete INT NOT NULL,
+    fecha_inicio_ahorro DATE NOT NULL,
+    meta_ahorro_semanal DECIMAL(12,2) NOT NULL,
+    meta_ahorro_mensual DECIMAL(12,2) NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sueno_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_sueno_paquete FOREIGN KEY (id_paquete) REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
 CREATE TABLE encuesta_respuesta (
-    id_respuesta      SERIAL PRIMARY KEY,
-    id_pregunta       INT NOT NULL REFERENCES encuesta_pregunta(id_pregunta) ON DELETE CASCADE,
-    id_reserva        INT NOT NULL REFERENCES reserva(id_reserva)            ON DELETE CASCADE,
-    id_cliente        INT NOT NULL REFERENCES cliente(id_cliente)            ON DELETE CASCADE,
-    respuesta_texto   TEXT,
-    respuesta_numero  INT,
-    fecha             TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE (id_pregunta, id_reserva, id_cliente)
+    id_respuesta SERIAL PRIMARY KEY,
+    id_reserva INT NOT NULL,
+    id_pregunta INT NOT NULL,
+    valor_puntuacion INT NULL,
+    valor_sino BOOLEAN NULL,
+    valor_texto TEXT NULL,
+    fecha_respuesta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_er_reserva FOREIGN KEY (id_reserva) REFERENCES reserva(id_reserva) ON DELETE CASCADE,
+    CONSTRAINT fk_er_pregunta FOREIGN KEY (id_pregunta) REFERENCES encuesta_pregunta(id_pregunta) ON DELETE CASCADE
 );
 
------ MÓDULO 13: ADMINISTRACIÓN Y AUDITORÍA -----
 CREATE TABLE auditoria_admin (
     id_auditoria SERIAL PRIMARY KEY,
-    accion       VARCHAR(100) NOT NULL,
-    descripcion  TEXT,
-    fecha        TIMESTAMP NOT NULL DEFAULT NOW(),
-    id_admin     INT NOT NULL REFERENCES cliente(id_cliente)
+    id_usuario_admin INT NOT NULL,
+    accion VARCHAR(100) NOT NULL,
+    detalles TEXT NOT NULL,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_admin FOREIGN KEY (id_usuario_admin) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );
 
------ ÍNDICES DE OPTIMIZACIÓN -----
-CREATE INDEX idx_cliente_correo      ON cliente(correo);
-CREATE INDEX idx_cliente_documento   ON cliente(numero_documento);
-CREATE INDEX idx_cliente_nivel       ON cliente(id_nivel);
-CREATE INDEX idx_reserva_cliente     ON reserva(id_cliente);
-CREATE INDEX idx_reserva_paquete     ON reserva(id_paquete);
-CREATE INDEX idx_reserva_estado      ON reserva(estado);
-CREATE INDEX idx_reserva_fecha_viaje ON reserva(fecha_viaje);
-CREATE INDEX idx_paquete_destino     ON paquete_turistico(id_destino);
-CREATE INDEX idx_paquete_estado      ON paquete_turistico(estado);
-CREATE INDEX idx_paquete_fecha       ON paquete_turistico(fecha_inicio);
-CREATE INDEX idx_seguro_servicio     ON seguro_servicio(id_seguro);
-CREATE INDEX idx_reserva_seguro      ON reserva_seguro(id_reserva);
-CREATE INDEX idx_metodo_proveedor    ON metodo_pago_proveedor(id_proveedor);
-CREATE INDEX idx_historial_cliente   ON historial_busqueda(id_cliente);
-CREATE INDEX idx_notif_cliente       ON notificacion(id_cliente);
-CREATE INDEX idx_favoritos_cliente   ON favoritos(id_cliente);
-CREATE INDEX idx_auditoria_admin     ON auditoria_admin(id_admin);
-CREATE INDEX idx_personaliz_reserva ON personalizacion_reserva(id_reserva);
-
-COMMIT;
-
-
+-- ------------------------------------------------------------
+-- 3. DML - INSERCIÓN DE DATOS INICIALES
+-- ------------------------------------------------------------
 
 INSERT INTO nivel (nombre, min_monto, min_reservas, descripcion, porcentaje_descuento) VALUES
 ('Explorador', 0.00, 0, 'Nivel inicial para nuevos viajeros', 0.00),
@@ -480,8 +284,7 @@ INSERT INTO nivel (nombre, min_monto, min_reservas, descripcion, porcentaje_desc
 ('Viajero Elite', 6000000.00, 5, 'Acceso a promociones y descuentos especiales', 10.00),
 ('Embajador', 15000000.00, 10, 'El nivel de fidelización más alto de MAREVA', 15.00);
 
--- 1. CLIENTE (Sin FKs obligatorias) - 10 registros
-INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, rol, codigo_referido, id_nivel) VALUES
+INSERT INTO usuario (nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, rol, codigo_referido, id_nivel) VALUES
 ('Cesar', 'Uzcategui', 'CC', '1000000001', '3100000001', 'cesar@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
 ('Andres', 'Aroca', 'CC', '1000000002', '3100000002', 'andres@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
 ('Laura', 'Rubiano', 'CC', '1000000003', '3100000003', 'laura@mareva.co', 'Admin_mareva01', 'admin', NULL, 4),
@@ -491,48 +294,56 @@ INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento, telefon
 ('Carlos', 'Mendoza', 'CC', '2000000002', '3200000002', 'carlos.m@test.co', 'cliente_pass2', 'cliente', 'CM20262', 2),
 ('Mariana', 'Gomez', 'CC', '2000000003', '3200000003', 'mariana.g@test.co', 'cliente_pass3', 'cliente', 'MG20263', 3),
 ('Jorge', 'Torres', 'CE', '2000000004', '3200000004', 'jorge.t@test.co', 'cliente_pass4', 'cliente', 'JT20264', 1),
-('Daniela', 'Rios', 'CC', '2000000005', '3200000005', 'daniela.r@test.co', 'cliente_pass5', 'cliente', 'DR20265', 2);
+('Daniela', 'Rios', 'CC', '2000000005', '3200000005', 'daniela.r@test.co', 'cliente_pass5', 'cliente', 'DR20265', 2),
+('Andrés', 'Herrera', 'CC', '3000000001', '3100001111', 'andres.guia@mareva.co', 'Guia_pass1', 'guia', NULL, 1),
+('Avianca', 'Corp', 'NIT', '860002964-4', '6014138000', 'contacto@avianca.com', 'Prov_pass1', 'proveedor', NULL, 1);
 
--- 2. DESTINO - 10 registros
-INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones) VALUES
-('Cartagena de Indias', 'Bolívar', 'Cartagena', 'playa', 'Ciudad amurallada histórica y playas', 'Ciudad Amurallada, Castillo San Felipe'),
-('Medellín', 'Antioquia', 'Medellín', 'ciudad', 'Ciudad de la eterna primavera e innovación', 'El Poblado, Comuna 13, Parque Arví'),
-('Guatapé', 'Antioquia', 'Guatapé', 'aventura', 'Pueblo de zócalos y majestuoso embalse', 'Piedra del Peñol, Embalse de Guatapé'),
-('San Andrés', 'San Andrés', 'San Andrés', 'playa', 'Mar de los siete colores en el Caribe', 'Johnny Cay, Hoyo Soplador, El Acuario'),
-('Parque Tayrona', 'Magdalena', 'Santa Marta', 'playa', 'Naturaleza salvaje y selva tropical', 'Cabo San Juan, Playa Cristal'),
-('Valle del Cocora', 'Quindío', 'Salento', 'montaña', 'Hogar de las palmas de cera', 'Salento, Miradores, Fincas Cafeteras'),
-('Barichara', 'Santander', 'Barichara', 'cultural', 'Pueblo patrimonio de arquitectura colonial', 'Camino Real, Capilla Santa Bárbara'),
-('Leticia', 'Amazonas', 'Leticia', 'aventura', 'Puerta de entrada a la Amazonía', 'Isla de los Micos, Parque Amacayacu'),
-('Caño Cristales', 'Meta', 'La Macarena', 'aventura', 'El río de los cinco colores', 'Río Caño Cristales, Pozos Naturales'),
-('Eje Cafetero', 'Quindío', 'Armenia', 'cultural', 'Paisaje Cultural Cafetero de Colombia', 'Parque del Café, Panaca, Fincas');
+INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones, imagen_principal, estado) VALUES
+('Cartagena de Indias', 'Bolívar', 'Cartagena', 'playa', 'Ciudad amurallada Patrimonio de la Humanidad con playas caribeñas.', 'Ciudad Amurallada, Islas del Rosario, Castillo de San Felipe, Bocagrande', 'img/destinos/cartagena_indias.jpeg', TRUE),
+('Medellín', 'Antioquia', 'Medellín', 'ciudad', 'La ciudad de la eterna primavera, innovadora y cultural.', 'El Poblado, Metro Cable, Pueblito Paisa, Museo de Antioquia', 'img/destinos/medellin.jpeg', TRUE),
+('Guatapé', 'Antioquia', 'Guatapé', 'aventura', 'Pueblo colorido con la imponente Piedra del Peñol.', 'La Piedra del Peñol, Embalse de Guatapé, Zócalos pintados', 'img/destinos/guatape.jpeg', TRUE),
+('San Andrés', 'San Andrés', 'San Andrés', 'playa', 'El mar de los siete colores en el Caribe colombiano.', 'Hoyo Soplador, Johnny Cay, La Piscinita, El Acuario', 'img/destinos/san_andres.jpeg', TRUE),
+('Parque Tayrona', 'Magdalena', 'Santa Marta', 'playa', 'Naturaleza salvaje: selva tropical y playas vírgenes.', 'Cabo San Juan, Playa Cristal, Arrecifes, Pueblito', 'img/destinos/tayrona.jpeg', TRUE),
+('Valle del Cocora', 'Quindío', 'Salento', 'montaña', 'Hogar de las palmas de cera, árbol nacional de Colombia.', 'Palmas de Cera, Salento, Finca El Ocaso, Mirador', 'img/destinos/cocora.jpeg', TRUE),
+('Barichara', 'Santander', 'Barichara', 'cultural', 'El pueblo más bonito de Colombia, arquitectura colonial.', 'Catedral de la Inmaculada, Camino Real, Capilla de Santa Bárbara', 'img/destinos/barichara.jpg', TRUE),
+('Leticia', 'Amazonas', 'Leticia', 'aventura', 'Puerta de entrada a la Amazonía colombiana.', 'Parque Amacayacu, Isla de los Micos, Reserva Tanimboca', 'img/destinos/leticia.jpeg', TRUE),
+('Caño Cristales', 'Meta', 'La Macarena', 'aventura', 'El río más hermoso del mundo, famoso por sus colores únicos.', 'Río Caño Cristales, Pozos naturales, Senderismo, Miradores', 'img/destinos/caño_cristales.jpeg', TRUE),
+('Eje Cafetero', 'Quindío', 'Armenia', 'cultural', 'Paisaje Cultural Cafetero, Patrimonio de la Humanidad.', 'Fincas cafeteras, Parque del Café, Pueblos patrimonio, Jeep willys', 'img/destinos/eje_cafetero.jpeg', TRUE),
+('Nuquí', 'Chocó', 'Nuquí', 'playa', 'Paraíso del Pacífico colombiano, avistamiento de ballenas jorobadas.', 'Playas vírgenes, Avistamiento ballenas, Manglares, Termas', 'img/destinos/nuqui.jpeg', TRUE),
+('Barichara Colonial', 'Santander', 'Barichara', 'cultural', 'Arquitectura colonial de piedra y el Camino Real hacia Guane.', 'Catedral Inmaculada, Capilla de Jesús, Camino Real, Guane', 'img/destinos/barichara_colonial.jpg', TRUE),
+('Las Lajas', 'Nariño', 'Ipiales', 'cultural', 'Basílica neogótica construida sobre un cañón, ícono religioso.', 'Basílica Las Lajas, Puente, Cascadas, Laguna La Cocha', 'img/destinos/lajas.jpeg', TRUE),
+('Villa de Leyva', 'Boyacá', 'Villa de Leyva', 'cultural', 'Plaza empedrada más grande de Colombia, arquitectura colonial.', 'Plaza Mayor, Museo del Desierto, Pozos Azules, Ráquira', 'img/destinos/leyva.jpeg', TRUE),
+('Cañón del Chicamocha', 'Santander', 'San Gil', 'aventura', 'Capital colombiana de los deportes extremos y paisajes épicos.', 'Teleférico, Rafting, Parapente, Parque Chicamocha', 'img/destinos/cañon_chicamocha.jpeg', TRUE),
+('Mompox', 'Bolívar', 'Mompox', 'cultural', 'Ciudad Patrimonio de la Humanidad a orillas del río Magdalena.', 'Calle Real, Iglesias coloniales, Orfebrería, Festival de Jazz', 'img/destinos/mompox.jpeg', TRUE),
+('Sierra Nevada', 'Magdalena', 'Santa Marta', 'aventura', 'La montaña costera más alta del mundo y territorios indígenas.', 'Ciudad Perdida, Comunidades Kogi, Caminatas, Biodiversidad', 'img/destinos/sierra_nevada.jpeg', TRUE),
+('Tolú y Coveñas', 'Sucre', 'Tolú', 'playa', 'Playas tranquilas del Caribe colombiano, ideal para el descanso.', 'Playas Tolú, Islas de San Bernardo, Motonáutica, Manglar', 'img/destinos/tolu.jpeg', TRUE),
+('Isla Gorgona', 'Cauca', 'Guapi', 'aventura', 'Parque Nacional Natural, antigua prisión y reserva marina única.', 'Buceo, Avistamiento ballenas, Senderismo, Biodiversidad marina', 'img/destinos/gorgona.jpeg', TRUE),
+('Capurganá', 'Chocó', 'Acandí', 'playa', 'Pueblo caribeño sin carreteras, paraíso de buceadores.', 'Playa La Caleta, Sapzurro, Arrecifes de coral, Senderismo', 'img/destinos/capurgana.jpeg', TRUE);
 
--- 3. PROVEEDOR - 10 registros
-INSERT INTO proveedor (nombre, nit, tipo_empresa, descripcion, politica_reembolso_general, regla_retracto_desistimiento, gastos_gestion_agencia, porcentaje_gestion_agencia, direccion, ciudad, telefono, correo, nombre_contacto, telefono_contacto, correo_contacto) VALUES
-('Avianca', '860002964-4', 'Aerolínea', 'Transporte aéreo nacional e internacional', 'Tarifas según clase comprada', 'Retracto 48h / Desistimiento 24h con retención 10%', 50000.00, 5.00, 'Calle 26 # 103-09', 'Bogotá', '6014138000', 'contacto@avianca.com', 'Carlos Reyes', '3009876543', 'creyes@avianca.com'),
-('LATAM Airlines', '899999035-1', 'Aerolínea', 'Aerolínea con rutas nacionales en Colombia', 'Políticas estandarizadas por tipo de billete', 'Aplica normativa Aerocivil para retracto', 50000.00, 5.00, 'Carrera 10 # 97-13', 'Bogotá', '6015185800', 'ventas@latam.com', 'Andrea Ruiz', '3118765432', 'aruiz@latam.com'),
-('Hotel Las Américas', '800100200-1', 'Hotel', 'Resort 5 estrellas frente al mar', 'Cancelación gratuita hasta 48h antes', 'No aplica ley de retracto aéreo', 30000.00, 3.00, 'Anillo Vial Sector Cielo Mar', 'Cartagena', '6056543210', 'reservas@lasamericas.co', 'María Torres', '3001234567', 'mtorres@lasamericas.co'),
-('Decameron Colombia', '800112233-5', 'Hotel', 'Cadena de hoteles todo incluido', 'Cancelación con penalidad dentro de los 7 días', 'Sujeto a contrato interno', 40000.00, 4.00, 'Avenida Colombia # 1-19', 'San Andrés', '6085121212', 'reservas@decameron.co', 'Ana Gómez', '3152345678', 'agomez@decameron.co'),
-('CocoraTours', '900567890-3', 'Operador Local', 'Tours guiados y transporte en Quindío', 'Escala de penalidades según anticipación', 'Sin retracto automatizado', 15000.00, 2.00, 'Calle 6 # 4-12', 'Salento', '3145678901', 'info@cocoratours.co', 'Juliana Ríos', '3145678901', 'jrios@cocoratours.co'),
-('Ecoturismo Tayrona', '900345678-2', 'Operador Local', 'Guía y logística en el Parque Tayrona', 'Cancelaciones según días de aviso previo', 'N/A', 20000.00, 2.50, 'Carrera 1 # 12-05', 'Santa Marta', '3123456789', 'info@ecotayrona.co', 'Pedro Silva', '3123456789', 'psilva@ecotayrona.co'),
-('Expreso Bolivariano', '860000120-9', 'Transporte Terrestre', 'Transporte de pasajeros por carretera', 'Tiquetes modificables con penalidad', 'Retracto conforme a la SIC', 10000.00, 1.50, 'Terminal de Transportes', 'Bogotá', '6014241100', 'servicio@bolivariano.com.co', 'Gonzalo Peña', '3105554433', 'gpena@bolivariano.com'),
-('Restaurante Andrés Carne de Res', '800054321-7', 'Restaurante', 'Gastronomía y entretenimiento', 'Reservas grupales requieren anticipo', 'No reembolsable No-Show', 10000.00, 1.00, 'Calle 3 # 11A-56', 'Chia', '6018612222', 'eventos@andrescarnederes.com', 'Lina Morales', '3169998877', 'lmorales@andres.com'),
-('Amazonas Expedition', '900888777-4', 'Operador Local', 'Excursiones en selva profunda', 'Reembolsos graduados hasta 15 días antes', 'No retracto', 25000.00, 3.50, 'Calle 8 # 9-40', 'Leticia', '3132221100', 'contacto@amazonasexp.co', 'Samuel Chipana', '3132221100', 'schipana@amazonasexp.co'),
-('Transportes Marítimos del Caribe', '800777666-0', 'Transporte Terrestre', 'Lanchas y traslados insulares', 'No reembolsable por condiciones de clima', 'N/A', 10000.00, 2.00, 'Muelle La Bodeguita', 'Cartagena', '6056641122', 'reservas@maritimoscaribe.co', 'Hernán Polo', '3014443322', 'hpolo@maritimoscaribe.co');
+INSERT INTO proveedor (id_usuario, nombre, nit, tipo_empresa, descripcion, politica_reembolso_general, regla_retracto_desistimiento, gastos_gestion_agencia, porcentaje_gestion_agencia, direccion, ciudad, telefono, correo, nombre_contacto, telefono_contacto, correo_contacto) VALUES
+(12, 'Avianca', '860002964-4', 'Aerolínea', 'Transporte aéreo nacional e internacional', 'Tarifas según clase comprada', 'Retracto 48h / Desistimiento 24h con retención 10%', 50000.00, 5.00, 'Calle 26 # 103-09', 'Bogotá', '6014138000', 'contacto@avianca.com', 'Carlos Reyes', '3009876543', 'creyes@avianca.com'),
+(NULL, 'LATAM Airlines', '899999035-1', 'Aerolínea', 'Aerolínea con rutas nacionales en Colombia', 'Políticas estandarizadas por tipo de billete', 'Aplica normativa Aerocivil para retracto', 50000.00, 5.00, 'Carrera 10 # 97-13', 'Bogotá', '6015185800', 'ventas@latam.com', 'Andrea Ruiz', '3118765432', 'aruiz@latam.com'),
+(NULL, 'Hotel Las Américas', '800100200-1', 'Hotel', 'Resort 5 estrellas frente al mar', 'Cancelación gratuita hasta 48h antes', 'No aplica ley de retracto aéreo', 30000.00, 3.00, 'Anillo Vial Sector Cielo Mar', 'Cartagena', '6056543210', 'reservas@lasamericas.co', 'María Torres', '3001234567', 'mtorres@lasamericas.co'),
+(NULL, 'Decameron Colombia', '800112233-5', 'Hotel', 'Cadena de hoteles todo incluido', 'Cancelación con penalidad dentro de los 7 días', 'Sujeto a contrato interno', 40000.00, 4.00, 'Avenida Colombia # 1-19', 'San Andrés', '6085121212', 'reservas@decameron.co', 'Ana Gómez', '3152345678', 'agomez@decameron.co'),
+(NULL, 'CocoraTours', '900567890-3', 'Operador Local', 'Tours guiados y transporte en Quindío', 'Escala de penalidades según anticipación', 'Sin retracto automatizado', 15000.00, 2.00, 'Calle 6 # 4-12', 'Salento', '3145678901', 'info@cocoratours.co', 'Juliana Ríos', '3145678901', 'jrios@cocoratours.co'),
+(NULL, 'Ecoturismo Tayrona', '900345678-2', 'Operador Local', 'Guía y logística en el Parque Tayrona', 'Cancelaciones según días de aviso previo', 'N/A', 20000.00, 2.50, 'Carrera 1 # 12-05', 'Santa Marta', '3123456789', 'info@ecotayrona.co', 'Pedro Silva', '3123456789', 'psilva@ecotayrona.co'),
+(NULL, 'Expreso Bolivariano', '860000120-9', 'Transporte Terrestre', 'Transporte de pasajeros por carretera', 'Tiquetes modificables con penalidad', 'Retracto conforme a la SIC', 10000.00, 1.50, 'Terminal de Transportes', 'Bogotá', '6014241100', 'servicio@bolivariano.com.co', 'Gonzalo Peña', '3105554433', 'gpena@bolivariano.com'),
+(NULL, 'Restaurante Andrés Carne de Res', '800054321-7', 'Restaurante', 'Gastronomía y entretenimiento', 'Reservas grupales requieren anticipo', 'No reembolsable No-Show', 10000.00, 1.00, 'Calle 3 # 11A-56', 'Chia', '6018612222', 'eventos@andrescarnederes.com', 'Lina Morales', '3169998877', 'lmorales@andres.com'),
+(NULL, 'Amazonas Expedition', '900888777-4', 'Operador Local', 'Excursiones en selva profunda', 'Reembolsos graduados hasta 15 días antes', 'No retracto', 25000.00, 3.50, 'Calle 8 # 9-40', 'Leticia', '3132221100', 'contacto@amazonasexp.co', 'Samuel Chipana', '3132221100', 'schipana@amazonasexp.co'),
+(NULL, 'Transportes Marítimos del Caribe', '800777666-0', 'Transporte Terrestre', 'Lanchas y traslados insulares', 'No reembolsable por condiciones de clima', 'N/A', 10000.00, 2.00, 'Muelle La Bodeguita', 'Cartagena', '6056641122', 'reservas@maritimoscaribe.co', 'Hernán Polo', '3014443322', 'hpolo@maritimoscaribe.co');
 
--- 4. GUIA_TURISTICO - 10 registros
-INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo) VALUES
-('Andrés', 'Herrera', 'Español, Inglés', 'Historia colonial y playas', '3100001111', 'andres.guia@mareva.co'),
-('Valentina', 'López', 'Español, Inglés, Francés', 'Ecoturismo y senderismo', '3100002222', 'valentina.guia@mareva.co'),
-('Miguel', 'Castillo', 'Español', 'Deportes extremos y aventura', '3100003333', 'miguel.guia@mareva.co'),
-('Claudia', 'Morales', 'Español, Alemán', 'Cultura e historia regional', '3100004444', 'claudia.guia@mareva.co'),
-('Esteban', 'Suarez', 'Español, Inglés', 'Fotografía de naturaleza', '3100005555', 'esteban.guia@mareva.co'),
-('Diana', 'Pérez', 'Español, Italiano', 'Gastronomía local', '3100006666', 'diana.guia@mareva.co'),
-('Felipe', 'Castro', 'Español, Portugués', 'Rutas de alta montaña', '3100007777', 'felipe.guia@mareva.co'),
-('Lucía', 'Navarro', 'Español, Inglés', 'Arqueología y etnografía', '3100008888', 'lucia.guia@mareva.co'),
-('Oscar', 'Vargas', 'Español', 'Navegación y buceo básico', '3100009999', 'oscar.guia@mareva.co'),
-('Ximena', 'Rojas', 'Español, Inglés', 'Avistamiento de aves', '3100001010', 'ximena.guia@mareva.co');
+INSERT INTO guia_turistico (id_usuario, nombre, apellido, idiomas, especialidad, telefono, correo) VALUES
+(11, 'Andrés', 'Herrera', 'Español, Inglés', 'Historia colonial y playas', '3100001111', 'andres.guia@mareva.co'),
+(NULL, 'Valentina', 'López', 'Español, Inglés, Francés', 'Ecoturismo y senderismo', '3100002222', 'valentina.guia@mareva.co'),
+(NULL, 'Miguel', 'Castillo', 'Español', 'Deportes extremos y aventura', '3100003333', 'miguel.guia@mareva.co'),
+(NULL, 'Claudia', 'Morales', 'Español, Alemán', 'Cultura e historia regional', '3100004444', 'claudia.guia@mareva.co'),
+(NULL, 'Esteban', 'Suarez', 'Español, Inglés', 'Fotografía de naturaleza', '3100005555', 'esteban.guia@mareva.co'),
+(NULL, 'Diana', 'Pérez', 'Español, Italiano', 'Gastronomía local', '3100006666', 'diana.guia@mareva.co'),
+(NULL, 'Felipe', 'Castro', 'Español, Portugués', 'Rutas de alta montaña', '3100007777', 'felipe.guia@mareva.co'),
+(NULL, 'Lucía', 'Navarro', 'Español, Inglés', 'Arqueología y etnografía', '3100008888', 'lucia.guia@mareva.co'),
+(NULL, 'Oscar', 'Vargas', 'Español', 'Navegación y buceo básico', '3100009999', 'oscar.guia@mareva.co'),
+(NULL, 'Ximena', 'Rojas', 'Español, Inglés', 'Avistamiento de aves', '3100001010', 'ximena.guia@mareva.co');
 
--- 5. TIPO_SEGURO - 10 registros
 INSERT INTO tipo_seguro (nombre, descripcion, cobertura_general) VALUES
 ('Responsabilidad Civil Aérea', 'Cobertura exigida por normativa aeronáutica', 'Daños a pasajeros durante vuelos'),
 ('Responsabilidad Civil Hotelera', 'Seguro obligatorio en instalaciones hoteleras', 'Accidentes e incidentes dentro del hotel'),
@@ -545,7 +356,6 @@ INSERT INTO tipo_seguro (nombre, descripcion, cobertura_general) VALUES
 ('Seguro Deportes Extremos', 'Cobertura para actividades de alto riesgo', 'Rescate y atención especializada'),
 ('Seguro Multiriesgo Premium', 'Protección total combinada para el viajero', 'Salud, equipaje, cancelación y accidentes');
 
--- 6. TEMPORADA - 10 registros
 INSERT INTO temporada (nombre, categoria, descripcion, fecha_inicio, fecha_fin) VALUES
 ('Vacaciones Mitad de Año 2026', 'Alta', 'Periodo escolar de junio y julio', '2026-06-15', '2026-07-31'),
 ('Semana Santa 2026', 'Alta', 'Semana mayor de receso', '2026-03-29', '2026-04-05'),
@@ -558,7 +368,6 @@ INSERT INTO temporada (nombre, categoria, descripcion, fecha_inicio, fecha_fin) 
 ('Temporada Avistamiento de Ballenas', 'Media', 'Temporada natural en el Pacífico', '2026-07-15', '2026-10-31'),
 ('Feria de Cali', 'Alta', 'Festividades de fin de año en Cali', '2026-12-25', '2026-12-30');
 
--- 7. ENCUESTA_PREGUNTA - 10 registros
 INSERT INTO encuesta_pregunta (texto, tipo_respuesta, orden) VALUES
 ('¿Cómo califica la atención de la agencia MAREVA?', 'Puntuacion', 1),
 ('¿El paquete cumplió con las expectativas descritas?', 'Puntuacion', 2),
@@ -571,248 +380,24 @@ INSERT INTO encuesta_pregunta (texto, tipo_respuesta, orden) VALUES
 ('¿Cómo califica la relación precio-calidad del paquete?', 'Puntuacion', 9),
 ('¿Volvería a reservar sus próximas vacaciones con nosotros?', 'Si_No', 10);
 
--- 8. PAQUETES_TURISTICOS - 11 paquetes_turisticos
-INSERT INTO paquete_turistico (nombre,slug,imagen_url,descripcion,precio,duracion_dias,duracion_noches,cupos_totales,cupos_disponibles,fecha_inicio,fecha_fin,imagen_principal,personalizable,estado,id_destino,id_guia) 
-VALUES
-(
-    'Cartagena Mágica',
-    'cartagena-magica',
-    'img/paquetes/Cartagena.jpeg',
-    'Descubre la ciudad amurallada con playas privadas e historia colonial.',
-    1850000, 5, 4, 20, 14,
-    '2026-07-01', '2026-07-05',
-    'img/paquetes/Cartagena.jpeg',
-    TRUE, 'activo', 1, 1
-),
-
-(
-    'Medellín Innovadora',
-    'medellin-innovadora',
-    'img/paquetes/Medellin.jpeg',
-    'Conoce la ciudad más transformadora de América Latina.',
-    1200000, 4, 3, 25, 20,
-    '2026-07-10', '2026-07-13',
-    'img/paquetes/Medellin.jpeg',
-    FALSE, 'activo', 2, 2
-),
-
-(
-    'Guatapé Extremo',
-    'guatape-extremo',
-    'img/paquetes/Guatape.jpeg',
-    'Adrenalina pura: sube la Piedra del Peñol y navega el embalse.',
-    890000, 3, 2, 15, 12,
-    '2026-07-15', '2026-07-17',
-    'img/paquetes/Guatape.jpeg',
-    TRUE, 'activo', 3, 3
-),
-
-(
-    'San Andrés Todo Incluido',
-    'san-andres-todo-incluido',
-    'img/paquetes/SanAndres.jpeg',
-    'El mar de los siete colores con todo incluido en resort 5 estrellas.',
-    3200000, 7, 6, 30, 18,
-    '2026-08-01', '2026-08-07',
-    'img/paquetes/SanAndres.jpeg',
-    FALSE, 'activo', 4, 1
-),
-
-(
-    'Tayrona Salvaje',
-    'tayrona-salvaje',
-    'img/paquetes/Tayrona.jpeg',
-    'Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.',
-    1450000, 5, 4, 12, 8,
-    '2026-08-10', '2026-08-14',
-    'img/paquetes/Tayrona.jpeg',
-    TRUE, 'activo', 5, 2
-),
-
-(
-    'Valle del Cocora Místico',
-    'valle-del-cocora-mistico',
-    'img/paquetes/Cocora.jpeg',
-    'Caminata entre palmas de cera y fincas cafeteras del Quindío.',
-    980000, 3, 2, 20, 15,
-    '2026-09-01', '2026-09-03',
-    'img/paquetes/Cocora.jpeg',
-    FALSE, 'activo', 6, 3
-),
-
-(
-    'Amazonas Aventura',
-    'amazonas-aventura',
-    'img/paquetes/Amazonas.jpeg',
-    'Explora la selva amazónica y conoce comunidades indígenas.',
-    2750000, 6, 5, 18, 14,
-    '2026-09-10', '2026-09-15',
-    'img/paquetes/Amazonas.jpeg',
-    TRUE, 'activo', 8, 1
-),
-
-(
-    'Desierto de la Tatacoa',
-    'desierto-de-la-tatacoa',
-    'img/paquetes/Desierto.jpeg',
-    'Observación astronómica y recorridos por paisajes únicos.',
-    750000, 3, 2, 20, 16,
-    '2026-09-20', '2026-09-22',
-    'img/paquetes/Desierto.jpeg',
-    FALSE, 'activo', 8, 2
-),
-
-(
-    'Caño Cristales Premium',
-    'cano-cristales-premium',
-    'img/paquetes/Caño.jpeg',
-    'Visita el río más hermoso del mundo con guía especializado.',
-    2950000, 5, 4, 15, 10,
-    '2026-10-01', '2026-10-05',
-    'img/paquetes/Caño.jpeg',
-    TRUE, 'activo', 9, 3
-),
-
-(
-    'Eje Cafetero Tradicional',
-    'eje-cafetero-tradicional',
-    'img/paquetes/EjeCafetero.jpeg',
-    'Recorrido por fincas cafeteras y pueblos patrimonio.',
-    1350000, 4, 3, 25, 18,
-    '2026-10-10', '2026-10-13',
-    'img/paquetes/EjeCafetero.jpeg',
-    FALSE, 'activo', 10, 1
-),
-
-(
-    'Nuquí Ecoturismo',
-    'nuqui-ecoturismo',
-    'img/paquetes/Nuqui.jpeg',
-    'Avistamiento de ballenas y playas vírgenes del Pacífico.',
-    2400000, 5, 4, 16, 12,
-    '2026-10-20', '2026-10-24',
-    'img/paquetes/Nuqui.jpeg',
-    TRUE, 'activo', 11, 2
-),
-
-(
-    'Barichara Colonial',
-    'barichara-colonial',
-    'img/paquetes/Barichara.jpg',
-    'Conoce uno de los pueblos más bellos de Colombia.',
-    890000, 3, 2, 20, 17,
-    '2026-11-01', '2026-11-03',
-    'img/paquetes/Barichara.jpg',
-    FALSE, 'activo', 12, 3
-),
-
-(
-    'Santuario Las Lajas',
-    'santuario-las-lajas',
-    'img/paquetes/Santuario.jpeg',
-    'Recorrido religioso y cultural por Nariño.',
-    680000, 3, 2, 22, 19,
-    '2026-11-08', '2026-11-10',
-    'img/paquetes/Santuario.jpeg',
-    FALSE, 'activo', 13, 1
-),
-
-(
-    'Boyacá Histórica',
-    'boyaca-historica',
-    'img/paquetes/BOYaca.jpeg',
-    'Villa de Leyva, Ráquira y monumentos históricos.',
-    980000, 4, 3, 24, 20,
-    '2026-11-15', '2026-11-18',
-    'img/paquetes/Boyaca.jpeg',
-    TRUE, 'activo', 14, 2
-),
-
-(
-    'Cañón del Chicamocha',
-    'canon-del-chicamocha',
-    'img/paquetes/CañonChica.jpeg',
-    'Deportes extremos y paisajes espectaculares.',
-    1150000, 4, 3, 18, 13,
-    '2026-11-25', '2026-11-28',
-    'img/paquetes/CañonChica.jpeg',
-    TRUE, 'activo', 15, 3
-),
-
-(
-    'Mompox Patrimonial',
-    'mompox-patrimonial',
-    'img/paquetes/Mompox.jpg',
-    'Historia, arquitectura colonial y cultura ribereña.',
-    1250000, 4, 3, 20, 16,
-    '2026-12-01', '2026-12-04',
-    'img/paquetes/Mompox.jpg',
-    FALSE, 'activo', 16, 1
-),
-
-(
-    'Sierra Nevada Ancestral',
-    'sierra-nevada-ancestral',
-    'img/paquetes/CierraNevada.jpeg',
-    'Conexión con comunidades indígenas y naturaleza.',
-    2100000, 5, 4, 14, 10,
-    '2026-12-10', '2026-12-14',
-    'img/paquetes/CierraNevada.jpeg',
-    TRUE, 'activo', 17, 2
-),
-
-(
-    'Tolú y Coveñas Relax',
-    'tolu-y-covenas-relax',
-    'img/paquetes/Tolu.jpeg',
-    'Playas tranquilas y actividades acuáticas.',
-    1100000, 4, 3, 26, 21,
-    '2026-12-18', '2026-12-21',
-    'img/paquetes/Tolu.jpeg',
-    FALSE, 'activo', 18, 3
-),
-
-(
-    'Isla Gorgona Explorer',
-    'isla-gorgona-explorer',
-    'img/paquetes/Isla.jpeg',
-    'Naturaleza, senderismo y biodiversidad marina.',
-    2800000, 5, 4, 12, 8,
-    '2027-01-10', '2027-01-14',
-    'img/paquetes/Isla.jpeg',
-    TRUE, 'activo', 19, 1
-),
-
-(
-    'Capurganá Paraíso',
-    'capurgana-paraiso',
-    'img/paquetes/Capurgana.jpeg',
-    'Playas cristalinas y ecoturismo en el Caribe colombiano.',
-    1900000, 5, 4, 18, 13,
-    '2027-01-20', '2027-01-24',
-    'img/paquetes/Capurgana.jpeg',
-    TRUE, 'activo', 20, 2
-);
-
--- 9. DESTINOS - 12 destinos
-INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones, imagen_principal, estado) VALUES
-('Cartagena de Indias', 'Bolívar',    'Cartagena',    'playa',    'Ciudad amurallada Patrimonio de la Humanidad con playas caribeñas.',    'Ciudad Amurallada, Islas del Rosario, Castillo de San Felipe, Bocagrande',  'img/destinos/cartagena_indias.jpeg',        TRUE),
-('Medellín',            'Antioquia',  'Medellín',     'ciudad',   'La ciudad de la eterna primavera, innovadora y cultural.',             'El Poblado, Metro Cable, Pueblito Paisa, Museo de Antioquia',              'img/destinos/medellin.jpeg',         TRUE),
-('Guatapé',             'Antioquia',  'Guatapé',      'aventura', 'Pueblo colorido con la imponente Piedra del Peñol.',                   'La Piedra del Peñol, Embalse de Guatapé, Zócalos pintados',                'img/destinos/guatape.jpeg',          TRUE),
-('San Andrés',          'San Andrés', 'San Andrés',   'playa',    'El mar de los siete colores en el Caribe colombiano.',                 'Hoyo Soplador, Johnny Cay, La Piscinita, El Acuario',                      'img/destinos/san_andres.jpeg',       TRUE),
-('Parque Tayrona',      'Magdalena',  'Santa Marta',  'playa',    'Naturaleza salvaje: selva tropical y playas vírgenes.',                'Cabo San Juan, Playa Cristal, Arrecifes, Pueblito',                        'img/destinos/tayrona.jpeg',          TRUE),
-('Valle del Cocora',    'Quindío',    'Salento',      'montaña',  'Hogar de las palmas de cera, árbol nacional de Colombia.',             'Palmas de Cera, Salento, Finca El Ocaso, Mirador',                         'img/destinos/cocora.jpeg',    TRUE),
-('Barichara',           'Santander',  'Barichara',    'cultural', 'El pueblo más bonito de Colombia, arquitectura colonial.',             'Catedral de la Inmaculada, Camino Real, Capilla de Santa Bárbara',         'img/destinos/barichara.jpg',        TRUE),
-('Leticia',             'Amazonas',   'Leticia',      'aventura', 'Puerta de entrada a la Amazonía colombiana.',                          'Parque Amacayacu, Isla de los Micos, Reserva Tanimboca',                   'img/destinos/leticia.jpeg',          TRUE),
-('Caño Cristales',      'Meta',       'La Macarena',  'aventura', 'El río más hermoso del mundo, famoso por sus colores únicos.',         'Río Caño Cristales, Pozos naturales, Senderismo, Miradores',               'img/destinos/caño_cristales.jpeg',   TRUE),
-('Eje Cafetero',        'Quindío',    'Armenia',      'cultural', 'Paisaje Cultural Cafetero, Patrimonio de la Humanidad.',               'Fincas cafeteras, Parque del Café, Pueblos patrimonio, Jeep willys',       'img/destinos/eje_cafetero.jpeg',     TRUE),
-('Nuquí',               'Chocó',      'Nuquí',        'playa',    'Paraíso del Pacífico colombiano, avistamiento de ballenas jorobadas.', 'Playas vírgenes, Avistamiento ballenas, Manglares, Termas',                'img/destinos/nuqui.jpeg',            TRUE),
-('Barichara Colonial',  'Santander',  'Barichara',    'cultural', 'Arquitectura colonial de piedra y el Camino Real hacia Guane.',        'Catedral Inmaculada, Capilla de Jesús, Camino Real, Guane',                'img/destinos/barichara_colonial.jpg',TRUE),
-('Las Lajas',           'Nariño',     'Ipiales',      'cultural', 'Basílica neogótica construida sobre un cañón, ícono religioso.',       'Basílica Las Lajas, Puente, Cascadas, Laguna La Cocha',                    'img/destinos/lajas.jpeg',        TRUE),
-('Villa de Leyva',      'Boyacá',     'Villa de Leyva','cultural','Plaza empedrada más grande de Colombia, arquitectura colonial.',        'Plaza Mayor, Museo del Desierto, Pozos Azules, Ráquira',                   'img/destinos/leyva.jpeg',   TRUE),
-('Cañón del Chicamocha','Santander',  'San Gil',      'aventura', 'Capital colombiana de los deportes extremos y paisajes épicos.',       'Teleférico, Rafting, Parapente, Parque Chicamocha',                        'img/destinos/cañon_chicamocha.jpeg',       TRUE),
-('Mompox',              'Bolívar',    'Mompox',       'cultural', 'Ciudad Patrimonio de la Humanidad a orillas del río Magdalena.',       'Calle Real, Iglesias coloniales, Orfebrería, Festival de Jazz',             'img/destinos/mompox.jpeg',           TRUE),
-('Sierra Nevada',       'Magdalena',  'Santa Marta',  'aventura', 'La montaña costera más alta del mundo y territorios indígenas.',       'Ciudad Perdida, Comunidades Kogi, Caminatas, Biodiversidad',               'img/destinos/sierra_nevada.jpeg',    TRUE),
-('Tolú y Coveñas',      'Sucre',      'Tolú',         'playa',    'Playas tranquilas del Caribe colombiano, ideal para el descanso.',     'Playas Tolú, Islas de San Bernardo, Motonáutica, Manglar',                 'img/destinos/tolu.jpeg',     TRUE),
-('Isla Gorgona',        'Cauca',      'Guapi',        'aventura', 'Parque Nacional Natural, antigua prisión y reserva marina única.',     'Buceo, Avistamiento ballenas, Senderismo, Biodiversidad marina',            'img/destinos/gorgona.jpeg',          TRUE),
-('Capurganá',           'Chocó',      'Acandí',       'playa',    'Pueblo caribeño sin carreteras, paraíso de buceadores.',              'Playa La Caleta, Sapzurro, Arrecifes de coral, Senderismo',                'img/destinos/capurgana.jpeg',        TRUE);
+INSERT INTO paquete_turistico (nombre, slug, imagen_url, descripcion, precio, duracion_dias, duracion_noches, cupos_totales, cupos_disponibles, fecha_inicio, fecha_fin, imagen_principal, personalizable, estado, id_destino, id_guia) VALUES
+('Cartagena Mágica', 'cartagena-magica', 'img/paquetes/Cartagena.jpeg', 'Descubre la ciudad amurallada con playas privadas e historia colonial.', 1850000, 5, 4, 20, 14, '2026-07-01', '2026-07-05', 'img/paquetes/Cartagena.jpeg', TRUE, 'activo', 1, 1),
+('Medellín Innovadora', 'medellin-innovadora', 'img/paquetes/Medellin.jpeg', 'Conoce la ciudad más transformadora de América Latina.', 1200000, 4, 3, 25, 20, '2026-07-10', '2026-07-13', 'img/paquetes/Medellin.jpeg', FALSE, 'activo', 2, 2),
+('Guatapé Extremo', 'guatape-extremo', 'img/paquetes/Guatape.jpeg', 'Adrenalina pura: sube la Piedra del Peñol y navega el embalse.', 890000, 3, 2, 15, 12, '2026-07-15', '2026-07-17', 'img/paquetes/Guatape.jpeg', TRUE, 'activo', 3, 3),
+('San Andrés Todo Incluido', 'san-andres-todo-incluido', 'img/paquetes/SanAndres.jpeg', 'El mar de los siete colores con todo incluido en resort 5 estrellas.', 3200000, 7, 6, 30, 18, '2026-08-01', '2026-08-07', 'img/paquetes/SanAndres.jpeg', FALSE, 'activo', 4, 1),
+('Tayrona Salvaje', 'tayrona-salvaje', 'img/paquetes/Tayrona.jpeg', 'Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.', 1450000, 5, 4, 12, 8, '2026-08-10', '2026-08-14', 'img/paquetes/Tayrona.jpeg', TRUE, 'activo', 5, 2),
+('Valle del Cocora Místico', 'valle-del-cocora-mistico', 'img/paquetes/Cocora.jpeg', 'Caminata entre palmas de cera y fincas cafeteras del Quindío.', 980000, 3, 2, 20, 15, '2026-09-01', '2026-09-03', 'img/paquetes/Cocora.jpeg', FALSE, 'activo', 6, 3),
+('Amazonas Aventura', 'amazonas-aventura', 'img/paquetes/Amazonas.jpeg', 'Explora la selva amazónica y conoce comunidades indígenas.', 2750000, 6, 5, 18, 14, '2026-09-10', '2026-09-15', 'img/paquetes/Amazonas.jpeg', TRUE, 'activo', 8, 1),
+('Desierto de la Tatacoa', 'desierto-de-la-tatacoa', 'img/paquetes/Desierto.jpeg', 'Observación astronómica y recorridos por paisajes únicos.', 750000, 3, 2, 20, 16, '2026-09-20', '2026-09-22', 'img/paquetes/Desierto.jpeg', FALSE, 'activo', 8, 2),
+('Caño Cristales Premium', 'cano-cristales-premium', 'img/paquetes/Caño.jpeg', 'Visita el río más hermoso del mundo con guía especializado.', 2950000, 5, 4, 15, 10, '2026-10-01', '2026-10-05', 'img/paquetes/Caño.jpeg', TRUE, 'activo', 9, 3),
+('Eje Cafetero Tradicional', 'eje-cafetero-tradicional', 'img/paquetes/EjeCafetero.jpeg', 'Recorrido por fincas cafeteras y pueblos patrimonio.', 1350000, 4, 3, 25, 18, '2026-10-10', '2026-10-13', 'img/paquetes/EjeCafetero.jpeg', FALSE, 'activo', 10, 1),
+('Nuquí Ecoturismo', 'nuqui-ecoturismo', 'img/paquetes/Nuqui.jpeg', 'Avistamiento de ballenas y playas vírgenes del Pacífico.', 2400000, 5, 4, 16, 12, '2026-10-20', '2026-10-24', 'img/paquetes/Nuqui.jpeg', TRUE, 'activo', 11, 2),
+('Barichara Colonial', 'barichara-colonial', 'img/paquetes/Barichara.jpg', 'Conoce uno de los pueblos más bellos de Colombia.', 890000, 3, 2, 20, 17, '2026-11-01', '2026-11-03', 'img/paquetes/Barichara.jpg', FALSE, 'activo', 12, 3),
+('Santuario Las Lajas', 'santuario-las-lajas', 'img/paquetes/Santuario.jpeg', 'Recorrido religioso y cultural por Nariño.', 680000, 3, 2, 22, 19, '2026-11-08', '2026-11-10', 'img/paquetes/Santuario.jpeg', FALSE, 'activo', 13, 1),
+('Boyacá Histórica', 'boyaca-historica', 'img/paquetes/BOYaca.jpeg', 'Villa de Leyva, Ráquira y monumentos históricos.', 980000, 4, 3, 24, 20, '2026-11-15', '2026-11-18', 'img/paquetes/Boyaca.jpeg', TRUE, 'activo', 14, 2),
+('Cañón del Chicamocha', 'canon-del-chicamocha', 'img/paquetes/CañonChica.jpeg', 'Deportes extremos y paisajes espectaculares.', 1150000, 4, 3, 18, 13, '2026-11-25', '2026-11-28', 'img/paquetes/CañonChica.jpeg', TRUE, 'activo', 15, 3),
+('Mompox Patrimonial', 'mompox-patrimonial', 'img/paquetes/Mompox.jpg', 'Historia, arquitectura colonial y cultura ribereña.', 1250000, 4, 3, 20, 16, '2026-12-01', '2026-12-04', 'img/paquetes/Mompox.jpg', FALSE, 'activo', 16, 1),
+('Sierra Nevada Ancestral', 'sierra-nevada-ancestral', 'img/paquetes/CierraNevada.jpeg', 'Conexión con comunidades indígenas y naturaleza.', 2100000, 5, 4, 14, 10, '2026-12-10', '2026-12-14', 'img/paquetes/CierraNevada.jpeg', TRUE, 'activo', 17, 2),
+('Tolú y Coveñas Relax', 'tolu-y-covenas-relax', 'img/paquetes/Tolu.jpeg', 'Playas tranquilas y actividades acuáticas.', 1100000, 4, 3, 26, 21, '2026-12-18', '2026-12-21', 'img/paquetes/Tolu.jpeg', FALSE, 'activo', 18, 3),
+('Isla Gorgona Explorer', 'isla-gorgona-explorer', 'img/paquetes/Isla.jpeg', 'Naturaleza, senderismo y biodiversidad marina.', 2800000, 5, 4, 12, 8, '2027-01-10', '2027-01-14', 'img/paquetes/Isla.jpeg', TRUE, 'activo', 19, 1),
+('Capurganá Paraíso', 'capurgana-paraiso', 'img/paquetes/Capurgana.jpeg', 'Playas cristalinas y ecoturismo en el Caribe colombiano.', 1900000, 5, 4, 18, 13, '2027-01-20', '2027-01-24', 'img/paquetes/Capurgana.jpeg', TRUE, 'activo', 20, 2);
