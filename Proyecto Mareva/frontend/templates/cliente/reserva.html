@@ -85,6 +85,17 @@
       </div>
       {% endif %}
 
+      <div class="form-group" style="margin-bottom:var(--space-6)"> 
+        <label class="form-label"> 💳 Política de no reembolso </label> 
+          <p class="text-muted" style="font-size:var(--text-sm);margin-bottom:var(--space-3)"> Al aceptar esta política, reconoces que el valor pagado por la reserva no será reembolsable en caso de cancelación. </p> 
+            <select name="acepta_no_reembolso" class="form-select" required> 
+              <option value="" selected disabled> Selecciona una opción </option>
+              <option value="si"> Sí, acepto la política de no reembolso </option> 
+              <option value="no"> No, no acepto la política </option> 
+            </select> 
+      
+      </div>
+
       <div class="form-group" style="margin-bottom:var(--space-8)">
         <label class="form-label">Notas o solicitudes especiales</label>
         <textarea name="notas" class="form-textarea" rows="3" placeholder="Preferencias, celebraciones..."></textarea>
