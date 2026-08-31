@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container" style="max-width: 720px">
+
+        <a
+            href="javascript:history.back()"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver
+        </a>
+
+        {% if error %}
+
+            <div class="perfil-card">
+
+                <h2 class="perfil-card__title">
+                    ⚠️ Encuesta no disponible
+                </h2>
+
+                <p class="text-muted">
+                    {{ error }}
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <p class="section-label">
+                ⭐ Encuesta de satisfacción
+            </p>
+
+            <h1 class="section-title">
+                Cuéntanos sobre tu experiencia
+            </h1>
+
+            <p class="section-desc">
+                Tu opinión nos ayuda a mejorar nuestros paquetes y el
+                servicio de Mareva.
+            </p>
+
+            <div
+                style="
+                    background:var(--gray-100);
+                    border-radius:var(--radius-md);
+                    padding:var(--space-4);
+                    margin-bottom:var(--space-6)
+                "
+            >
+
+                <p style="font-size:var(--text-sm)">
+                    <strong>Paquete:</strong>
+                    {{ reserva.paquete_nombre }}
+                </p>
+
+                <p style="font-size:var(--text-sm)">
+                    <strong>Reserva:</strong>
+                    {{ reserva.id_reserva }}
+                </p>
+
+            </div>
+
+            <form
+                method="POST"
+                action="#"
+            >
+
+                {% for pregunta in preguntas %}
+
+                    <div
+                        class="perfil-card"
+                        style="margin-bottom:var(--space-4)"
+                    >
+
+                        <label
+                            class="form-label"
+                            for="pregunta_{{ pregunta.id_pregunta }}"
+                        >
+
+                            {{ loop.index }}.
+                            {{ pregunta.texto }}
+
+                        </label>
+
+                        {% if pregunta.tipo_respuesta == "numero" %}
+
+                            <input
+                                type="number"
+                                id="pregunta_{{ pregunta.id_pregunta }}"
+                                name="pregunta_{{ pregunta.id_pregunta }}"
+                                class="form-input"
+                                min="1"
+                                max="5"
+                                required
+                            >
+
+                            <small class="text-muted">
+                                Califica de 1 a 5.
+                            </small>
+
+                        {% elif pregunta.tipo_respuesta == "texto" %}
+
+                            <textarea
+                                id="pregunta_{{ pregunta.id_pregunta }}"
+                                name="pregunta_{{ pregunta.id_pregunta }}"
+                                class="form-textarea"
+                                rows="4"
+                                placeholder="Escribe tu respuesta..."
+                                required
+                            ></textarea>
+
+                        {% elif pregunta.tipo_respuesta == "opcion" %}
+
+                            <select
+                                id="pregunta_{{ pregunta.id_pregunta }}"
+                                name="pregunta_{{ pregunta.id_pregunta }}"
+                                class="form-select"
+                                required
+                            >
+
+                                <option value="">
+                                    Selecciona una opción
+                                </option>
+
+                                <option value="Excelente">
+                                    Excelente
+                                </option>
+
+                                <option value="Bueno">
+                                    Bueno
+                                </option>
+
+                                <option value="Regular">
+                                    Regular
+                                </option>
+
+                                <option value="Malo">
+                                    Malo
+                                </option>
+
+                                <option value="Muy malo">
+                                    Muy malo
+                                </option>
+
+                            </select>
+
+                        {% else %}
+
+                            <input
+                                type="text"
+                                id="pregunta_{{ pregunta.id_pregunta }}"
+                                name="pregunta_{{ pregunta.id_pregunta }}"
+                                class="form-input"
+                                required
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-lg"
+                    style="width:100%;justify-content:center"
+                >
+                    Enviar encuesta ⭐
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+{% endblock %}
