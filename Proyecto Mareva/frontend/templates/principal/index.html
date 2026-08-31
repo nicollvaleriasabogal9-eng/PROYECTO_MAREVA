@@ -16,8 +16,8 @@
         Descubre los mejores destinos con MAREVA.
       </p>
 
-      <form class="search-bar" onsubmit="return buscarPaquete(event)">
-        <input type="text" id="searchInput" class="search-bar__input" placeholder="Buscar destino o paquete...">
+      <form class="search-bar" method="GET" action="{{ url_for('paquetes.listar_catalogo') }}">
+        <input type="text" id="searchInput" class="search-bar__input" name="q" placeholder="Buscar destino o paquete...">
         <button type="submit" class="btn btn-primary">Buscar</button>
       </form>
 
