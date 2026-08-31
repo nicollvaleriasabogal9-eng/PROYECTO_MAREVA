@@ -1,6 +1,7 @@
 from flask import request, session, redirect, url_for, render_template, jsonify
 from services.reserva_services import ReservaService
 from services.paquete_services import PaqueteService
+from services.encuesta_services import EncuestaService
 
 
 class ReservaController:
@@ -40,8 +41,9 @@ class ReservaController:
         fecha_viaje = request.form.get("fecha_inicio") or None
         notas = request.form.get("notas", "").strip()
         alergias = request.form.get("alergias", "").strip() or None
-        mascotas = request.form.get("mascotas") == "si"
+        mascotas = request.form.get("mascotas")
         plan = request.form.get("plan", "completo")
+        acepta_no_reembolso = request.form.get("acepta_no_reembolso") == "si"
         extras_raw = request.form.getlist("extras")
         extras_ids = [int(e) for e in extras_raw if e.isdigit()]
 
@@ -63,6 +65,7 @@ class ReservaController:
             alergias=alergias,
             mascotas=mascotas,
             plan=plan,
+            acepta_no_reembolso=acepta_no_reembolso,
             metodo_contacto="correo",
             extras_ids=extras_ids,
             viajeros=viajeros,
@@ -74,6 +77,85 @@ class ReservaController:
 
         session["ultima_reserva_codigo"] = resultado["codigo_unico"]
         return redirect(url_for("home.home"))
+
+    def modificar_viajeros(self, id_reserva):
+        usuario = session.get("usuario")
+
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+
+        reserva = self.service.obtener_reserva_con_viajeros(
+            id_reserva,
+            usuario["id"]
+        )
+
+        if not reserva:
+            return redirect(url_for("home.perfil"))
+
+        if reserva["estado"] not in ("solicitada", "pendiente a pago"):
+            return redirect(url_for("home.perfil"))
+
+        return render_template(
+            "cliente/modificar_viajeros.html",
+            reserva=reserva
+        )
+
+    def guardar_cambios_viajero(self, id_viajero):
+        usuario = session.get("usuario")
+
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+
+        nombre = request.form.get("nombre", "").strip()
+        apellido = request.form.get("apellido", "").strip()
+        tipo_documento = request.form.get("tipo_documento", "").strip()
+        numero_documento = request.form.get("numero_documento", "").strip()
+
+        if not nombre or not apellido or not numero_documento:
+            return redirect(url_for("home.perfil"))
+
+        resultado = self.service.actualizar_viajero(
+            id_viajero,
+            usuario["id"],
+            nombre,
+            apellido,
+            tipo_documento,
+            numero_documento
+        )
+
+        if not resultado["ok"]:
+            print("ERROR:", resultado["error"])
+
+        return redirect(url_for("home.perfil"))
+
+    def completar_reserva(self, id_reserva):
+
+        usuario = session.get("usuario")
+
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+
+        resultado = self.service.completar_reserva(id_reserva)
+
+        if not resultado["ok"]:
+            return redirect(url_for("home.perfil"))
+
+        return redirect(url_for("home.perfil"))
+
+    def listar_reservas_admin(self):
+
+        usuario = session.get("usuario")
+
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+
+        reservas = self.service.listar_reservas_admin()
+
+        return render_template(
+            "admin/reservas.html",
+            reservas=reservas
+        )
+
     #Lee los datos de los viajeros desde el formulario
     def _leer_viajeros(self, total_personas):
         viajeros = []
