@@ -84,6 +84,165 @@ class PaqueteRepository:
         cursor.close()
         return [{"id_guia": f[0], "nombre_completo": f"{f[1]} {f[2]}"} for f in filas]
 
+    def filtrar(self, termino, categoria, duracion, precio_max, incluye):
+
+        sql = QUERY_BASE + """
+            WHERE p.estado = 'activo'
+        """
+
+        valores = []
+
+        if termino:
+            patron= f"%{termino}%"
+
+            sql += """
+                AND (
+                    p.nombre ILIKE %s
+                    OR p.descripcion ILIKE %s
+                    OR d.nombre_destino ILIKE %s
+                    OR d.departamento ILIKE %s
+                    OR d.categoria ILIKE %s
+                )
+            """
+
+            valores.extend([
+                patron,
+                patron,
+                patron,
+                patron,
+                patron
+            ])
+
+        if categoria == "todos":
+                    categoria = ""
+
+        if categoria:
+            sql += """
+                AND d.categoria = %s
+            """
+
+            valores.append(categoria)
+    
+        if duracion:
+
+            duraciones = []
+
+            if "corto" in duracion:
+                duraciones.append("p.duracion_dias BETWEEN 1 AND 3")
+
+            if "medio" in duracion:
+                duraciones.append("p.duracion_dias BETWEEN 4 AND 7")
+
+            if "largo" in duracion:
+                duraciones.append("p.duracion_dias >= 8")
+
+            if duraciones:
+                sql += " AND (" + " OR ".join(duraciones) + ")"
+
+        if precio_max:
+
+            sql += """
+                AND p.precio <= %s
+            """
+            valores.append(precio_max)
+
+        if incluye:
+
+            condiciones_incluye = []
+
+            if "alojamiento" in incluye:
+                condiciones_incluye.append("""
+                    EXISTS (
+                        SELECT 1
+                        FROM paquete_alojamiento pa
+                        WHERE pa.id_paquete = p.id_paquete
+                    )
+                """)
+
+            if "transporte" in incluye:
+                condiciones_incluye.append("""
+                    EXISTS (
+                        SELECT 1
+                        FROM paquete_transporte pt
+                        WHERE pt.id_paquete = p.id_paquete
+                    )
+                """)
+
+            if "guia" in incluye:
+                condiciones_incluye.append("""
+                    p.id_guia IS NOT NULL
+                """)
+
+            if "seguro" in incluye:
+                condiciones_incluye.append("""
+                    (
+                        EXISTS (
+                            SELECT 1
+                            FROM paquete_alojamiento pa
+                            JOIN seguro_servicio ss
+                                ON ss.id_alojamiento = pa.id_alojamiento
+                            WHERE pa.id_paquete = p.id_paquete
+
+                        )
+                        OR
+                        EXISTS (
+                            SELECT 1
+                            FROM paquete_transporte pt
+                            JOIN seguro_servicio ss
+                                ON ss.id_transporte = pt.id_transporte
+                            WHERE pt.id_paquete = p.id_paquete
+                        )
+                    )
+                """)
+
+            if condiciones_incluye:
+                sql += " AND (" + " OR ".join(condiciones_incluye) + ")"
+
+        sql += """
+                    ORDER BY p.id_paquete
+                """
+
+        cursor = self.conexion.cursor()
+        cursor.execute(sql, valores)
+        filas = cursor.fetchall()
+
+        cursor.close()
+
+        print("FILAS ENCONTRADAS:", "\n", filas)
+
+        return [ 
+            self._fila_a_dict(fila)
+            for fila in filas
+        ]
+
+
+    def buscar(self, termino):
+
+        cursor = self.conexion.cursor()
+
+        cursor.execute(QUERY_BASE + """
+            WHERE p.estado = 'activo'
+            AND (
+                p.nombre ILIKE %s
+                OR p.descripcion ILIKE %s
+                OR d.nombre_destino ILIKE %s
+                OR d.departamento ILIKE %s
+                OR d.categoria ILIKE %s
+            )
+            ORDER BY p.Id_paquete
+        """, (
+            f"%{termino}%",
+            f"%{termino}%",
+            f"%{termino}%",
+            f"%{termino}%",
+            f"%{termino}%"
+        ))
+
+        filas = cursor.fetchall()
+        cursor.close()
+        print(filas)
+        return [self._fila_a_dict(fila) for fila in filas]
+
     # ---------- Admin: escritura ----------
 
     def crear(self, datos):
@@ -131,9 +290,7 @@ class PaqueteRepository:
         self.conexion.commit()
         cursor.close()
         return cambiado
-    def obtener_incluye(self, id_paquete):
-        cursor = self.conexion.cursor()
-    incluye = []
+    
 
     def obtener_incluye(self, id_paquete):
         cursor = self.conexion.cursor()
