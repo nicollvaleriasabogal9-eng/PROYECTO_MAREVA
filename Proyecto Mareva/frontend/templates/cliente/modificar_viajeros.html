@@ -1,0 +1,199 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container" style="max-width:720px">
+
+        <a
+            href="{{ url_for('home.perfil') }}"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver al perfil
+        </a>
+
+        <p class="section-label">👥 Gestión de viajeros</p>
+
+        <h1 class="section-title">
+            Modificar viajeros
+        </h1>
+
+        <p class="section-desc">
+            Reserva {{ reserva.codigo_unico }}
+        </p>
+
+        {% if reserva.estado in ("solicitada", "pendiente a pago") %}
+
+            <div class="alert alert-info" style="margin-bottom:var(--space-6)">
+                Puedes modificar la información de los viajeros mientras la
+                reserva se encuentre en estado
+                <strong>{{ reserva.estado }}</strong>.
+            </div>
+
+            {% for viajero in reserva.viajeros %}
+
+                <div
+                    class="perfil-card"
+                    style="margin-bottom:var(--space-6)"
+                >
+
+                    <h2
+                        style="
+                            font-size:var(--text-xl);
+                            margin-bottom:var(--space-4);
+                        "
+                    >
+                        👤 Viajero {{ loop.index }}
+                    </h2>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'reserva.guardar_cambios_viajero',
+                            id_viajero=viajero.id_viajero
+                        ) }}"
+                    >
+
+                        <div class="grid-2">
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Nombre
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="nombre"
+                                    class="form-input"
+                                    value="{{ viajero.nombre }}"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Apellido
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="apellido"
+                                    class="form-input"
+                                    value="{{ viajero.apellido }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="grid-2">
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Tipo de documento
+                                </label>
+
+                                <select
+                                    name="tipo_documento"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option
+                                        value="CC"
+                                        {% if viajero.tipo_documento == "CC" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Cédula de ciudadanía
+                                    </option>
+
+                                    <option
+                                        value="TI"
+                                        {% if viajero.tipo_documento == "TI" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Tarjeta de identidad
+                                    </option>
+
+                                    <option
+                                        value="CE"
+                                        {% if viajero.tipo_documento == "CE" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Cédula de extranjería
+                                    </option>
+
+                                    <option
+                                        value="PA"
+                                        {% if viajero.tipo_documento == "PA" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Pasaporte
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Número de documento
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="numero_documento"
+                                    class="form-input"
+                                    value="{{ viajero.numero_documento }}"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            style="width:100%;justify-content:center;margin-top:var(--space-2)"
+                        >
+                            💾 Guardar cambios
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-error">
+
+                Ya no puedes modificar los viajeros de esta reserva porque
+                su estado actual es
+                <strong>{{ reserva.estado }}</strong>.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+{% endblock %}
+```
