@@ -30,8 +30,11 @@
         <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
         <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
         <li><a href="{{ url_for('destinos.listar_catalogo')}}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
+        {% if session.get("usuario") and session["usuario"]["rol"] == "admin" %}
+        <li><a href="{{ url_for('reserva.listar_reservas_admin') }}" class="{% if request.path == '/reservas'%}active{% endif %} navbar__link">Reservas</a></li>
+        <li><a href="{{ url_for('encuesta.reporte') }}" class="{% if request.path == '/admin/encuestas/reporte'%}active{% endif %} navbar__link">Reportes</a></li>
+        {% endif %}
         <li><a href="" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
-        <li><a href="" class="{% if request.path == '/insignias'%}active{% endif %} navbar__link">Insignias</a></li>
       </ul>
 
 <div class="navbar__actions">
