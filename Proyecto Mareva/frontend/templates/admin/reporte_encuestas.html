@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container">
+
+        <a
+            href="javascript:history.back()"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver
+        </a>
+
+        <p class="section-label">📊 Reportes</p>
+
+        <h1 class="section-title">
+            Resultados de encuestas
+        </h1>
+
+        <p class="section-desc">
+            Consulta los resultados de satisfacción de los clientes.
+        </p>
+
+
+        <!-- ========================= -->
+        <!-- FILTROS -->
+        <!-- ========================= -->
+
+        <div
+            class="perfil-card"
+            style="margin-bottom:var(--space-6)"
+        >
+
+            <h3 class="perfil-card__title">
+                🔎 Filtrar resultados
+            </h3>
+
+            <form
+                method="GET"
+                action="{{ url_for('encuesta.reporte') }}"
+            >
+
+                <div class="grid-3">
+
+                    <!-- PAQUETE -->
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Paquete
+                        </label>
+
+                        <select
+                            name="id_paquete"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Todos los paquetes
+                            </option>
+
+                            {% for paquete in paquetes %}
+
+                                <option
+                                    value="{{ paquete.id_paquete }}"
+                                    {% if filtros.id_paquete|string == paquete.id_paquete|string %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ paquete.nombre }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- DESTINO -->
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Destino
+                        </label>
+
+                        <select
+                            name="id_destino"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Todos los destinos
+                            </option>
+
+                            {% for destino in destinos %}
+
+                                <option
+                                    value="{{ destino.id_destino }}"
+                                    {% if filtros.id_destino|string == destino.id_destino|string %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ destino.nombre }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FECHA INICIO -->
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Desde
+                        </label>
+
+                        <input
+                            type="date"
+                            name="fecha_inicio"
+                            class="form-input"
+                            value="{{ filtros.fecha_inicio or '' }}"
+                        >
+
+                    </div>
+
+
+                    <!-- FECHA FIN -->
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Hasta
+                        </label>
+
+                        <input
+                            type="date"
+                            name="fecha_fin"
+                            class="form-input"
+                            value="{{ filtros.fecha_fin or '' }}"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:var(--space-3);
+                        margin-top:var(--space-4);
+                    "
+                >
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        🔎 Aplicar filtros
+                    </button>
+
+                    <a
+                        href="{{ url_for('encuesta.reporte') }}"
+                        class="btn btn-outline"
+                    >
+                        Limpiar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- RESULTADOS -->
+        <!-- ========================= -->
+
+        <div class="perfil-card">
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:var(--space-4);
+                "
+            >
+
+                <h3 class="perfil-card__title">
+                    📋 Resultados
+                </h3>
+
+                <span class="text-muted">
+                    {{ resultados|length }} resultado(s)
+                </span>
+
+            </div>
+
+
+            {% if resultados %}
+
+                {% for resultado in resultados %}
+
+                    <div
+                        style="
+                            border:1px solid var(--gray-200);
+                            border-radius:var(--radius-md);
+                            padding:var(--space-4);
+                            margin-bottom:var(--space-4);
+                        "
+                    >
+
+                        <p>
+                            <strong>
+                                📦 Paquete:
+                            </strong>
+
+                            {{ resultado.paquete }}
+                        </p>
+
+
+                        <p>
+                            <strong>
+                                📍 Destino:
+                            </strong>
+
+                            {{ resultado.destino }}
+                        </p>
+
+
+                        <div class="divider"></div>
+
+
+                        <p>
+                            <strong>
+                                Pregunta:
+                            </strong>
+
+                            {{ resultado.pregunta }}
+                        </p>
+
+
+                        <!-- PREGUNTAS NUMÉRICAS -->
+
+                        {% if resultado.tipo_respuesta in ["numero", "escala", "rating"] %}
+
+                            <p>
+                                <strong>
+                                    ⭐ Promedio:
+                                </strong>
+
+                                {% if resultado.promedio is not none %}
+
+                                    {{ resultado.promedio }}
+
+                                {% else %}
+
+                                    Sin respuestas numéricas
+
+                                {% endif %}
+
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    👥 Total de respuestas:
+                                </strong>
+
+                                {{ resultado.total_respuestas }}
+                            </p>
+
+
+                        <!-- PREGUNTAS ABIERTAS -->
+
+                        {% else %}
+
+                            <p>
+                                <strong>
+                                    💬 Respuesta:
+                                </strong>
+                            </p>
+
+                            <p>
+                                {{ resultado.respuesta_texto or "Sin respuesta" }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if resultado.fecha %}
+
+                            <small class="text-muted">
+                                Última respuesta:
+                                {{ resultado.fecha }}
+                            </small>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <div
+                    style="
+                        text-align:center;
+                        padding:var(--space-6);
+                    "
+                >
+
+                    <p style="font-size:2rem;">
+                        📭
+                    </p>
+
+                    <p class="text-muted">
+                        No se encontraron respuestas para los
+                        filtros seleccionados.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}
