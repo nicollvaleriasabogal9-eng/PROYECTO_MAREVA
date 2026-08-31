@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container">
+
+        <a
+            href="javascript:history.back()"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver
+        </a>
+
+        <p class="section-label">📋 Administración</p>
+
+        <h1 class="section-title">
+            Reservas
+        </h1>
+
+        <p class="section-desc">
+            Consulta las reservas de los clientes y gestiona su estado.
+        </p>
+
+        <div class="divider"></div>
+
+        {% if error %}
+
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+        {% if reservas %}
+
+            <div style="overflow-x:auto;">
+
+                <table style="width:100%; border-collapse:collapse;">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Código
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Cliente
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Paquete
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Fecha de viaje
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Estado
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Acción
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for reserva in reservas %}
+
+                            <tr style="border-top:1px solid var(--gray-200);">
+
+                                <td style="padding:var(--space-3);">
+                                    <strong>
+                                        {{ reserva.codigo_unico }}
+                                    </strong>
+                                </td>
+
+                                <td style="padding:var(--space-3);">
+
+                                    <strong>
+                                        {{ reserva.cliente_nombre }}
+                                    </strong>
+
+                                    <br>
+
+                                    <small style="color:var(--gray-600);">
+                                        {{ reserva.cliente_correo }}
+                                    </small>
+
+                                </td>
+
+                                <td style="padding:var(--space-3);">
+                                    {{ reserva.paquete_nombre }}
+                                </td>
+
+                                <td style="padding:var(--space-3);">
+                                    {{ reserva.fecha_viaje or "Sin fecha" }}
+                                </td>
+
+                                <td style="padding:var(--space-3);">
+
+                                    {% if reserva.estado == "completada" %}
+
+                                        <span class="badge badge-blue">
+                                            ✓ Completada
+                                        </span>
+
+                                    {% elif reserva.estado == "solicitada" %}
+
+                                        <span class="badge">
+                                            Solicitada
+                                        </span>
+
+                                    {% elif reserva.estado == "pendiente a pago" %}
+
+                                        <span class="badge">
+                                            Pendiente a pago
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge">
+                                            {{ reserva.estado }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td style="padding:var(--space-3);">
+
+                                    {% if reserva.estado != "completada" %}
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for(
+                                                'reserva.completar_reserva',
+                                                id_reserva=reserva.id_reserva
+                                            ) }}"
+                                            onsubmit="return confirm(
+                                                '¿Marcar esta reserva como completada? Se enviará la encuesta al correo del cliente.'
+                                            );"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-primary btn-sm"
+                                            >
+                                                ✓ Completar
+                                            </button>
+
+                                        </form>
+
+                                    {% else %}
+
+                                        <span class="text-muted">
+                                            Encuesta enviada
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="perfil-card">
+
+                <p class="text-muted">
+                    No hay reservas registradas.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+{% endblock %}
