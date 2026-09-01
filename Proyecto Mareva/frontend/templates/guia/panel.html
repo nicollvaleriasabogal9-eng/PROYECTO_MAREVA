@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero guia-hero">
+  <div class="container guia-hero__content">
+    <div>
+      <p class="section-label">🧭 Panel del guía turístico</p>
+      <h1>Hola, {{ perfil.nombre }} {{ perfil.apellido }}</h1>
+      <p>Administra los paquetes y viajeros que MAREVA te asignó.</p>
+    </div>
+    <div class="guia-profile-chip">
+      <strong>{{ perfil.especialidad or 'Guía MAREVA' }}</strong>
+      <span>{{ perfil.idiomas or 'Español' }}</span>
+    </div>
+  </div>
+</section>
+
+<main class="section guia-panel">
+  <div class="container">
+    <div class="guia-stats">
+      <article><span>Paquetes activos</span><strong>{{ resumen.paquetes_activos }}</strong></article>
+      <article><span>Reservas pendientes</span><strong>{{ resumen.reservas_pendientes }}</strong></article>
+      <article><span>Viajeros próximos</span><strong>{{ resumen.viajeros_pendientes }}</strong></article>
+      <article><span>Viajes completados</span><strong>{{ resumen.viajes_completados }}</strong></article>
+    </div>
+
+    <section class="guia-section">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">Itinerario</p>
+          <h2>Mis paquetes asignados</h2>
+        </div>
+      </div>
+      {% if paquetes %}
+      <div class="guia-paquetes">
+        {% for paquete in paquetes %}
+        <article class="guia-paquete">
+          <div class="guia-paquete__icon">{{ paquete.emoji or '🧳' }}</div>
+          <div>
+            <span class="badge {{ 'badge-green' if paquete.estado == 'activo' else 'badge-purple' }}">{{ paquete.estado }}</span>
+            <h3>{{ paquete.nombre }}</h3>
+            <p>{{ paquete.destino }}, {{ paquete.departamento }}</p>
+            <small>{{ paquete.fecha_inicio or 'Fecha abierta' }} — {{ paquete.fecha_fin or 'Por definir' }}</small>
+          </div>
+          <div class="guia-paquete__numbers">
+            <strong>{{ paquete.total_reservas }}</strong><span>reservas</span>
+            <strong>{{ paquete.cupos_disponibles }}/{{ paquete.cupos_totales }}</strong><span>cupos</span>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><span>🗺️</span><h3>No tienes paquetes asignados</h3><p>El administrador puede asignarte desde el panel de paquetes.</p></div>
+      {% endif %}
+    </section>
+
+    <section class="guia-section">
+      <div class="section-heading guia-heading-reservas">
+        <div>
+          <p class="section-label">Operación</p>
+          <h2>Reservas y viajeros</h2>
+        </div>
+        <form method="GET" class="guia-filter">
+          <label for="estado">Estado</label>
+          <select name="estado" id="estado" class="form-select" onchange="this.form.submit()">
+            <option value="" {% if filtro_estado == 'todos' %}selected{% endif %}>Todos</option>
+            {% for estado in ['solicitada', 'confirmada', 'en_proceso', 'completada', 'cancelada'] %}
+              <option value="{{ estado }}" {% if filtro_estado == estado %}selected{% endif %}>{{ estado|replace('_', ' ')|title }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      {% if reservas %}
+      <div class="guia-reservas">
+        {% for reserva in reservas %}
+        <article class="guia-reserva">
+          <header>
+            <div>
+              <span class="guia-reserva__code">{{ reserva.codigo_unico }}</span>
+              <h3>{{ reserva.paquete_emoji or '🧳' }} {{ reserva.paquete_nombre }}</h3>
+              <p>{{ reserva.destino }} · Viaje: {{ reserva.fecha_viaje or 'por definir' }}</p>
+            </div>
+            <span class="estado estado--{{ reserva.estado }}">{{ reserva.estado|replace('_', ' ') }}</span>
+          </header>
+          <div class="guia-reserva__grid">
+            <div><small>Cliente</small><strong>{{ reserva.cliente_nombre }}</strong><a href="mailto:{{ reserva.cliente_correo }}">{{ reserva.cliente_correo }}</a><a href="tel:{{ reserva.cliente_telefono }}">{{ reserva.cliente_telefono }}</a></div>
+            <div><small>Viajeros</small><strong>{{ reserva.total_viajeros }}</strong><span>{{ reserva.cant_adultos }} adultos · {{ reserva.cant_menores }} menores</span></div>
+            <div><small>Valor final</small><strong>${{ "{:,.0f}".format(reserva.valor_final or 0) }}</strong><span>Descuento: {{ "{:,.0f}".format(reserva.porcentaje_descuento or 0) }}%</span></div>
+          </div>
+          {% if reserva.observaciones %}<p class="guia-reserva__notes"><strong>Observaciones:</strong> {{ reserva.observaciones }}</p>{% endif %}
+          {% set opciones = transiciones.get(reserva.estado, []) %}
+          {% if opciones %}
+          <footer>
+            {% for nuevo_estado in opciones|sort %}
+            <form method="POST" action="{{ url_for('guia.actualizar_estado', id_reserva=reserva.id_reserva) }}">
+              <input type="hidden" name="estado" value="{{ nuevo_estado }}">
+              <button class="btn {{ 'btn-outline' if nuevo_estado == 'cancelada' else 'btn-primary' }} btn-sm" type="submit">
+                {% if nuevo_estado == 'confirmada' %}Confirmar{% elif nuevo_estado == 'en_proceso' %}Iniciar viaje{% elif nuevo_estado == 'completada' %}Marcar completada{% else %}Cancelar{% endif %}
+              </button>
+            </form>
+            {% endfor %}
+          </footer>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><span>📋</span><h3>No hay reservas en este estado</h3><p>Cambia el filtro o espera nuevas asignaciones.</p></div>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}
