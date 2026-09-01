@@ -37,7 +37,7 @@ CREATE TABLE cliente (
     intentos_fallidos INT          NOT NULL DEFAULT 0,
     bloqueado_hasta   TIMESTAMP,
     id_nivel          INT REFERENCES nivel(id_nivel),
-    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente'))
+    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente', 'guia'))
 );
 
 -- Relación cliente ↔ insignia (N:M)---
@@ -90,6 +90,7 @@ CREATE TABLE proveedor (
     ciudad            VARCHAR(100),
     telefono          VARCHAR(20),
     correo            VARCHAR(100),
+    contrasena        VARCHAR(255) NOT NULL,
     nombre_contacto   VARCHAR(100),
     telefono_contacto VARCHAR(20),
     correo_contacto   VARCHAR(100),
@@ -121,6 +122,7 @@ CREATE TABLE guia_turistico (
     especialidad VARCHAR(200),
     telefono     VARCHAR(20),
     correo       VARCHAR(100),
+    contrasena        VARCHAR(255) NOT NULL,
     estado       BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -322,13 +324,23 @@ CREATE TABLE reserva (
     cant_menores        INT           NOT NULL DEFAULT 0,
     observaciones       TEXT,
     acepta_no_reembolso BOOLEAN       NOT NULL DEFAULT FALSE,
+    plan                 TEXT,
+    alergias             TEXT,
+    mascotas             BOOLEAN      NOT NULL DEFAULT FALSE,
     metodo_contacto     VARCHAR(30),
-    guia_pdf            VARCHAR(255),
-    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente),
-    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete),
-    CONSTRAINT chk_reserva_estado  CHECK (estado IN ('solicitada','confirmada','en_proceso','completada','cancelada')),
-    CONSTRAINT chk_cant_adultos    CHECK (cant_adultos >= 1),
-    CONSTRAINT chk_cant_menores    CHECK (cant_menores >= 0)
+    guia_pdf             VARCHAR(255),
+    id_cliente          INT NOT NULL
+        REFERENCES cliente(id_cliente),
+    id_paquete          INT NOT NULL
+        REFERENCES paquete_turistico(id_paquete),
+    CONSTRAINT chk_reserva_estado
+        CHECK (
+            estado IN ('solicitada', 'confirmada', 'en_proceso', 'completada', 'cancelada')
+        ),
+    CONSTRAINT chk_cant_adultos
+        CHECK (cant_adultos >= 1),
+    CONSTRAINT chk_cant_menores
+        CHECK (cant_menores >= 0)
 );
 
 --- Seguro adicional opcional que el cliente agrega a su reserva---
@@ -544,24 +556,23 @@ INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcio
 ('Capurganá',           'Chocó',      'Acandí',       'playa',    'Pueblo caribeño sin carreteras, paraíso de buceadores.',              'Playa La Caleta, Sapzurro, Arrecifes de coral, Senderismo',                'img/destinos/capurgana.jpeg',        TRUE);
 
 --- Proveedores---
-INSERT INTO proveedor (nombre, nit, tipo_empresa, descripcion, ciudad, telefono, correo, nombre_contacto, telefono_contacto) VALUES
-('Hotel Las Américas', '800100200-1', 'Hotel',        'Hotel 5 estrellas en Cartagena',      'Cartagena',  '6056543210',   'reservas@lasamericas.co', 'María Torres',  '3001234567'),
-('Avianca',            '860002964-4', 'Aerolínea',    'Aerolínea nacional',                  'Bogotá',     '018000953434', 'grupos@avianca.com',      'Carlos Reyes',  '3009876543'),
-('Decameron Colombia', '800112233-5', 'Todo incluido','Resorts todo incluido en Colombia',   'San Andrés', '6085121212',   'reservas@decameron.co',   'Ana Gómez',     '3152345678'),
-('Ecoturismo Tayrona', '900345678-2', 'Operador',     'Operador turístico local Tayrona',    'Santa Marta','3123456789',   'info@ecotayrona.co',      'Pedro Silva',   '3123456789'),
-('CocoraTours',        '900567890-3', 'Operador',     'Tours en el Quindío',                 'Salento',    '3145678901',   'info@cocoratours.co',     'Juliana Ríos',  '3145678901');
+INSERT INTO proveedor (nombre, nit, tipo_empresa, descripcion, ciudad, telefono, correo, contrasena, nombre_contacto, telefono_contacto) 
+VALUES
+('Hotel Las Américas', '800100200-1', 'Hotel', 'Hotel 5 estrellas en Cartagena', 'Cartagena', '6056543210', 'reservas@lasamericas.co', 'Proveedor_mareva01', 'María Torres', '3001234567'),
+('Avianca', '860002964-4', 'Aerolínea', 'Aerolínea nacional', 'Bogotá', '018000953434', 'grupos@avianca.com', 'Proveedor_mareva01', 'Carlos Reyes', '3009876543'),
+('CocoraTours', '900567890-3', 'Operador', 'Tours en el Quindío', 'Salento', '3145678901', 'info@cocoratours.co', 'Proveedor_mareva01', 'Juliana Ríos', '3145678901');
 
 --- Métodos de pago de proveedores ---
 INSERT INTO metodo_pago_proveedor (id_proveedor, tipo_metodo, entidad, titular, numero_referencia, instrucciones) VALUES
 (1, 'cuenta_bancaria', 'Bancolombia', 'Hotel Las Americas SAS', '12345678901', 'Transferir y enviar comprobante al correo del proveedor'),
-(5, 'nequi',           'Nequi',       'CocoraTours',            '3001234567',  NULL),
-(5, 'daviplata',       'Daviplata',   'CocoraTours',            '3209876543',  NULL);
+(2, 'nequi',           'Nequi',       'CocoraTours',            '3001234567',  NULL),
+(3, 'daviplata',       'Daviplata',   'CocoraTours',            '3209876543',  NULL);
 
 --- Guías turísticos ---
-INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo, estado) VALUES
-('Andrés',    'Herrera',  'Español, Inglés',           'Cartagena histórica y playas',  '3100001111', 'andres.guia@mareva.co',    TRUE),
-('Valentina', 'López',    'Español, Inglés, Francés',  'Ecoturismo y naturaleza',       '3100002222', 'valentina.guia@mareva.co', TRUE),
-('Miguel',    'Castillo', 'Español',                   'Aventura y deportes extremos',  '3100003333', 'miguel.guia@mareva.co',    TRUE);
+INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo, contrasena, estado) VALUES
+('Andrés',    'Herrera',  'Español, Inglés',           'Cartagena histórica y playas',  '3100001111', 'andres.guia@mareva.co', 'Guia123',    TRUE),
+('Valentina', 'López',    'Español, Inglés, Francés',  'Ecoturismo y naturaleza',       '3100002222', 'valentina.guia@mareva.co', 'GuiaTuristica123', TRUE),
+('Miguel',    'Castillo', 'Español',                   'Aventura y deportes extremos',  '3100003333', 'miguel.guia@mareva.co', 'scrypt:32768:8:1$AELZ8i2lbW4gWGaS$c93d8a0d0ce87f2c85e74f63337cb6d60ead433feddece2e6a1311fdb52d633596f8d755fb690f34d34a2b7e1344066ea5a3978567b5d0509b827ca2905d387b',   TRUE);
 
 --- Tipos de seguro ---
 INSERT INTO tipo_seguro (nombre, descripcion, cobertura_general) VALUES
@@ -581,225 +592,27 @@ INSERT INTO seguro (id_tipo_seguro, nombre, cobertura, precio, es_obligatorio, d
 --- Paquetes turísticos (20 paquetes)---
 INSERT INTO paquete_turistico (nombre,slug,imagen_url,descripcion,precio,duracion_dias,duracion_noches,cupos_totales,cupos_disponibles,fecha_inicio,fecha_fin,imagen_principal,personalizable,estado,id_destino,id_guia) 
 VALUES
-(
-    'Cartagena Mágica',
-    'cartagena-magica',
-    'img/paquetes/Cartagena.jpeg',
-    'Descubre la ciudad amurallada con playas privadas e historia colonial.',
-    1850000, 5, 4, 20, 14,
-    '2026-07-01', '2026-07-05',
-    'img/paquetes/Cartagena.jpeg',
-    TRUE, 'activo', 1, 1
-),
+('Cartagena Mágica','cartagena-magica','img/paquetes/Cartagena.jpeg','Descubre la ciudad amurallada con playas privadas e historia colonial.', 1850000, 5, 4, 20, 14,'2026-07-01', '2026-07-05','img/paquetes/Cartagena.jpeg',TRUE, 'activo', 1, 1),
+('Medellín Innovadora','medellin-innovadora','img/paquetes/Medellin.jpeg','Conoce la ciudad más transformadora de América Latina.',1200000, 4, 3, 25, 20,'2026-07-10', '2026-07-13','img/paquetes/Medellin.jpeg',FALSE, 'activo', 2, 2),
+('Guatapé Extremo','guatape-extremo','img/paquetes/Guatape.jpeg','Adrenalina pura: sube la Piedra del Peñol y navega el embalse.',890000, 3, 2, 15, 12,'2026-07-15', '2026-07-17','img/paquetes/Guatape.jpeg',TRUE, 'activo', 3, 3),
+('San Andrés Todo Incluido','san-andres-todo-incluido','img/paquetes/SanAndres.jpeg','El mar de los siete colores con todo incluido en resort 5 estrellas.',3200000, 7, 6, 30, 18,'2026-08-01', '2026-08-07','img/paquetes/SanAndres.jpeg',FALSE, 'activo', 4, 1),
+('Tayrona Salvaje','tayrona-salvaje','img/paquetes/Tayrona.jpeg','Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.',1450000, 5, 4, 12, 8,'2026-08-10', '2026-08-14','img/paquetes/Tayrona.jpeg',TRUE, 'activo', 5, 2),
+('Valle del Cocora Místico','valle-del-cocora-mistico','img/paquetes/Cocora.jpeg','Caminata entre palmas de cera y fincas cafeteras del Quindío.',980000, 3, 2, 20, 15,'2026-09-01', '2026-09-03','img/paquetes/Cocora.jpeg',FALSE, 'activo', 6, 3),
+('Amazonas Aventura','amazonas-aventura','img/paquetes/Amazonas.jpeg','Explora la selva amazónica y conoce comunidades indígenas.',2750000, 6, 5, 18, 14,'2026-09-10', '2026-09-15','img/paquetes/Amazonas.jpeg',TRUE, 'activo', 8, 1),
+('Desierto de la Tatacoa','desierto-de-la-tatacoa','img/paquetes/Desierto.jpeg','Observación astronómica y recorridos por paisajes únicos.',750000, 3, 2, 20, 16,'2026-09-20', '2026-09-22','img/paquetes/Desierto.jpeg',FALSE, 'activo', 8, 2),
+('Caño Cristales Premium','cano-cristales-premium','img/paquetes/Caño.jpeg','Visita el río más hermoso del mundo con guía especializado.',2950000, 5, 4, 15, 10,'2026-10-01', '2026-10-05','img/paquetes/Caño.jpeg',TRUE, 'activo', 9, 3),
+('Eje Cafetero Tradicional','eje-cafetero-tradicional','img/paquetes/EjeCafetero.jpeg','Recorrido por fincas cafeteras y pueblos patrimonio.',1350000, 4, 3, 25, 18,'2026-10-10', '2026-10-13','img/paquetes/EjeCafetero.jpeg',FALSE, 'activo', 10, 1),
+('Nuquí Ecoturismo','nuqui-ecoturismo','img/paquetes/Nuqui.jpeg','Avistamiento de ballenas y playas vírgenes del Pacífico.',2400000, 5, 4, 16, 12,'2026-10-20', '2026-10-24','img/paquetes/Nuqui.jpeg',TRUE, 'activo', 11, 2),
+('Barichara Colonial','barichara-colonial','img/paquetes/Barichara.jpg','Conoce uno de los pueblos más bellos de Colombia.',890000, 3, 2, 20, 17,'2026-11-01', '2026-11-03','img/paquetes/Barichara.jpg',FALSE, 'activo', 12, 3),
+('Santuario Las Lajas','santuario-las-lajas','img/paquetes/Santuario.jpeg','Recorrido religioso y cultural por Nariño.',680000, 3, 2, 22, 19,'2026-11-08', '2026-11-10','img/paquetes/Santuario.jpeg',FALSE, 'activo', 13, 1),
+('Boyacá Histórica','boyaca-historica','img/paquetes/BOYaca.jpeg','Villa de Leyva, Ráquira y monumentos históricos.',980000, 4, 3, 24, 20,'2026-11-15', '2026-11-18','img/paquetes/BOYaca.jpeg',TRUE, 'activo', 14, 2),
+('Cañón del Chicamocha','canon-del-chicamocha','img/paquetes/CañonChica.jpeg','Deportes extremos y paisajes espectaculares.',1150000, 4, 3, 18, 13,'2026-11-25', '2026-11-28','img/paquetes/CañonChica.jpeg',TRUE, 'activo', 15, 3),
+('Mompox Patrimonial','mompox-patrimonial','img/paquetes/Mompox.jpg','Historia, arquitectura colonial y cultura ribereña.',1250000, 4, 3, 20, 16,'2026-12-01', '2026-12-04','img/paquetes/Mompox.jpg',FALSE, 'activo', 16, 1),
+('Sierra Nevada Ancestral','sierra-nevada-ancestral','img/paquetes/CierraNevada.jpeg','Conexión con comunidades indígenas y naturaleza.',2100000, 5, 4, 14, 10,'2026-12-10', '2026-12-14','img/paquetes/CierraNevada.jpeg',TRUE, 'activo', 17, 2),
+('Tolú y Coveñas Relax','tolu-y-covenas-relax','img/paquetes/Tolu.jpeg','Playas tranquilas y actividades acuáticas.',1100000, 4, 3, 26, 21,'2026-12-18', '2026-12-21','img/paquetes/Tolu.jpeg',FALSE, 'activo', 18, 3),
+('Isla Gorgona Explorer','isla-gorgona-explorer','img/paquetes/Isla.jpeg','Naturaleza, senderismo y biodiversidad marina.',2800000, 5, 4, 12, 8,'2027-01-10', '2027-01-14','img/paquetes/Isla.jpeg',TRUE, 'activo', 19, 1),
+('Capurganá Paraíso','capurgana-paraiso','img/paquetes/Capurgana.jpeg','Playas cristalinas y ecoturismo en el Caribe colombiano.',1900000, 5, 4, 18, 13,'2027-01-20', '2027-01-24','img/paquetes/Capurgana.jpeg',TRUE, 'activo', 20, 2);
 
-(
-    'Medellín Innovadora',
-    'medellin-innovadora',
-    'img/paquetes/Medellin.jpeg',
-    'Conoce la ciudad más transformadora de América Latina.',
-    1200000, 4, 3, 25, 20,
-    '2026-07-10', '2026-07-13',
-    'img/paquetes/Medellin.jpeg',
-    FALSE, 'activo', 2, 2
-),
-
-(
-    'Guatapé Extremo',
-    'guatape-extremo',
-    'img/paquetes/Guatape.jpeg',
-    'Adrenalina pura: sube la Piedra del Peñol y navega el embalse.',
-    890000, 3, 2, 15, 12,
-    '2026-07-15', '2026-07-17',
-    'img/paquetes/Guatape.jpeg',
-    TRUE, 'activo', 3, 3
-),
-
-(
-    'San Andrés Todo Incluido',
-    'san-andres-todo-incluido',
-    'img/paquetes/SanAndres.jpeg',
-    'El mar de los siete colores con todo incluido en resort 5 estrellas.',
-    3200000, 7, 6, 30, 18,
-    '2026-08-01', '2026-08-07',
-    'img/paquetes/SanAndres.jpeg',
-    FALSE, 'activo', 4, 1
-),
-
-(
-    'Tayrona Salvaje',
-    'tayrona-salvaje',
-    'img/paquetes/Tayrona.jpeg',
-    'Selva, playas vírgenes y ecosistemas únicos en el Parque Tayrona.',
-    1450000, 5, 4, 12, 8,
-    '2026-08-10', '2026-08-14',
-    'img/paquetes/Tayrona.jpeg',
-    TRUE, 'activo', 5, 2
-),
-
-(
-    'Valle del Cocora Místico',
-    'valle-del-cocora-mistico',
-    'img/paquetes/Cocora.jpeg',
-    'Caminata entre palmas de cera y fincas cafeteras del Quindío.',
-    980000, 3, 2, 20, 15,
-    '2026-09-01', '2026-09-03',
-    'img/paquetes/Cocora.jpeg',
-    FALSE, 'activo', 6, 3
-),
-
-(
-    'Amazonas Aventura',
-    'amazonas-aventura',
-    'img/paquetes/Amazonas.jpeg',
-    'Explora la selva amazónica y conoce comunidades indígenas.',
-    2750000, 6, 5, 18, 14,
-    '2026-09-10', '2026-09-15',
-    'img/paquetes/Amazonas.jpeg',
-    TRUE, 'activo', 8, 1
-),
-
-(
-    'Desierto de la Tatacoa',
-    'desierto-de-la-tatacoa',
-    'img/paquetes/Desierto.jpeg',
-    'Observación astronómica y recorridos por paisajes únicos.',
-    750000, 3, 2, 20, 16,
-    '2026-09-20', '2026-09-22',
-    'img/paquetes/Desierto.jpeg',
-    FALSE, 'activo', 8, 2
-),
-
-(
-    'Caño Cristales Premium',
-    'cano-cristales-premium',
-    'img/paquetes/Caño.jpeg',
-    'Visita el río más hermoso del mundo con guía especializado.',
-    2950000, 5, 4, 15, 10,
-    '2026-10-01', '2026-10-05',
-    'img/paquetes/Caño.jpeg',
-    TRUE, 'activo', 9, 3
-),
-
-(
-    'Eje Cafetero Tradicional',
-    'eje-cafetero-tradicional',
-    'img/paquetes/EjeCafetero.jpeg',
-    'Recorrido por fincas cafeteras y pueblos patrimonio.',
-    1350000, 4, 3, 25, 18,
-    '2026-10-10', '2026-10-13',
-    'img/paquetes/EjeCafetero.jpeg',
-    FALSE, 'activo', 10, 1
-),
-
-(
-    'Nuquí Ecoturismo',
-    'nuqui-ecoturismo',
-    'img/paquetes/Nuqui.jpeg',
-    'Avistamiento de ballenas y playas vírgenes del Pacífico.',
-    2400000, 5, 4, 16, 12,
-    '2026-10-20', '2026-10-24',
-    'img/paquetes/Nuqui.jpeg',
-    TRUE, 'activo', 11, 2
-),
-
-(
-    'Barichara Colonial',
-    'barichara-colonial',
-    'img/paquetes/Barichara.jpg',
-    'Conoce uno de los pueblos más bellos de Colombia.',
-    890000, 3, 2, 20, 17,
-    '2026-11-01', '2026-11-03',
-    'img/paquetes/Barichara.jpg',
-    FALSE, 'activo', 12, 3
-),
-
-(
-    'Santuario Las Lajas',
-    'santuario-las-lajas',
-    'img/paquetes/Santuario.jpeg',
-    'Recorrido religioso y cultural por Nariño.',
-    680000, 3, 2, 22, 19,
-    '2026-11-08', '2026-11-10',
-    'img/paquetes/Santuario.jpeg',
-    FALSE, 'activo', 13, 1
-),
-
-(
-    'Boyacá Histórica',
-    'boyaca-historica',
-    'img/paquetes/BOYaca.jpeg',
-    'Villa de Leyva, Ráquira y monumentos históricos.',
-    980000, 4, 3, 24, 20,
-    '2026-11-15', '2026-11-18',
-    'img/paquetes/BOYaca.jpeg',
-    TRUE, 'activo', 14, 2
-),
-
-(
-    'Cañón del Chicamocha',
-    'canon-del-chicamocha',
-    'img/paquetes/CañonChica.jpeg',
-    'Deportes extremos y paisajes espectaculares.',
-    1150000, 4, 3, 18, 13,
-    '2026-11-25', '2026-11-28',
-    'img/paquetes/CañonChica.jpeg',
-    TRUE, 'activo', 15, 3
-),
-
-(
-    'Mompox Patrimonial',
-    'mompox-patrimonial',
-    'img/paquetes/Mompox.jpg',
-    'Historia, arquitectura colonial y cultura ribereña.',
-    1250000, 4, 3, 20, 16,
-    '2026-12-01', '2026-12-04',
-    'img/paquetes/Mompox.jpg',
-    FALSE, 'activo', 16, 1
-),
-
-(
-    'Sierra Nevada Ancestral',
-    'sierra-nevada-ancestral',
-    'img/paquetes/CierraNevada.jpeg',
-    'Conexión con comunidades indígenas y naturaleza.',
-    2100000, 5, 4, 14, 10,
-    '2026-12-10', '2026-12-14',
-    'img/paquetes/CierraNevada.jpeg',
-    TRUE, 'activo', 17, 2
-),
-
-(
-    'Tolú y Coveñas Relax',
-    'tolu-y-covenas-relax',
-    'img/paquetes/Tolu.jpeg',
-    'Playas tranquilas y actividades acuáticas.',
-    1100000, 4, 3, 26, 21,
-    '2026-12-18', '2026-12-21',
-    'img/paquetes/Tolu.jpeg',
-    FALSE, 'activo', 18, 3
-),
-
-(
-    'Isla Gorgona Explorer',
-    'isla-gorgona-explorer',
-    'img/paquetes/Isla.jpeg',
-    'Naturaleza, senderismo y biodiversidad marina.',
-    2800000, 5, 4, 12, 8,
-    '2027-01-10', '2027-01-14',
-    'img/paquetes/Isla.jpeg',
-    TRUE, 'activo', 19, 1
-),
-
-(
-    'Capurganá Paraíso',
-    'capurgana-paraiso',
-    'img/paquetes/Capurgana.jpeg',
-    'Playas cristalinas y ecoturismo en el Caribe colombiano.',
-    1900000, 5, 4, 18, 13,
-    '2027-01-20', '2027-01-24',
-    'img/paquetes/Capurgana.jpeg',
-    TRUE, 'activo', 20, 2
-);
 --- Servicios extra por paquete---
 INSERT INTO servicio_extra (nombre, precio, descripcion, estado, id_paquete) VALUES
 ('Snorkel en Islas del Rosario',   180000, 'Equipo incluido, 3 horas',            TRUE, 1),
