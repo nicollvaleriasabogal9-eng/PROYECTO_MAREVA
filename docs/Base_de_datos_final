@@ -322,13 +322,22 @@ CREATE TABLE reserva (
     cant_menores        INT           NOT NULL DEFAULT 0,
     observaciones       TEXT,
     acepta_no_reembolso BOOLEAN       NOT NULL DEFAULT FALSE,
+    alergias             TEXT,
+    mascotas             BOOLEAN      NOT NULL DEFAULT FALSE,
     metodo_contacto     VARCHAR(30),
-    guia_pdf            VARCHAR(255),
-    id_cliente          INT NOT NULL REFERENCES cliente(id_cliente),
-    id_paquete          INT NOT NULL REFERENCES paquete_turistico(id_paquete),
-    CONSTRAINT chk_reserva_estado  CHECK (estado IN ('solicitada','confirmada','en_proceso','completada','cancelada')),
-    CONSTRAINT chk_cant_adultos    CHECK (cant_adultos >= 1),
-    CONSTRAINT chk_cant_menores    CHECK (cant_menores >= 0)
+    guia_pdf             VARCHAR(255),
+    id_cliente          INT NOT NULL
+        REFERENCES cliente(id_cliente),
+    id_paquete          INT NOT NULL
+        REFERENCES paquete_turistico(id_paquete),
+    CONSTRAINT chk_reserva_estado
+        CHECK (
+            estado IN ('solicitada', 'confirmada', 'en_proceso', 'completada', 'cancelada')
+        ),
+    CONSTRAINT chk_cant_adultos
+        CHECK (cant_adultos >= 1),
+    CONSTRAINT chk_cant_menores
+        CHECK (cant_menores >= 0)
 );
 
 --- Seguro adicional opcional que el cliente agrega a su reserva---
