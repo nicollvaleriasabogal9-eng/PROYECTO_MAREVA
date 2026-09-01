@@ -37,7 +37,7 @@ CREATE TABLE cliente (
     intentos_fallidos INT          NOT NULL DEFAULT 0,
     bloqueado_hasta   TIMESTAMP,
     id_nivel          INT REFERENCES nivel(id_nivel),
-    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente'))
+    CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente', 'guia'))
 );
 
 -- Relación cliente ↔ insignia (N:M)---
@@ -90,6 +90,7 @@ CREATE TABLE proveedor (
     ciudad            VARCHAR(100),
     telefono          VARCHAR(20),
     correo            VARCHAR(100),
+    contrasena        VARCHAR(255) NOT NULL,
     nombre_contacto   VARCHAR(100),
     telefono_contacto VARCHAR(20),
     correo_contacto   VARCHAR(100),
