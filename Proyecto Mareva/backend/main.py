@@ -5,6 +5,9 @@ from routes.paquetes_routes import paquetes_bp
 from routes.reserva_routes import reserva_bp
 from routes.destino_routes import destinos_bp
 from routes.encuesta_routes import encuesta_bp
+from routes.favoritos_routes import favoritos_bp
+from routes.gamificacion_routes import gamificacion_bp
+from routes.guia_routes import guia_bp
 
 from datetime import timedelta
 
@@ -13,6 +16,9 @@ main = Flask(__name__, template_folder="../frontend/templates", static_folder=".
 
 main.secret_key = "mareva_secret_2026"
 
+main.register_blueprint(guia_bp)
+main.register_blueprint(gamificacion_bp)
+main.register_blueprint(favoritos_bp)
 main.register_blueprint(encuesta_bp)
 main.register_blueprint(reserva_bp)
 main.register_blueprint(paquetes_bp)
