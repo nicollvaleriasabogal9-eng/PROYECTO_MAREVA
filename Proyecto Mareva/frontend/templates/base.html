@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/paquetes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gamificacion.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/guia.css') }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
 </head>
 
@@ -27,14 +29,21 @@
 </a>
 
       <ul class="navbar__nav" id="mainNav">
-        <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link ">Inicio</a></li>
-        <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
-        <li><a href="{{ url_for('destinos.listar_catalogo')}}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
-        {% if session.get("usuario") and session["usuario"]["rol"] == "admin" %}
-        <li><a href="{{ url_for('reserva.listar_reservas_admin') }}" class="{% if request.path == '/reservas'%}active{% endif %} navbar__link">Reservas</a></li>
-        <li><a href="{{ url_for('encuesta.reporte') }}" class="{% if request.path == '/admin/encuestas/reporte'%}active{% endif %} navbar__link">Reportes</a></li>
+        {% set rol_actual = session.get('usuario', {}).get('rol') %}
+        {% if rol_actual == 'admin' %}
+          <li><a href="{{ url_for('paquetes.panel_admin') }}" class="navbar__link">Paquetes</a></li>
+          <li><a href="{{ url_for('gamificacion.admin_niveles') }}" class="navbar__link">Niveles</a></li>
+        {% elif rol_actual == 'guia' %}
+          <li><a href="{{ url_for('guia.panel') }}" class="navbar__link active">Mi panel</a></li>
+        {% else %}
+          <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link">Inicio</a></li>
+          <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
+          <li><a href="{{ url_for('destinos.listar_catalogo') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
+          {% if rol_actual == 'cliente' %}
+            <li><a href="{{ url_for('gamificacion.niveles') }}" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
+            <li><a href="{{ url_for('favoritos.listar') }}" class="{% if request.path == '/favoritos'%}active{% endif %} navbar__link">Favoritos (<span data-favoritos-total>{{ session.get('favoritos', [])|length }}</span>)</a></li>
+          {% endif %}
         {% endif %}
-        <li><a href="" class="{% if request.path == '/niveles'%}active{% endif %} navbar__link">Niveles</a></li>
       </ul>
 
 <div class="navbar__actions">
