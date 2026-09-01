@@ -73,6 +73,7 @@ class AuthRepository:
         )
 
         return usuario
+    
     # Obtiene la contraseña de un usuario por su correo electrónico
     def obtener_password_por_correo(self, correo):
         cursor = self.conexion.cursor()
@@ -90,6 +91,7 @@ class AuthRepository:
             return None
 
         return fila[0]
+    
     # Obtiene todos los IDs y contraseñas de los usuarios en la base de datos
     def obtener_todos_id_password(self):
         cursor = self.conexion.cursor()
@@ -103,3 +105,58 @@ class AuthRepository:
             self.conexion.rollback()
             cursor.close()
             return []
+
+    def buscar_guia_por_correo(self, correo):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT id_guia, nombre, apellido, correo, contrasena, estado
+                FROM guia_turistico
+                WHERE correo = %s
+            """, (correo,))
+
+            fila = cursor.fetchone()
+            cursor.close()
+
+            if fila is None:
+                return None
+
+            return {
+                "id": fila[0],
+                "nombre": fila[1],
+                "apellido": fila[2],
+                "correo": fila[3],
+                "contrasena": fila[4],
+                "estado": fila[5],
+                "rol": "guia"
+            }
+
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
+
+
+    def obtener_guia_password_por_correo(self, correo):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT contrasena
+                FROM guia_turistico
+                WHERE correo = %s
+            """, (correo,))
+
+            fila = cursor.fetchone()
+            cursor.close()
+
+            if fila is None:
+                return None
+
+            return fila[0]
+
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
