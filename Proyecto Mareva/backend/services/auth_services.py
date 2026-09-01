@@ -32,13 +32,29 @@ class AuthServices():
         return resultado
 
     def iniciar_sesion(self, correo, password):
-        # Obtiene el hash de la contraseña del usuario desde la base de datos
+
+
         password_hash = self.repository.obtener_password_por_correo(correo)
 
-        if password_hash is None:
-            return None
-        # Verifica si la contraseña proporcionada coincide con el hash almacenado
-        if not check_password_hash(password_hash, password):
+        if password_hash is not None:
+
+            if check_password_hash(password_hash, password):
+                return self.repository.buscar_por_correo(correo)
+
             return None
 
-        return self.repository.buscar_por_correo(correo)
+
+        guia_password = self.repository.obtener_guia_password_por_correo(correo)
+
+        if guia_password is not None:
+
+            if check_password_hash(guia_password, password):
+
+                guia = self.repository.buscar_guia_por_correo(correo)
+
+                if guia and guia["estado"]:
+                    return guia
+
+                return None
+
+        return None
