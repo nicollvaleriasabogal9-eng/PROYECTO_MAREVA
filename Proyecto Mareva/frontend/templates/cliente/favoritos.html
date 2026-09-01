@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="section-label">❤️ Selección temporal</p>
+    <h1>Mis paquetes favoritos</h1>
+    <p>Esta lista vive únicamente en tu sesión y no se guarda en la base de datos.</p>
+  </div>
+</section>
+
+<main class="section">
+  <div class="container">
+    {% if paquetes %}
+    <div class="grid-3 favoritos-grid">
+      {% for paquete in paquetes %}
+      <article class="card" data-favorite-card="{{ paquete.id_paquete }}">
+        <div class="" style="height: 180px">
+          <img src="{{ url_for('static', filename=paquete.imagen_url) }}" alt="Imagen tarjeton">
+        </div>
+        <div class="card__body">
+          <span class="card__tag">{{ paquete.departamento }}</span>
+          <h2 class="card__title">{{ paquete.nombre }}</h2>
+          <p class="card__desc">{{ paquete.descripcion }}</p>
+          <a href="{{ url_for('paquetes.ver_detalle', slug=paquete.slug) }}" class="btn btn-primary btn-sm">Ver detalles</a>
+          <button type="button" class="btn btn-outline btn-sm favorite-button is-favorite" data-paquete-id="{{ paquete.id_paquete }}" data-url="{{ url_for('favoritos.alternar', id_paquete=paquete.id_paquete) }}" aria-pressed="true">♥ Quitar</button>
+        </div>
+        <div class="card__footer"><strong class="card__price">${{ "{:,.0f}".format(paquete.precio) }}</strong></div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span>🤍</span>
+      <h2>Tu lista está vacía</h2>
+      <p>Marca el corazón de cualquier paquete para compararlo después durante esta sesión.</p>
+      <a href="{{ url_for('paquetes.listar_catalogo') }}" class="btn btn-primary">Explorar paquetes</a>
+    </div>
+    {% endif %}
+  </div>
+</main>
+<script src="{{ url_for('static', filename='js/favoritos.js') }}"></script>
+{% endblock %}
