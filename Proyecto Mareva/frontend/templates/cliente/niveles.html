@@ -1,50 +1,111 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main>
-    <section class="page-hero">
-            <div class="container">
-                <p class="section-label">🚀 Niveles</p>
-                <h1 class="section-title">Tus niveles</h1>
-                <p class="section-desc">¡Mira los niveles que has ganado y sigue desbloqueando más!</p>
-            </div>
-        </section>
-
-        <section class="section niveles-barra">
-    <div class="container">
-
-        <div class="nivel-info">
-            <h2 class="section-title">
-                Nivel Actual: <span class="gradient-text">Explorador</span>
-            </h2>
-        </div>
-
-        <div class="xp-bar">
-            <div class="xp-bar__fill" style="width: 0%;"></div>
-
-            <div class="xp-step">
-                <div class="xp-step__circle">🧭</div>
-                <span>Explorador</span>
-            </div>
-
-            <div class="xp-step">
-                <div class="xp-step__circle">🗺️</div>
-                <span>Aventurero</span>
-            </div>
-
-            <div class="xp-step">
-                <div class="xp-step__circle">🏔️</div>
-                <span>Expedicionario</span>
-            </div>
-
-            <div class="xp-step">
-                <div class="xp-step__circle">👑</div>
-                <span>Embajador</span>
-            </div>
-
-        </div>
-
-    </div>
+<section class="page-hero gamificacion-hero">
+  <div class="container">
+    <p class="section-label">🚀 Sistema de niveles</p>
+    <h1 class="section-title">Tu progreso en MAREVA</h1>
+    <p class="section-desc">
+      Tu nivel se calcula con el valor de tus reservas confirmadas y la cantidad de viajes acumulados.
+    </p>
+  </div>
 </section>
-</main>
+
+<section class="section gamificacion-page">
+  <div class="container">
+    {% for notificacion in notificaciones if not notificacion.leida %}
+      {% if loop.first %}
+      <div class="gamificacion-alert">✨ {{ notificacion.mensaje }}</div>
+      {% endif %}
+    {% endfor %}
+
+    {% if nivel_actual %}
+    <div class="nivel-resumen">
+      <div>
+        <span class="nivel-resumen__eyebrow">Nivel actual</span>
+        <h2>{{ nivel_actual.nombre }}</h2>
+        <p>{{ nivel_actual.descripcion or 'Sigue viajando para desbloquear nuevos beneficios.' }}</p>
+      </div>
+      <div class="nivel-resumen__beneficio">
+        <strong>{{ "{:,.0f}".format(nivel_actual.porcentaje_descuento) }}%</strong>
+        <span>de descuento del nivel</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="stats-grid">
+      <article class="stat-card">
+        <span>💳 Monto acumulado</span>
+        <strong>${{ "{:,.0f}".format(estadisticas.monto_total) }}</strong>
+        <small>Reservas confirmadas o completadas</small>
+      </article>
+      <article class="stat-card">
+        <span>🧳 Reservas válidas</span>
+        <strong>{{ estadisticas.reservas_validas }}</strong>
+        <small>Viajes que cuentan para tu nivel</small>
+      </article>
+      <article class="stat-card">
+        <span>✅ Viajes completados</span>
+        <strong>{{ estadisticas.viajes_completados }}</strong>
+        <small>Historial de experiencias finalizadas</small>
+      </article>
+    </div>
+
+    {% if siguiente_nivel %}
+    <div class="progress-panel">
+      <div class="progress-panel__header">
+        <div>
+          <span>Siguiente nivel</span>
+          <h3>{{ siguiente_nivel.nombre }}</h3>
+        </div>
+        <strong>{{ progreso.general }}%</strong>
+      </div>
+      <div class="progress-track" aria-label="Progreso general hacia el siguiente nivel">
+        <span style="width: {{ progreso.general }}%; "></span>
+      </div>
+      <div class="progress-details">
+        <p><strong>Monto:</strong> te faltan ${{ "{:,.0f}".format(progreso.faltan_monto) }}</p>
+        <p><strong>Reservas:</strong> te faltan {{ progreso.faltan_reservas }}</p>
+      </div>
+    </div>
+    {% else %}
+    <div class="progress-panel progress-panel--complete">
+      <h3>👑 Alcanzaste el nivel máximo</h3>
+      <p>Ya desbloqueaste el nivel más alto disponible en MAREVA.</p>
+    </div>
+    {% endif %}
+
+    <div class="section-heading">
+      <div>
+        <p class="section-label">Ruta de progreso</p>
+        <h2>Todos los niveles</h2>
+      </div>
+    </div>
+
+    <div class="niveles-grid">
+      {% for nivel in niveles %}
+      <article class="nivel-card {% if nivel.actual %}nivel-card--actual{% elif nivel.alcanzado %}nivel-card--alcanzado{% endif %}">
+        <div class="nivel-card__icon">
+          {% if nivel.actual %}⭐{% elif nivel.alcanzado %}✓{% else %}🔒{% endif %}
+        </div>
+        <span class="nivel-card__estado">
+          {% if nivel.actual %}Nivel actual{% elif nivel.alcanzado %}Alcanzado{% else %}Por desbloquear{% endif %}
+        </span>
+        <h3>{{ nivel.nombre }}</h3>
+        <p>{{ nivel.descripcion or 'Nivel de viajero MAREVA' }}</p>
+        <ul>
+          <li>Desde ${{ "{:,.0f}".format(nivel.min_monto) }}</li>
+          <li>{{ nivel.min_reservas }} reservas</li>
+          <li>{{ "{:,.0f}".format(nivel.porcentaje_descuento) }}% de descuento</li>
+        </ul>
+      </article>
+      {% endfor %}
+    </div>
+
+    <div class="gamificacion-alert" style="margin-top: var(--space-8)">
+      💡 El descuento de tu nivel se calcula en el servidor y queda registrado
+      junto con el valor final de cada nueva reserva.
+    </div>
+  </div>
+</section>
 {% endblock %}
