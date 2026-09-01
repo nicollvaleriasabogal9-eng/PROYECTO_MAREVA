@@ -128,24 +128,22 @@ class AuthController:
         correo = request.form.get("correo","").strip()
         password = request.form.get("password","")
 
-
         usuario = self.service.iniciar_sesion(correo, password)
 
-        print("Resultado de iniciar_sesion:", usuario)
 
         if usuario is None:
-            return render_template("principal/login.html", error="Correo o contraseña incorrectos.")
+            return render_template("principal/login.html", error="Correo o contraseña incorrectos.", correo=correo)
 
         #   Manejo de la sesión del usuario 
         recordar = request.form.get("recordar")
         session.permanent = bool(recordar)
         # Almacenar la información del usuario en la sesión
         session["usuario"] = {
-            "id": usuario.id,
-            "nombre": usuario.nombre,
-            "apellido": usuario.apellido,
-            "correo": usuario.correo,
-            "rol": usuario.rol
+            "id": usuario.id if hasattr(usuario, "id") else usuario["id"],
+            "nombre": usuario.nombre if hasattr(usuario, "nombre") else usuario["nombre"],
+            "apellido": usuario.apellido if hasattr(usuario, "apellido") else usuario["apellido"],
+            "correo": usuario.correo if hasattr(usuario, "correo") else usuario["correo"],
+            "rol": usuario.rol if hasattr(usuario, "rol") else usuario["rol"]
         }
 
         print("Usuario autenticado:", session["usuario"]["correo"])
