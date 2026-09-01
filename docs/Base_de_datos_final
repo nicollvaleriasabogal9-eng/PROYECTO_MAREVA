@@ -572,7 +572,7 @@ INSERT INTO metodo_pago_proveedor (id_proveedor, tipo_metodo, entidad, titular, 
 INSERT INTO guia_turistico (nombre, apellido, idiomas, especialidad, telefono, correo, contrasena, estado) VALUES
 ('Andrés',    'Herrera',  'Español, Inglés',           'Cartagena histórica y playas',  '3100001111', 'andres.guia@mareva.co', 'Guia123',    TRUE),
 ('Valentina', 'López',    'Español, Inglés, Francés',  'Ecoturismo y naturaleza',       '3100002222', 'valentina.guia@mareva.co', 'GuiaTuristica123', TRUE),
-('Miguel',    'Castillo', 'Español',                   'Aventura y deportes extremos',  '3100003333', 'miguel.guia@mareva.co', 'GuiaMiguel123',   TRUE);
+('Miguel',    'Castillo', 'Español',                   'Aventura y deportes extremos',  '3100003333', 'miguel.guia@mareva.co', 'scrypt:32768:8:1$AELZ8i2lbW4gWGaS$c93d8a0d0ce87f2c85e74f63337cb6d60ead433feddece2e6a1311fdb52d633596f8d755fb690f34d34a2b7e1344066ea5a3978567b5d0509b827ca2905d387b',   TRUE);
 
 --- Tipos de seguro ---
 INSERT INTO tipo_seguro (nombre, descripcion, cobertura_general) VALUES
