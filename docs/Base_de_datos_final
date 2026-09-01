@@ -122,6 +122,7 @@ CREATE TABLE guia_turistico (
     especialidad VARCHAR(200),
     telefono     VARCHAR(20),
     correo       VARCHAR(100),
+    contrasena        VARCHAR(255) NOT NULL,
     estado       BOOLEAN NOT NULL DEFAULT TRUE
 );
 
