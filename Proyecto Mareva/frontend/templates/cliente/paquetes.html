@@ -97,7 +97,17 @@
           <a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">
           Ver Detalles
           </a>
-          
+
+          </a>
+          {% set es_favorito = p.id_paquete in session.get('favoritos', []) %}
+          <button type="button"
+                  class="btn btn-outline btn-sm favorite-button {% if es_favorito %}is-favorite{% endif %}"
+                  data-paquete-id="{{ p.id_paquete }}"
+                  data-url="{{ url_for('favoritos.alternar', id_paquete=p.id_paquete) }}"
+                  aria-pressed="{{ 'true' if es_favorito else 'false' }}">
+            {{ '♥ Favorito' if es_favorito else '♡ Favorito' }}
+          </button>
+
           {% if session.get("usuario") and session["usuario"].get("rol") == "admin" %}
 
             <div class="admin-actions">
@@ -135,5 +145,6 @@
 
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script src="{{ url_for('static', filename='js/paquetes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/favoritos.js') }}"></script>
 
 {% endblock %}
