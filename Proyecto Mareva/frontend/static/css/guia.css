@@ -1,0 +1,618 @@
+/* =========================================================
+   PANEL DEL GUÍA - MAREVA
+   ========================================================= */
+
+.guia-panel {
+    background: #f7f9fc;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.guia-hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.guia-hero__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.guia-hero h1 {
+    margin: 0.5rem 0;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+}
+
+.guia-hero p:not(.section-label) {
+    margin: 0;
+    color: #64748b;
+    font-size: 1.05rem;
+}
+
+.guia-profile-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 180px;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+}
+
+.guia-profile-chip strong {
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.guia-profile-chip span {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.guia-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+}
+
+.guia-stats article {
+    position: relative;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guia-stats article:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.09);
+}
+
+.guia-stats span {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.guia-stats strong {
+    display: block;
+    color: #0f172a;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+/* =========================================================
+   SECCIONES
+   ========================================================= */
+
+.guia-section {
+    margin-bottom: 3.5rem;
+}
+
+.guia-section .section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.guia-section h2 {
+    margin: 0.35rem 0 0;
+    color: #0f172a;
+    font-size: 1.7rem;
+}
+
+.section-label {
+    margin: 0;
+    color: #0f766e;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* =========================================================
+   PAQUETES
+   ========================================================= */
+
+.guia-paquetes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.guia-paquete {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.guia-paquete:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+}
+
+.guia-paquete__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    background: #f0fdfa;
+    border-radius: 15px;
+    font-size: 1.7rem;
+}
+
+.guia-paquete h3 {
+    margin: 0.45rem 0 0.25rem;
+    color: #1e293b;
+    font-size: 1.05rem;
+}
+
+.guia-paquete p {
+    margin: 0 0 0.25rem;
+    color: #64748b;
+    font-size: 0.88rem;
+}
+
+.guia-paquete small {
+    color: #94a3b8;
+}
+
+.guia-paquete__numbers {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 0.4rem;
+    row-gap: 0.15rem;
+    min-width: 90px;
+    text-align: right;
+}
+
+.guia-paquete__numbers strong {
+    color: #0f172a;
+    font-size: 1.1rem;
+}
+
+.guia-paquete__numbers span {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.badge-green {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.badge-purple {
+    color: #6b21a8;
+    background: #f3e8ff;
+}
+
+/* =========================================================
+   FILTRO
+   ========================================================= */
+
+.guia-heading-reservas {
+    align-items: center !important;
+}
+
+.guia-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.guia-filter label {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.guia-filter .form-select {
+    min-width: 170px;
+    padding: 0.65rem 2.2rem 0.65rem 0.85rem;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.88rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.guia-filter .form-select:focus {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+/* =========================================================
+   RESERVAS
+   ========================================================= */
+
+.guia-reservas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.guia-reserva {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.guia-reserva:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.07);
+}
+
+.guia-reserva > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.guia-reserva__code {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    color: #0f766e;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.guia-reserva h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.05rem;
+}
+
+.guia-reserva header p {
+    margin: 0.35rem 0 0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   ESTADOS
+   ========================================================= */
+
+.estado {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.estado--solicitada {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.estado--confirmada {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.estado--en_proceso {
+    color: #075985;
+    background: #e0f2fe;
+}
+
+.estado--completada {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.estado--cancelada {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+/* =========================================================
+   INFORMACIÓN DE RESERVA
+   ========================================================= */
+
+.guia-reserva__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 1.35rem 1.5rem;
+}
+
+.guia-reserva__grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.guia-reserva__grid small {
+    margin-bottom: 0.15rem;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.guia-reserva__grid strong {
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.guia-reserva__grid span,
+.guia-reserva__grid a {
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.guia-reserva__grid a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.guia-reserva__grid a:hover {
+    color: #0f766e;
+}
+
+/* =========================================================
+   OBSERVACIONES
+   ========================================================= */
+
+.guia-reserva__notes {
+    margin: 0;
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    color: #64748b;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.guia-reserva__notes strong {
+    color: #334155;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.guia-reserva > footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    padding: 1rem 1.5rem;
+    background: #fafafa;
+    border-top: 1px solid #f1f5f9;
+}
+
+.guia-reserva > footer form {
+    margin: 0;
+}
+
+.btn-sm {
+    padding: 0.55rem 0.9rem;
+    border-radius: 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.btn-outline:hover {
+    background: #fef2f2;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 2rem;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    text-align: center;
+}
+
+.empty-state > span {
+    margin-bottom: 0.75rem;
+    font-size: 2.5rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.35rem;
+    color: #334155;
+    font-size: 1.05rem;
+}
+
+.empty-state p {
+    max-width: 450px;
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .guia-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .guia-paquetes {
+        grid-template-columns: 1fr;
+    }
+
+    .guia-reserva__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* =========================================================
+   RESPONSIVE - CELULAR
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .guia-hero__content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .guia-profile-chip {
+        width: 100%;
+    }
+
+    .guia-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .guia-stats article {
+        padding: 1.1rem;
+    }
+
+    .guia-stats strong {
+        font-size: 1.6rem;
+    }
+
+    .guia-section .section-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .guia-heading-reservas {
+        gap: 1rem;
+    }
+
+    .guia-filter {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .guia-filter .form-select {
+        flex: 1;
+    }
+
+    .guia-paquete {
+        grid-template-columns: auto 1fr;
+    }
+
+    .guia-paquete__numbers {
+        grid-column: 2;
+        grid-template-columns: auto auto;
+        justify-content: start;
+        text-align: left;
+    }
+
+    .guia-reserva > header {
+        flex-direction: column;
+    }
+
+    .guia-reserva__grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .guia-reserva > footer {
+        flex-direction: column;
+    }
+
+    .guia-reserva > footer form,
+    .guia-reserva > footer button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE - CELULAR PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 450px) {
+
+    .guia-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .guia-paquete {
+        grid-template-columns: 1fr;
+    }
+
+    .guia-paquete__icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .guia-paquete__numbers {
+        grid-column: auto;
+    }
+
+    .guia-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
