@@ -59,6 +59,19 @@ class PaqueteRepository:
             return None
         return self._fila_a_dict(fila)
 
+    def obtener_por_ids(self, ids_paquetes):
+        if not ids_paquetes:
+            return []
+        cursor = self.conexion.cursor()
+        cursor.execute(
+            QUERY_BASE
+            + " WHERE p.id_paquete = ANY(%s) AND p.estado = 'activo' ORDER BY p.id_paquete",
+            (ids_paquetes,),
+        )
+        paquetes = [self._fila_a_dict(fila) for fila in cursor.fetchall()]
+        cursor.close()
+        return paquetes
+
     def obtener_servicios_extra(self, id_paquete):
         cursor = self.conexion.cursor()
         cursor.execute(
