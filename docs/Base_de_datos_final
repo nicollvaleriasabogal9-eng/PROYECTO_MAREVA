@@ -280,6 +280,86 @@ CREATE TABLE servicio_extra (
     id_paquete        INT NOT NULL REFERENCES paquete_turistico(id_paquete) ON DELETE CASCADE
 );
 
+CREATE TABLE contrato
+(
+    id_contrato              SERIAL PRIMARY KEY,
+    id_proveedor             INTEGER NOT NULL,
+    id_paquete               INTEGER NOT NULL,
+    descripcion_terminos     TEXT NOT NULL,
+    fecha_inicio             DATE,
+    fecha_fin                DATE,
+    condiciones_comerciales  TEXT,
+    estado_contrato          VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    fecha_creacion           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    respuesta_proveedor      VARCHAR(20),
+    fecha_respuesta          TIMESTAMP,
+
+    CONSTRAINT contrato_proveedor_fkey
+        FOREIGN KEY (id_proveedor)
+        REFERENCES proveedor(id_proveedor)
+        ON DELETE CASCADE,
+
+    CONSTRAINT contrato_paquete_fkey
+        FOREIGN KEY (id_paquete)
+        REFERENCES paquete_turistico(id_paquete)
+        ON DELETE CASCADE,
+
+    CONSTRAINT contrato_estado_check
+        CHECK (
+            estado_contrato IN (
+                'pendiente',
+                'aceptado',
+                'rechazado',
+                'vigente',
+                'vencido'
+            )
+        ),
+
+    CONSTRAINT contrato_respuesta_check
+        CHECK (
+            respuesta_proveedor IS NULL
+            OR respuesta_proveedor IN ('aceptado', 'rechazado')
+        ),
+
+    CONSTRAINT contrato_fechas_check
+        CHECK (
+            fecha_fin IS NULL
+            OR fecha_inicio IS NULL
+            OR fecha_fin >= fecha_inicio
+        )
+);
+
+CREATE TABLE documento
+(
+    id_documento       SERIAL PRIMARY KEY,
+    id_contrato        INTEGER,
+    id_proveedor       INTEGER NOT NULL,
+    nombre_documento   VARCHAR(150) NOT NULL,
+    tipo_documento     VARCHAR(50),
+    url_documento      VARCHAR(500),
+    fecha_carga        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado_documento   VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+
+    CONSTRAINT documento_contrato_fkey
+        FOREIGN KEY (id_contrato)
+        REFERENCES contrato(id_contrato)
+        ON DELETE CASCADE,
+
+    CONSTRAINT documento_proveedor_fkey
+        FOREIGN KEY (id_proveedor)
+        REFERENCES proveedor(id_proveedor)
+        ON DELETE CASCADE,
+
+    CONSTRAINT documento_estado_check
+        CHECK (
+            estado_documento IN (
+                'pendiente',
+                'aprobado',
+                'rechazado'
+            )
+        )
+);
+
 
 --- MÓDULO 9: PROMOCIONES---
 
