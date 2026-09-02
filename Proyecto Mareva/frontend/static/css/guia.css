@@ -447,21 +447,6 @@
     transition: all 0.2s ease;
 }
 
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
-}
-
-.btn-outline:hover {
-    background: #fef2f2;
-}
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
-
 .empty-state {
     display: flex;
     flex-direction: column;
