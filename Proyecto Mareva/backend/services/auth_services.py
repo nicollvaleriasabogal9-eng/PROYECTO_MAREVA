@@ -43,6 +43,15 @@ class AuthServices():
 
             return None
 
+        proveedor_password = self.repository.obtener_proveedor_password_por_correo(correo) 
+        
+        if proveedor_password is not None: 
+            if check_password_hash(proveedor_password, password): 
+                proveedor = self.repository.buscar_proveedor_por_correo(correo) 
+                if proveedor and proveedor["estado"]: 
+                    return proveedor 
+                return None
+
 
         guia_password = self.repository.obtener_guia_password_por_correo(correo)
 
