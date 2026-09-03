@@ -141,15 +141,27 @@ class AuthController:
         session["usuario"] = {
             "id": usuario.id if hasattr(usuario, "id") else usuario["id"],
             "nombre": usuario.nombre if hasattr(usuario, "nombre") else usuario["nombre"],
-            "apellido": usuario.apellido if hasattr(usuario, "apellido") else usuario["apellido"],
+            "apellido": usuario.apellido if hasattr(usuario, "apellido") else usuario.get("apellido"),
             "correo": usuario.correo if hasattr(usuario, "correo") else usuario["correo"],
             "rol": usuario.rol if hasattr(usuario, "rol") else usuario["rol"]
         }
 
         print("Usuario autenticado:", session["usuario"]["correo"])
-        # Manejo de enlaces de redirección después del inicio de sesión
+      
         next_url = request.args.get("next") or request.form.get("next")
-        if next_url:
-            return redirect(next_url)
 
+        rol = session["usuario"]["rol"] # Redirecciones según el rol 
+        if rol == "admin": 
+            return redirect(url_for("paquetes.panel_admin")) 
+        
+        elif rol == "guia": 
+            return redirect(url_for("guia.panel")) 
+        
+        elif rol == "proveedor": 
+            return redirect(url_for("home.home")) 
+        
+        elif next_url and next_url.startswith("/") and not next_url.startswith("//"): 
+            return redirect(next_url) 
+        
         return redirect(url_for("home.home"))
+
