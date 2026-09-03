@@ -97,10 +97,11 @@ class AuthRepository:
         cursor = self.conexion.cursor()
 
         try:
-            cursor.execute("SELECT id, contrasena FROM cliente")
+            cursor.execute("SELECT id_cliente, contrasena FROM cliente")
             filas = cursor.fetchall()
             cursor.close()
             return filas
+        
         except Exception:
             self.conexion.rollback()
             cursor.close()
@@ -145,6 +146,60 @@ class AuthRepository:
             cursor.execute("""
                 SELECT contrasena
                 FROM guia_turistico
+                WHERE correo = %s
+            """, (correo,))
+
+            fila = cursor.fetchone()
+            cursor.close()
+
+            if fila is None:
+                return None
+
+            return fila[0]
+
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
+
+    def buscar_proveedor_por_correo(self, correo):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT id_proveedor, nombre, correo, contrasena, estado
+                FROM proveedor
+                WHERE correo = %s
+            """, (correo,))
+
+            fila = cursor.fetchone()
+            cursor.close()
+
+            if fila is None:
+                return None
+
+            return {
+                "id": fila[0],
+                "nombre": fila[1],
+                "correo": fila[2],
+                "contrasena": fila[3],
+                "estado": fila[4],
+                "rol": "proveedor"
+            }
+
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return None
+
+
+    def obtener_proveedor_password_por_correo(self, correo):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT contrasena
+                FROM proveedor
                 WHERE correo = %s
             """, (correo,))
 
