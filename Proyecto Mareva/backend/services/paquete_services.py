@@ -67,6 +67,12 @@ class PaqueteService:
 
         return paquetes
 
+    def listar_por_ids(self, ids_paquetes):
+        return [
+            factory_paquete(paquete).to_dict()
+            for paquete in self.repo.obtener_por_ids(ids_paquetes)
+        ]
+
     def buscar(self, termino):
 
         if not termino:
