@@ -1,14 +1,16 @@
-
 import re
 import phonenumbers
 
 from repositories.proveedor_repositories import ProveedorRepository
 
-
 class ProveedorService:
 
     def __init__(self):
         self.repository = ProveedorRepository()
+
+# =========================================================
+# REGISTRO DE PROVEEDOR
+# =========================================================
 
     def registrar_proveedor(
         self,
@@ -26,7 +28,6 @@ class ProveedorService:
         correo_contacto
     ):
 
-
         nombre = " ".join(nombre.split())
 
         if not nombre:
@@ -43,7 +44,6 @@ class ProveedorService:
                 "error": "El nombre debe tener entre 2 y 100 caracteres."
             }
 
-
         nit = nit.strip()
 
         if not nit:
@@ -59,7 +59,6 @@ class ProveedorService:
                 "campo": "nit",
                 "error": "El NIT solo puede contener números y guiones."
             }
-
 
         tipo_empresa = " ".join(tipo_empresa.split())
 
@@ -93,7 +92,6 @@ class ProveedorService:
                 "error": "La descripción no puede superar los 1000 caracteres."
             }
 
-
         direccion = direccion.strip()
 
         if direccion and len(direccion) > 200:
@@ -102,7 +100,6 @@ class ProveedorService:
                 "campo": "direccion",
                 "error": "La dirección no puede superar los 200 caracteres."
             }
-
 
         ciudad = " ".join(ciudad.split())
 
@@ -113,10 +110,10 @@ class ProveedorService:
                 "error": "La ciudad no puede superar los 100 caracteres."
             }
 
-
         if telefono:
 
             try:
+
                 if not telefono.startswith("+"):
                     return {
                         "ok": False,
@@ -124,7 +121,10 @@ class ProveedorService:
                         "error": "Ingrese el teléfono con código de país."
                     }
 
-                numero_tel = phonenumbers.parse(telefono, None)
+                numero_tel = phonenumbers.parse(
+                    telefono,
+                    None
+                )
 
                 if not phonenumbers.is_valid_number(numero_tel):
                     return {
@@ -140,8 +140,12 @@ class ProveedorService:
                     "error": "Ingrese un teléfono válido."
                 }
 
-
         correo = correo.strip().lower()
+
+        correo_valido = (
+            r"^[a-zA-Z0-9._%+-]+@"
+            r"[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        )
 
         if not correo:
             return {
@@ -150,15 +154,12 @@ class ProveedorService:
                 "error": "El correo electrónico es obligatorio."
             }
 
-        correo_valido = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-
         if not re.fullmatch(correo_valido, correo):
             return {
                 "ok": False,
                 "campo": "correo",
                 "error": "Ingrese un correo electrónico válido."
             }
-
 
         if not contrasena:
             return {
@@ -170,7 +171,7 @@ class ProveedorService:
         if len(contrasena) < 8:
             return {
                 "ok": False,
-                "campo": "contrasena",
+            "campo": "contrasena",
                 "error": "La contraseña debe tener mínimo 8 caracteres."
             }
 
@@ -186,6 +187,7 @@ class ProveedorService:
         if telefono_contacto:
 
             try:
+
                 if not telefono_contacto.startswith("+"):
                     return {
                         "ok": False,
@@ -212,19 +214,19 @@ class ProveedorService:
                     "error": "Ingrese un teléfono de contacto válido."
                 }
 
-
         correo_contacto = correo_contacto.strip().lower()
 
         if correo_contacto:
 
-            if not re.fullmatch(correo_valido, correo_contacto):
+            if not re.fullmatch(
+                correo_valido,
+                correo_contacto
+            ):
                 return {
                     "ok": False,
                     "campo": "correo_contacto",
                     "error": "Ingrese un correo de contacto válido."
                 }
-
-    
 
         return self.repository.registrar_proveedor(
             nombre,
@@ -239,5 +241,121 @@ class ProveedorService:
             nombre_contacto,
             telefono_contacto,
             correo_contacto
+        )
+
+# =========================================================
+# RF-127
+# LISTAR CONTRATOS
+# =========================================================
+
+    def obtener_contratos(self, proveedor_id):
+
+        return self.repository.obtener_contratos_por_proveedor(
+            proveedor_id
+        )
+
+# =========================================================
+# RF-128
+# OBTENER DETALLE
+# =========================================================
+
+    def obtener_contrato(
+        self,
+        id_contrato,
+        proveedor_id
+    ):
+
+        return self.repository.obtener_contrato_por_id(
+            id_contrato,
+            proveedor_id
+        )
+
+# =========================================================
+# RF-129
+# RESPONDER CONTRATO
+# =========================================================
+
+    def responder_contrato(
+        self,
+        id_contrato,
+        proveedor_id,
+        decision
+    ):
+
+        contrato = self.repository.obtener_contrato_por_id(
+            id_contrato,
+            proveedor_id
+        )
+
+        if not contrato:
+            return {
+                "ok": False,
+                "error": "Contrato no encontrado."
+            }
+
+        if contrato["estado_contrato"] != "pendiente":
+            return {
+                "ok": False,
+                "error": "Este contrato ya no está pendiente de respuesta."
+            }
+
+        resultado = self.repository.responder_contrato(
+            id_contrato,
+            proveedor_id,
+            decision
+        )
+
+        if not resultado["ok"]:
+            return resultado
+
+        return {
+            "ok": True,
+            "mensaje": (
+                "Contrato aceptado correctamente."
+                if decision == "aceptado"
+                else "Contrato rechazado correctamente."
+            )
+        }
+
+# =========================================================
+# RF-136
+# FIRMA ELECTRÓNICA
+# =========================================================
+
+    def firmar_contrato(
+        self,
+        id_contrato,
+        proveedor_id
+    ):
+
+        contrato = self.repository.obtener_contrato_por_id(
+            id_contrato,
+            proveedor_id
+        )
+
+        if not contrato:
+            return {
+                "ok": False,
+                "error": "Contrato no encontrado."
+            }
+
+        if contrato["estado_contrato"] != "aceptado":
+            return {
+                "ok": False,
+                "error": (
+                    "El contrato debe estar aceptado "
+                    "antes de realizar la firma electrónica."
+                )
+            }
+
+        if contrato.get("firma_proveedor"):
+            return {
+                "ok": False,
+                "error": "Este contrato ya fue firmado electrónicamente."
+            }
+
+        return self.repository.firmar_contrato(
+            id_contrato,
+            proveedor_id
         )
 
