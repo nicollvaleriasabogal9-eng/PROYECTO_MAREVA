@@ -293,6 +293,10 @@ CREATE TABLE contrato
     fecha_creacion           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     respuesta_proveedor      VARCHAR(20),
     fecha_respuesta          TIMESTAMP,
+    firma_proveedor          BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_firma              TIMESTAMP,
+    metodo_firma             VARCHAR(50)
+
 
     CONSTRAINT contrato_proveedor_fkey
         FOREIGN KEY (id_proveedor)
