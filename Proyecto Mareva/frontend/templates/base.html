@@ -31,7 +31,6 @@
       <ul class="navbar__nav" id="mainNav">
         {% set rol_actual = session.get('usuario', {}).get('rol') %}
         {% if rol_actual == 'admin' %}
-          <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link">Inicio</a></li>
           <li><a href="{{ url_for('paquetes.panel_admin') }}" class="navbar__link">Paquetes</a></li>
           <li><a href="{{ url_for('gamificacion.admin_niveles') }}" class="navbar__link">Niveles</a></li>
           <li><a href="{{ url_for('proveedor.registrar_proveedor') }}" class="navbar__link">Proveedores</a></li>
@@ -39,8 +38,7 @@
           <li><a href="{{ url_for('guia.panel') }}" class="navbar__link active">Mi panel</a></li>
         {% elif rol_actual == 'proveedor' %}
           <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link">Inicio</a></li>
-          <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
-          <li><a href="{{ url_for('destinos.listar_catalogo') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Destinos</a></li>
+          <li><a href="{{ url_for('proveedor.contratos') }}" class="{% if request.path == '/destinos'%}active{% endif %} navbar__link">Contratos</a></li>
         {% elif rol_actual == 'cliente' %}
           <li><a href="{{ url_for('home.home') }}" class="{% if request.path == '/'%}active{% endif %} navbar__link">Inicio</a></li>
           <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path == '/paquetes'%}active{% endif %}">Paquetes</a></li>
