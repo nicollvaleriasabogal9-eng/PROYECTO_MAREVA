@@ -4,8 +4,9 @@
 
   <main>
     <div>
-      <div class="card__img--placeholder" style="height: 200px;">
-        {{ paquete.emoji }}
+      
+      <div class="img_detalles-wrap" style="height: 200px;">
+        <img src="{{ url_for('static', filename=paquete.imagen_url) }}" alt="{ p.nombre }">
       </div>
       <div class="section" style="display: flexbox; justify-content: center; align-items: center; text-align: center;">
         <p class="section-label">🔍 Detalles Del Paquete</p>
