@@ -1,0 +1,656 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="section guia-panel">
+
+<div class="container">
+
+    <!-- =================================================
+         ENCABEZADO
+    ================================================== -->
+
+    <div class="guia-hero" style="padding-bottom: 2rem;">
+
+        <div class="guia-hero__content">
+
+            <div>
+
+                <p class="section-label">
+                    Contrato #{{ contrato.id_contrato }}
+                </p>
+
+                <h1>
+                    {{ contrato.nombre_paquete }}
+                </h1>
+
+                <p>
+                    Revisa los términos, condiciones y estado
+                    del contrato antes de tomar una decisión.
+                </p>
+
+            </div>
+
+            <div>
+
+                {% if contrato.estado_contrato == 'pendiente' %}
+
+                    <span class="estado estado--solicitada">
+                        Pendiente de respuesta
+                    </span>
+
+                {% elif contrato.estado_contrato == 'aceptado' %}
+
+                    <span class="estado estado--confirmada">
+                        Aceptado
+                    </span>
+
+                {% elif contrato.estado_contrato == 'rechazado' %}
+
+                    <span class="estado estado--cancelada">
+                        Rechazado
+                    </span>
+
+                {% elif contrato.estado_contrato == 'vigente' %}
+
+                    <span class="estado estado--confirmada">
+                        Vigente
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         MENSAJES
+    ================================================== -->
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+        {% if mensajes %}
+
+            {% for categoria, mensaje in mensajes %}
+
+                <div
+                    class="alert
+                    {% if categoria == 'success' %}
+                        alert-success
+                    {% else %}
+                        alert-danger
+                    {% endif %}"
+                    style="margin-bottom: 1rem;"
+                >
+                    {{ mensaje }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =================================================
+         INFORMACIÓN GENERAL
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    Información general
+                </p>
+
+                <h2>
+                    Datos del contrato
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            <div class="guia-reserva__grid">
+
+                <div>
+
+                    <small>
+                        Paquete
+                    </small>
+
+                    <strong>
+                        {{ contrato.nombre_paquete }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Destino
+                    </small>
+
+                    <strong>
+                        {{ contrato.nombre_destino or 'No especificado' }}
+                    </strong>
+
+                    {% if contrato.departamento %}
+
+                        <span>
+                            {{ contrato.departamento }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Precio
+                    </small>
+
+                    <strong>
+                        ${{ "{:,.0f}".format(contrato.precio or 0) }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Fecha de creación
+                    </small>
+
+                    <strong>
+                        {{ contrato.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Inicio
+                    </small>
+
+                    <strong>
+
+                        {% if contrato.fecha_inicio %}
+                            {{ contrato.fecha_inicio.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Por definir
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Finalización
+                    </small>
+
+                    <strong>
+
+                        {% if contrato.fecha_fin %}
+                            {{ contrato.fecha_fin.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Por definir
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Duración
+                    </small>
+
+                    <span>
+
+                        {% if contrato.duracion_dias %}
+                            {{ contrato.duracion_dias }}
+                            día{% if contrato.duracion_dias != 1 %}s{% endif %}
+                        {% endif %}
+
+                        {% if contrato.duracion_noches %}
+                            · {{ contrato.duracion_noches }}
+                            noche{% if contrato.duracion_noches != 1 %}s{% endif %}
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        Respuesta
+                    </small>
+
+                    <strong>
+
+                        {% if contrato.respuesta_proveedor == 'aceptado' %}
+                            Aceptado
+                        {% elif contrato.respuesta_proveedor == 'rechazado' %}
+                            Rechazado
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =================================================
+         DESCRIPCIÓN DEL PAQUETE
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    Proceso de contratación
+                </p>
+
+                <h2>
+                    Información del paquete
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            <div class="guia-reserva__notes">
+
+                {% if contrato.descripcion_paquete %}
+
+                    <span style="white-space: pre-line;">
+                        {{ contrato.descripcion_paquete }}
+                    </span>
+
+                {% else %}
+
+                    <span>
+                        No se proporcionó una descripción adicional.
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =================================================
+         TÉRMINOS Y CLÁUSULAS - RF128
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    RF-128
+                </p>
+
+                <h2>
+                    Términos y condiciones
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            <div
+                class="guia-reserva__notes"
+                style="
+                    padding: 1.5rem;
+                    background: #ffffff;
+                    color: #475569;
+                    line-height: 1.8;
+                "
+            >
+
+                <div style="white-space: pre-line;">
+                    {{ contrato.descripcion_terminos }}
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =================================================
+         CONDICIONES COMERCIALES
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    Condiciones
+                </p>
+
+                <h2>
+                    Condiciones comerciales
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            <div
+                class="guia-reserva__notes"
+                style="
+                    padding: 1.5rem;
+                    background: #ffffff;
+                    color: #475569;
+                    line-height: 1.8;
+                "
+            >
+
+                {% if contrato.condiciones_comerciales %}
+
+                    <div style="white-space: pre-line;">
+                        {{ contrato.condiciones_comerciales }}
+                    </div>
+
+                {% else %}
+
+                    <span>
+                        No se especificaron condiciones comerciales.
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =================================================
+         ESTADO DE FIRMA
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    RF-136
+                </p>
+
+                <h2>
+                    Firma electrónica
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            {% if contrato.firma_proveedor %}
+
+                <div class="guia-reserva__notes">
+
+                    <strong>
+                        ✓ Contrato firmado electrónicamente
+                    </strong>
+
+                    <br>
+
+                    {% if contrato.fecha_firma %}
+
+                        <span>
+                            Fecha de firma:
+                            {{ contrato.fecha_firma.strftime('%d/%m/%Y %H:%M') }}
+                        </span>
+
+                    {% endif %}
+
+                    {% if contrato.metodo_firma %}
+
+                        <br>
+
+                        <span>
+                            Método:
+                            {{ contrato.metodo_firma }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            {% elif contrato.estado_contrato == 'aceptado' %}
+
+                <div class="guia-reserva__notes">
+
+                    <strong>
+                        El contrato está aceptado y pendiente de firma.
+                    </strong>
+
+                    <br>
+
+                    <span>
+                        Al firmarlo electrónicamente registrarás
+                        formalmente tu aceptación del documento.
+                    </span>
+
+                </div>
+
+            {% else %}
+
+                <div class="guia-reserva__notes">
+
+                    <span>
+                        La firma electrónica estará disponible
+                        después de aceptar el contrato.
+                    </span>
+
+                </div>
+
+            {% endif %}
+
+        </article>
+
+    </section>
+
+
+    <!-- =================================================
+         ACCIONES
+    ================================================== -->
+
+    <section class="guia-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-label">
+                    Acciones
+                </p>
+
+                <h2>
+                    Gestionar contrato
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <article class="guia-reserva">
+
+            <footer>
+
+                <a
+                    href="{{ url_for('proveedor.contratos') }}"
+                    class="btn btn-ghost btn-sm"
+                >
+                    Volver a contratos
+                </a>
+
+
+                {% if contrato.estado_contrato == 'pendiente' %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'proveedor.responder_contrato',
+                            id_contrato=contrato.id_contrato
+                        ) }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="decision"
+                            value="rechazado"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-ghost btn-sm"
+                            onclick="return confirm(
+                                '¿Deseas rechazar este contrato?'
+                            )"
+                        >
+                            Rechazar contrato
+                        </button>
+
+                    </form>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'proveedor.responder_contrato',
+                            id_contrato=contrato.id_contrato
+                        ) }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="decision"
+                            value="aceptado"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-sm"
+                            onclick="return confirm(
+                                '¿Confirmas que deseas aceptar este contrato?'
+                            )"
+                        >
+                            Aceptar contrato
+                        </button>
+
+                    </form>
+
+
+                {% elif contrato.estado_contrato == 'aceptado'
+                      and not contrato.firma_proveedor %}
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'proveedor.firmar_contrato',
+                            id_contrato=contrato.id_contrato
+                        ) }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="confirmacion_firma"
+                            value="acepto"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-sm"
+                            onclick="return confirm(
+                                '¿Confirmas que deseas firmar electrónicamente este contrato?'
+                            )"
+                        >
+                            Firmar electrónicamente
+                        </button>
+
+                    </form>
+
+
+                {% elif contrato.firma_proveedor %}
+
+                    <span class="estado estado--confirmada">
+                        ✓ Contrato firmado
+                    </span>
+
+                {% endif %}
+
+            </footer>
+
+        </article>
+
+    </section>
+
+</div>
+
+
+</section>
+
+{% endblock %}

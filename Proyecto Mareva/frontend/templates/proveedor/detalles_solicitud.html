@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container">
+
+        <a href="{{ url_for('proveedor.solicitudes') }}"
+           class="btn btn-ghost btn-sm">
+            ← Volver a solicitudes
+        </a>
+
+        <h1>
+            Detalle de la solicitud
+        </h1>
+
+        <div class="perfil-card">
+
+            <h2>
+                {{ contrato.paquete_nombre }}
+            </h2>
+
+            <p>
+                <strong>Contrato:</strong>
+                #{{ contrato.id_contrato }}
+            </p>
+
+            <p>
+                <strong>Destino:</strong>
+                {{ contrato.destino_nombre or 'No especificado' }}
+            </p>
+
+            <p>
+                <strong>Estado:</strong>
+                {{ contrato.estado_contrato }}
+            </p>
+
+            <p>
+                <strong>Fecha de creación:</strong>
+                {{ contrato.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+            </p>
+
+        </div>
+
+
+        <h3>Términos y condiciones</h3>
+
+        <div class="perfil-card">
+
+            <p>
+                {{ contrato.descripcion_terminos }}
+            </p>
+
+        </div>
+
+
+        <h3>Condiciones comerciales</h3>
+
+        <div class="perfil-card">
+
+            <p>
+                {{ contrato.condiciones_comerciales or
+                   'No se especificaron condiciones comerciales.' }}
+            </p>
+
+        </div>
+
+
+        <h3>Información del paquete</h3>
+
+        <div class="perfil-card">
+
+            <p>
+                <strong>Descripción:</strong>
+                {{ contrato.paquete_descripcion }}
+            </p>
+
+            <p>
+                <strong>Duración:</strong>
+                {{ contrato.duracion_dias }}
+                días /
+                {{ contrato.duracion_noches }}
+                noches
+            </p>
+
+            <p>
+                <strong>Precio referencial:</strong>
+                ${{ "{:,.0f}".format(contrato.paquete_precio) }}
+            </p>
+
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}

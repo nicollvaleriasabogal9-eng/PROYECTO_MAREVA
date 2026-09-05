@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="section">
+    <div class="container">
+        <a href="{{ url_for('home.home') }}" class="btn btn-ghost btn-sm">← Volver</a>
+        <h1>Términos y condiciones de tus contratos</h1>
+        <p>Selecciona un contrato para ver sus términos, cláusulas y condiciones comerciales.</p>
+
+        {% if contratos %}
+            <div class="perfil-card">
+                {% for contrato in contratos %}
+                <div style="padding:var(--space-3) 0; border-bottom:1px solid var(--gray-200)">
+                    <a href="{{ url_for('proveedor.terminos', id_contrato=contrato.id_contrato) }}" style="display:block;">
+                        <strong>{{ contrato.paquete_nombre }}</strong>
+                        <span class="badge badge-{{ contrato.estado_contrato }}">{{ contrato.estado_contrato }}</span>
+                        <br>
+                        <small>Creado: {{ contrato.fecha_creacion.strftime('%d/%m/%Y') }}</small>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="perfil-card"><p>No tienes contratos registrados.</p></div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
