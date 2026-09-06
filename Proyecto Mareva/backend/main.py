@@ -9,6 +9,8 @@ from routes.favoritos_routes import favoritos_bp
 from routes.gamificacion_routes import gamificacion_bp
 from routes.guia_routes import guia_bp
 from routes.proveedores_routes import proveedor_bp
+from routes.reporte_routes import reporte_bp
+from routes.dashboard_routes import dashboard_bp
 
 from datetime import timedelta
 
@@ -27,6 +29,8 @@ main.register_blueprint(paquetes_bp)
 main.register_blueprint(auth_bp)
 main.register_blueprint(destinos_bp)
 main.register_blueprint(home_bp)
+main.register_blueprint(reporte_bp)
+main.register_blueprint(dashboard_bp)
 main.permanent_session_lifetime = timedelta(days=30) 
 
 if __name__ == "__main__":
