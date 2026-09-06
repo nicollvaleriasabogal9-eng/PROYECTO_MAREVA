@@ -3,203 +3,363 @@
 {% block content %}
 
 <main class="perfil-main">
+
   <div class="container">
 
-    <a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">
+    <a
+      href="javascript:history.back()"
+      class="btn btn-ghost btn-sm"
+      style="margin-bottom:var(--space-4)"
+    >
       ← Volver
     </a>
 
+
     <div class="perfil-layout">
 
+
       <aside class="perfil-sidebar">
-        <div class="perfil-avatar">👤</div>
-        <h2 class="perfil-nombre">{{ session["usuario"]["nombre"] }} {{ session["usuario"]["apellido"] }}</h2>
-        <p class="perfil-correo">{{ session["usuario"]["correo"] }}</p>
-        <span class="perfil-nivel"></span>
 
-        <div class="divider"></div>
+        <div class="perfil-avatar">
+          👤
+        </div>
 
-        <a href="{{ url_for('home.logout') }}" class="btn btn-outline" style="width:100%;justify-content:center">
+        <h2 class="perfil-nombre">
+          {{ session["usuario"]["nombre"] }}
+          {{ session["usuario"]["apellido"] }}
+        </h2>
+
+        <p class="perfil-correo">
+          {{ session["usuario"]["correo"] }}
+        </p>
+
+        <a
+          href="{{ url_for('home.logout') }}"
+          class="btn btn-outline"
+          style="width:100%;justify-content:center"
+        >
           Cerrar sesión
         </a>
+
       </aside>
+
+
 
       <div class="perfil-content">
 
+
         <div class="perfil-card">
-          <h3 class="perfil-card__title">🏆 Mis Niveles</h3>
+
+          <h3 class="perfil-card__title">
+            🏆 Mis Niveles
+          </h3>
+
           <div class="insignias-grid">
-            
-              <span class="badge badge-blue"></span>
-            
-              <p class="text-muted">Aún no tienes niveles. ¡Haz tu primera reserva!</p>
-           
+
+            <span class="badge badge-blue">
+            </span>
+
+            <p class="text-muted">
+              Aún no tienes niveles.
+              ¡Haz tu primera reserva!
+            </p>
+
           </div>
+
         </div>
 
-            {% if ultima_reserva %}
 
-            <div class="perfil-card">
-                <h3 class="perfil-card__title">📋 Última reserva</h3>
+        <div class="perfil-card">
 
-                <p style="font-size:var(--text-lg);margin-bottom:var(--space-3)">
-                    <strong>{{ ultima_reserva.paquete_nombre }}</strong>
-                </p>
+          <h3 class="perfil-card__title">
+            📋 Última reserva
+          </h3>
 
-                <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-                    <strong>Código:</strong>
-                    {{ ultima_reserva.codigo_unico }}
-                </p>
 
-                <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-                    <strong>Fecha del viaje:</strong>
-                    {{ ultima_reserva.fecha_viaje }}
-                </p>
+          {% if ultima_reserva %}
 
-                <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-                    <strong>Estado:</strong>
-                    {{ ultima_reserva.estado }}
-                </p>
+            <p
+              style="
+                font-size:var(--text-lg);
+                margin-bottom:var(--space-3)
+              "
+            >
+              <strong>
+                {{ ultima_reserva.paquete_nombre }}
+              </strong>
+            </p>
 
-                 <p style="font-size:var(--text-sm);color:var(--gray-600)">
-                    <strong>Reserva realizada:</strong>
-                        {{ ultima_reserva.fecha_reserva }}
-                 </p>
 
-                 {% if ultima_reserva.estado in ["solicitada", "pendiente a pago"] %}
+            <p
+              style="
+                font-size:var(--text-sm);
+                color:var(--gray-600);
+                margin-bottom:var(--space-2)
+              "
+            >
+              <strong>Código:</strong>
+              {{ ultima_reserva.codigo_unico }}
+            </p>
 
-                    <a
-                        href="{{ url_for('reserva.modificar_viajeros', id_reserva=ultima_reserva.id_reserva) }}"
-                        class="btn btn-outline"
-                        >
-                            👥 Modificar viajeros
-                    </a>
 
-                {% endif %}
+            <p
+              style="
+                font-size:var(--text-sm);
+                color:var(--gray-600);
+                margin-bottom:var(--space-2)
+              "
+            >
+              <strong>Fecha del viaje:</strong>
+              {{ ultima_reserva.fecha_viaje }}
+            </p>
 
-            </div>
 
-             {% else %}
+            <p
+              style="
+                font-size:var(--text-sm);
+                color:var(--gray-600);
+                margin-bottom:var(--space-2)
+              "
+            >
+              <strong>Estado:</strong>
+              {{ ultima_reserva.estado }}
+            </p>
 
-                <p class="text-muted">
-                    No tienes reservas aún.
-                    <a href="{{ url_for('paquetes.listar_catalogo') }}" class="form-link">
-                        Explorar paquetes
-                    </a>
-                </p>
+
+            <p
+              style="
+                font-size:var(--text-sm);
+                color:var(--gray-600);
+                margin-bottom:var(--space-4)
+              "
+            >
+              <strong>Reserva realizada:</strong>
+              {{ ultima_reserva.fecha_reserva }}
+            </p>
+
+
+            {% if ultima_reserva.estado in ["solicitada", "pendiente a pago"] %}
+
+              <a
+                href="{{ url_for(
+                  'reserva.modificar_viajeros',
+                  id_reserva=ultima_reserva.id_reserva
+                ) }}"
+                class="btn btn-outline"
+              >
+                👥 Modificar viajeros
+              </a>
 
             {% endif %}
 
+
+          {% else %}
+
+            <p class="text-muted">
+
+              No tienes reservas aún.
+
+              <a
+                href="{{ url_for('paquetes.listar_catalogo') }}"
+                class="form-link"
+              >
+                Explorar paquetes
+              </a>
+
+            </p>
+
+          {% endif %}
+
         </div>
+
 
         <div class="perfil-card">
-          <h3 class="perfil-card__title">👤 Información de cuenta</h3>
-          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Nombre:</strong> {{ session["usuario"]["nombre"] }} {{ session["usuario"]["apellido"] }}
+
+          <h3 class="perfil-card__title">
+            👤 Información de cuenta
+          </h3>
+
+
+          <p
+            style="
+              font-size:var(--text-sm);
+              color:var(--gray-600);
+              margin-bottom:var(--space-2)
+            "
+          >
+            <strong>Nombre:</strong>
+
+            {{ session["usuario"]["nombre"] }}
+            {{ session["usuario"]["apellido"] }}
           </p>
-          <p style="font-size:var(--text-sm);color:var(--gray-600);margin-bottom:var(--space-2)">
-            <strong>Correo:</strong> {{ session["usuario"]["correo"] }}
+
+
+          <p
+            style="
+              font-size:var(--text-sm);
+              color:var(--gray-600);
+              margin-bottom:var(--space-2)
+            "
+          >
+            <strong>Correo:</strong>
+
+            {{ session["usuario"]["correo"] }}
           </p>
+
         </div>
 
-<div class="perfil-card">
 
-```
-<div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="perfil-card">
 
-    <h3 class="perfil-card__title">
-        🔎 Historial de búsquedas
-    </h3>
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:var(--space-4);
+            "
+          >
 
-    {% if historial %}
-        <form
-            method="POST"
-            action="{{ url_for('home.eliminar_historial') }}"
-        >
-            <button type="submit" class="btn btn-outline">
-                🗑️ Borrar todo
-            </button>
-        </form>
-    {% endif %}
+            <h3 class="perfil-card__title">
+              🔎 Historial de búsquedas
+            </h3>
 
-</div>
 
-{% if historial %}
+            {% if historial %}
 
-    {% for busqueda in historial %}
+              <form
+                method="POST"
+                action="{{ url_for('home.eliminar_historial') }}"
+              >
 
-        <div class="historial-item">
-
-            <p>
-                <strong>
-                    {% if busqueda.destino_buscado %}
-                        {{ busqueda.destino_buscado }}
-                    {% else %}
-                        Búsqueda por filtros
-                    {% endif %}
-                </strong>
-            </p>
-
-            <p>
-                <strong>Categoría:</strong>
-                {{ busqueda.filtros.get("categoria") or "Todas" }}
-            </p>
-
-            <p>
-                <strong>Duración:</strong>
-                {{ busqueda.filtros.get("duracion") or "Todas" }}
-            </p>
-
-            <p>
-                <strong>Precio máximo:</strong>
-
-                {% if busqueda.filtros.get("precio_max") %}
-                    ${{ busqueda.filtros.get("precio_max") }}
-                {% else %}
-                    Sin límite
-                {% endif %}
-
-            </p>
-
-            <p>
-                <strong>Incluye:</strong>
-                {{ busqueda.filtros.get("incluye") or "Ninguno" }}
-            </p>
-
-            <small>
-                {{ busqueda.fecha_busqueda }}
-            </small>
-
-            <div style="margin-top: var(--space-3);">
-
-                <a
-                    href="{{ url_for('home.aplicar_filtros', id_busqueda=busqueda.id_busqueda) }}"
-                    class="btn btn-primary"
+                <button
+                  type="submit"
+                  class="btn btn-outline"
                 >
-                    🔎 Aplicar filtros
-                </a>
+                  🗑️ Borrar todo
+                </button>
 
-            </div>
+              </form>
+
+            {% endif %}
+
+          </div>
+
+
+          {% if historial %}
+
+            {% for busqueda in historial %}
+
+              <div class="historial-item">
+
+                <p>
+
+                  <strong>
+
+                    {% if busqueda.destino_buscado %}
+
+                      {{ busqueda.destino_buscado }}
+
+                    {% else %}
+
+                      Búsqueda por filtros
+
+                    {% endif %}
+
+                  </strong>
+
+                </p>
+
+
+                <p>
+
+                  <strong>Categoría:</strong>
+
+                  {{ busqueda.filtros.get("categoria") or "Todas" }}
+
+                </p>
+
+
+                <p>
+
+                  <strong>Duración:</strong>
+
+                  {{ busqueda.filtros.get("duracion") or "Todas" }}
+
+                </p>
+
+
+                <p>
+
+                  <strong>Precio máximo:</strong>
+
+                  {% if busqueda.filtros.get("precio_max") %}
+
+                    ${{ busqueda.filtros.get("precio_max") }}
+
+                  {% else %}
+
+                    Sin límite
+
+                  {% endif %}
+
+                </p>
+
+
+                <p>
+
+                  <strong>Incluye:</strong>
+
+                  {{ busqueda.filtros.get("incluye") or "Ninguno" }}
+
+                </p>
+
+
+                <small>
+
+                  {{ busqueda.fecha_busqueda }}
+
+                </small>
+
+
+                <div style="margin-top:var(--space-3);">
+
+                  <a
+                    href="{{ url_for(
+                      'home.aplicar_filtros',
+                      id_busqueda=busqueda.id_busqueda
+                    ) }}"
+                    class="btn btn-primary"
+                  >
+                    🔎 Aplicar filtros
+                  </a>
+
+                </div>
+
+              </div>
+
+            {% endfor %}
+
+
+          {% else %}
+
+            <p class="text-muted">
+
+              Aún no tienes búsquedas guardadas.
+
+            </p>
+
+          {% endif %}
 
         </div>
-
-    {% endfor %}
-
-{% else %}
-
-    <p class="text-muted">
-        Aún no tienes búsquedas guardadas.
-    </p>
-
-{% endif %}
-```
-
-</div>
 
 
       </div>
+
     </div>
+
   </div>
+
 </main>
 
 {% endblock %}
