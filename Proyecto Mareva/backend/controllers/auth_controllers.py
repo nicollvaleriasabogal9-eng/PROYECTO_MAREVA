@@ -152,7 +152,7 @@ class AuthController:
 
         rol = session["usuario"]["rol"] # Redirecciones según el rol 
         if rol == "admin": 
-            return redirect(url_for("paquetes.panel_admin")) 
+            return redirect(url_for("dashboard.mostrar_panel")) 
         
         elif rol == "guia": 
             return redirect(url_for("guia.panel")) 
