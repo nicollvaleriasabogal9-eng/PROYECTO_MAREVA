@@ -24,11 +24,6 @@
             Consulta los resultados de satisfacción de los clientes.
         </p>
 
-
-        <!-- ========================= -->
-        <!-- FILTROS -->
-        <!-- ========================= -->
-
         <div
             class="perfil-card"
             style="margin-bottom:var(--space-6)"
@@ -44,8 +39,6 @@
             >
 
                 <div class="grid-3">
-
-                    <!-- PAQUETE -->
 
                     <div class="form-group">
 
@@ -80,8 +73,6 @@
                     </div>
 
 
-                    <!-- DESTINO -->
-
                     <div class="form-group">
 
                         <label class="form-label">
@@ -115,8 +106,6 @@
                     </div>
 
 
-                    <!-- FECHA INICIO -->
-
                     <div class="form-group">
 
                         <label class="form-label">
@@ -132,8 +121,6 @@
 
                     </div>
 
-
-                    <!-- FECHA FIN -->
 
                     <div class="form-group">
 
@@ -181,10 +168,6 @@
 
         </div>
 
-
-        <!-- ========================= -->
-        <!-- RESULTADOS -->
-        <!-- ========================= -->
 
         <div class="perfil-card">
 
@@ -251,8 +234,6 @@
                         </p>
 
 
-                        <!-- PREGUNTAS NUMÉRICAS -->
-
                         {% if resultado.tipo_respuesta in ["numero", "escala", "rating"] %}
 
                             <p>
@@ -281,8 +262,6 @@
                                 {{ resultado.total_respuestas }}
                             </p>
 
-
-                        <!-- PREGUNTAS ABIERTAS -->
 
                         {% else %}
 
