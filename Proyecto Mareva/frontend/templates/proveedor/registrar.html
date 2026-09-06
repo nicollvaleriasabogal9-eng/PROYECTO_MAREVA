@@ -2,332 +2,607 @@
 
 {% block content %}
 
-    <style>
-
-        .contenedor {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            margin-bottom: 25px;
-        }
-
-        .grupo {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .fila {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .mensaje {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        @media (max-width: 700px) {
-            .fila {
-                grid-template-columns: 1fr;
-            }
-
-            body {
-                padding: 15px;
-            }
-        }
-    </style>
-
-    <div class="contenedor">
-
-        <h1>Registrar proveedor</h1>
-
-        {% if mensaje %}
-            <div class="mensaje">
-                {{ mensaje }}
-            </div>
-        {% endif %}
-
-        {% if error %}
-            <div class="error">
-                {{ error }}
-            </div>
-        {% endif %}
-
-        <form
-            action="{{ url_for('proveedor.registrar_proveedor') }}"
-            method="POST"
-        >
-
-            <div class="grupo">
-                <label for="nombre">
-                    Nombre del proveedor *
-                </label>
-
-                <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    maxlength="100"
-                    required
-                >
-            </div>
-
-
-            <div class="fila">
-
-                <div class="grupo">
-                    <label for="nit">
-                        NIT *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nit"
-                        name="nit"
-                        maxlength="30"
-                        required
-                    >
-                </div>
-
-
-                <div class="grupo">
-                    <label for="tipo_empresa">
-                        Tipo de empresa *
-                    </label>
-
-                    <input
-                        type="text"
-                        id="tipo_empresa"
-                        name="tipo_empresa"
-                        maxlength="50"
-                        placeholder="Ej: Hotel, transporte, restaurante..."
-                        required
-                    >
-                </div>
-
-            </div>
-
-
-            <div class="grupo">
-
-                <label for="descripcion">
-                    Descripción general *
-                </label>
-
-                <textarea
-                    id="descripcion"
-                    name="descripcion"
-                    maxlength="1000"
-                    required
-                ></textarea>
-
-            </div>
-
-
-            <div class="fila">
-
-                <div class="grupo">
-
-                    <label for="direccion">
-                        Dirección
-                    </label>
-
-                    <input
-                        type="text"
-                        id="direccion"
-                        name="direccion"
-                        maxlength="200"
-                    >
-
-                </div>
-
-
-                <div class="grupo">
-
-                    <label for="ciudad">
-                        Ciudad
-                    </label>
-
-                    <input
-                        type="text"
-                        id="ciudad"
-                        name="ciudad"
-                        maxlength="100"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="grupo">
-
-                <label for="telefono">
-                    Teléfono
-                </label>
-
-                <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    placeholder="+57 3001234567"
-                    maxlength="20"
-                >
-
-            </div>
-
-
-            <div class="grupo">
-
-                <label for="correo">
-                    Correo electrónico *
-                </label>
-
-                <input
-                    type="email"
-                    id="correo"
-                    name="correo"
-                    maxlength="100"
-                    required
-                >
-
-            </div>
-
-
-            <hr>
-
-            <h2>Datos de contacto</h2>
-
-
-            <div class="grupo">
-
-                <label for="nombre_contacto">
-                    Nombre del contacto
-                </label>
-
-                <input
-                    type="text"
-                    id="nombre_contacto"
-                    name="nombre_contacto"
-                    maxlength="100"
-                >
-
-            </div>
-
-
-            <div class="fila">
-
-                <div class="grupo">
-
-                    <label for="telefono_contacto">
-                        Teléfono del contacto
-                    </label>
-
-                    <input
-                        type="tel"
-                        id="telefono_contacto"
-                        name="telefono_contacto"
-                        placeholder="+57 3001234567"
-                        maxlength="20"
-                    >
-
-                </div>
-
-
-                <div class="grupo">
-
-                    <label for="correo_contacto">
-                        Correo del contacto
-                    </label>
-
-                    <input
-                        type="email"
-                        id="correo_contacto"
-                        name="correo_contacto"
-                        maxlength="100"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <hr>
-
-            <h2>Acceso del proveedor</h2>
-
-
-            <div class="grupo">
-
-                <label for="contrasena">
-                    Contraseña *
-                </label>
-
-                <input
-                    type="password"
-                    id="contrasena"
-                    name="contrasena"
-                    minlength="8"
-                    required
-                >
-
-            </div>
-
-
-            <button type="submit">
-                Registrar proveedor
-            </button>
-
-        </form>
+<section class="section">
+
+  <div class="container">
+
+
+    <div style="
+      max-width: 850px;
+      margin: 0 auto var(--space-8);
+    ">
+
+      <a
+        href="javascript:history.back()"
+        class="btn btn-ghost btn-sm"
+        style="margin-bottom:var(--space-4);"
+      >
+        ← Volver
+      </a>
+
+      <span class="section-label">
+        Gestión de proveedores
+      </span>
+
+      <h1 class="section-title">
+        Registrar proveedor
+      </h1>
+
+      <p class="section-desc">
+        Registra la información del proveedor que hará parte de la red
+        de servicios turísticos de MAREVA.
+      </p>
 
     </div>
 
-{% endblock %}
 
+    <!-- =====================================================
+         MENSAJES
+         ===================================================== -->
+
+    <div style="
+      max-width: 850px;
+      margin: 0 auto var(--space-6);
+    ">
+
+      {% if mensaje %}
+
+        <div
+          style="
+            background:rgba(16,185,129,.1);
+            border:1px solid rgba(16,185,129,.25);
+            color:#047857;
+            padding:var(--space-4);
+            border-radius:var(--radius-md);
+            margin-bottom:var(--space-4);
+            font-size:var(--text-sm);
+          "
+        >
+          ✓ {{ mensaje }}
+        </div>
+
+      {% endif %}
+
+
+      {% if error %}
+
+        <div
+          style="
+            background:rgba(239,68,68,.08);
+            border:1px solid rgba(239,68,68,.2);
+            color:#b91c1c;
+            padding:var(--space-4);
+            border-radius:var(--radius-md);
+            margin-bottom:var(--space-4);
+            font-size:var(--text-sm);
+          "
+        >
+          ⚠️ {{ error }}
+        </div>
+
+      {% endif %}
+
+    </div>
+
+    <div
+      class="card"
+      style="
+        max-width:850px;
+        margin:0 auto;
+        padding:var(--space-8);
+      "
+    >
+
+      <form
+        action="{{ url_for('proveedor.registrar_proveedor') }}"
+        method="POST"
+      >
+
+
+        <div style="
+          margin-bottom:var(--space-8);
+        ">
+
+          <div style="
+            display:flex;
+            align-items:flex-start;
+            gap:var(--space-3);
+            margin-bottom:var(--space-6);
+          ">
+
+            <div
+              style="
+                width:42px;
+                height:42px;
+                flex-shrink:0;
+                display:grid;
+                place-items:center;
+                border-radius:var(--radius-md);
+                background:rgba(74,108,247,.1);
+                color:var(--blue);
+                font-size:1.2rem;
+              "
+            >
+              🏢
+            </div>
+
+            <div>
+
+              <h2 style="
+                margin:0 0 4px;
+                font-size:var(--text-xl);
+                color:var(--gray-800);
+              ">
+                Información general
+              </h2>
+
+              <p style="
+                margin:0;
+                color:var(--gray-400);
+                font-size:var(--text-sm);
+              ">
+                Información básica del proveedor y su empresa.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- Nombre -->
+
+          <div class="form-group" style="margin-bottom:var(--space-4);">
+
+            <label
+              for="nombre"
+              class="form-label"
+            >
+              Nombre del proveedor *
+            </label>
+
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              class="form-input"
+              maxlength="100"
+              placeholder="Ej: Hotel Las Américas"
+              required
+            >
+
+          </div>
+
+
+
+          <div class="grid-2">
+
+            <div class="form-group">
+
+              <label
+                for="nit"
+                class="form-label"
+              >
+                NIT *
+              </label>
+
+              <input
+                type="text"
+                id="nit"
+                name="nit"
+                class="form-input"
+                maxlength="30"
+                placeholder="Ej: 900123456-7"
+                required
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                for="tipo_empresa"
+                class="form-label"
+              >
+                Tipo de empresa *
+              </label>
+
+              <input
+                type="text"
+                id="tipo_empresa"
+                name="tipo_empresa"
+                class="form-input"
+                maxlength="50"
+                placeholder="Hotel, transporte, restaurante..."
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="form-group"
+            style="margin-top:var(--space-4);"
+          >
+
+            <label
+              for="descripcion"
+              class="form-label"
+            >
+              Descripción general *
+            </label>
+
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              class="form-textarea"
+              maxlength="1000"
+              placeholder="Describe brevemente los servicios que ofrece el proveedor..."
+              style="min-height:140px;resize:vertical;"
+              required
+            ></textarea>
+
+            <span style="
+              font-size:var(--text-xs);
+              color:var(--gray-400);
+            ">
+              Máximo 1000 caracteres.
+            </span>
+
+          </div>
+
+
+          <div
+            class="grid-2"
+            style="margin-top:var(--space-4);"
+          >
+
+            <div class="form-group">
+
+              <label
+                for="direccion"
+                class="form-label"
+              >
+                Dirección
+              </label>
+
+              <input
+                type="text"
+                id="direccion"
+                name="direccion"
+                class="form-input"
+                maxlength="200"
+                placeholder="Dirección del establecimiento"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                for="ciudad"
+                class="form-label"
+              >
+                Ciudad
+              </label>
+
+              <input
+                type="text"
+                id="ciudad"
+                name="ciudad"
+                class="form-input"
+                maxlength="100"
+                placeholder="Ej: Bogotá"
+              >
+
+            </div>
+
+          </div>
+
+
+
+          <div
+            class="form-group"
+            style="margin-top:var(--space-4);"
+          >
+
+            <label
+              for="telefono"
+              class="form-label"
+            >
+              Teléfono
+            </label>
+
+            <input
+              type="tel"
+              id="telefono"
+              name="telefono"
+              class="form-input"
+              placeholder="+57 3001234567"
+              maxlength="20"
+            >
+
+          </div>
+
+
+
+          <div
+            class="form-group"
+            style="margin-top:var(--space-4);"
+          >
+
+            <label
+              for="correo"
+              class="form-label"
+            >
+              Correo electrónico *
+            </label>
+
+            <input
+              type="email"
+              id="correo"
+              name="correo"
+              class="form-input"
+              maxlength="100"
+              placeholder="correo@empresa.com"
+              required
+            >
+
+          </div>
+
+        </div>
+
+
+        <div style="
+          height:1px;
+          background:var(--gray-200);
+          margin-bottom:var(--space-8);
+        "></div>
+
+        <div style="
+          margin-bottom:var(--space-8);
+        ">
+
+          <div style="
+            display:flex;
+            align-items:flex-start;
+            gap:var(--space-3);
+            margin-bottom:var(--space-6);
+          ">
+
+            <div
+              style="
+                width:42px;
+                height:42px;
+                flex-shrink:0;
+                display:grid;
+                place-items:center;
+                border-radius:var(--radius-md);
+                background:rgba(139,92,246,.1);
+                color:var(--purple);
+                font-size:1.2rem;
+              "
+            >
+              👤
+            </div>
+
+            <div>
+
+              <h2 style="
+                margin:0 0 4px;
+                font-size:var(--text-xl);
+                color:var(--gray-800);
+              ">
+                Datos de contacto
+              </h2>
+
+              <p style="
+                margin:0;
+                color:var(--gray-400);
+                font-size:var(--text-sm);
+              ">
+                Persona responsable de la comunicación con MAREVA.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label
+              for="nombre_contacto"
+              class="form-label"
+            >
+              Nombre del contacto
+            </label>
+
+            <input
+              type="text"
+              id="nombre_contacto"
+              name="nombre_contacto"
+              class="form-input"
+              maxlength="100"
+              placeholder="Nombre de la persona responsable"
+            >
+
+          </div>
+
+
+          <div
+            class="grid-2"
+            style="margin-top:var(--space-4);"
+          >
+
+            <div class="form-group">
+
+              <label
+                for="telefono_contacto"
+                class="form-label"
+              >
+                Teléfono del contacto
+              </label>
+
+              <input
+                type="tel"
+                id="telefono_contacto"
+                name="telefono_contacto"
+                class="form-input"
+                placeholder="+57 3001234567"
+                maxlength="20"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label
+                for="correo_contacto"
+                class="form-label"
+              >
+                Correo del contacto
+              </label>
+
+              <input
+                type="email"
+                id="correo_contacto"
+                name="correo_contacto"
+                class="form-input"
+                maxlength="100"
+                placeholder="contacto@empresa.com"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div style="
+          height:1px;
+          background:var(--gray-200);
+          margin-bottom:var(--space-8);
+        "></div>
+
+
+        <div style="
+          margin-bottom:var(--space-8);
+        ">
+
+          <div style="
+            display:flex;
+            align-items:flex-start;
+            gap:var(--space-3);
+            margin-bottom:var(--space-6);
+          ">
+
+            <div
+              style="
+                width:42px;
+                height:42px;
+                flex-shrink:0;
+                display:grid;
+                place-items:center;
+                border-radius:var(--radius-md);
+                background:rgba(255,213,79,.2);
+                color:var(--yellow-dark);
+                font-size:1.2rem;
+              "
+            >
+              🔐
+            </div>
+
+            <div>
+
+              <h2 style="
+                margin:0 0 4px;
+                font-size:var(--text-xl);
+                color:var(--gray-800);
+              ">
+                Acceso del proveedor
+              </h2>
+
+              <p style="
+                margin:0;
+                color:var(--gray-400);
+                font-size:var(--text-sm);
+              ">
+                Credenciales que utilizará el proveedor para ingresar a MAREVA.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label
+              for="contrasena"
+              class="form-label"
+            >
+              Contraseña *
+            </label>
+
+            <input
+              type="password"
+              id="contrasena"
+              name="contrasena"
+              class="form-input"
+              minlength="8"
+              placeholder="Mínimo 8 caracteres"
+              required
+            >
+
+            <span style="
+              font-size:var(--text-xs);
+              color:var(--gray-400);
+            ">
+              La contraseña debe tener al menos 8 caracteres.
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div style="
+          display:flex;
+          justify-content:flex-end;
+          align-items:center;
+          gap:var(--space-3);
+          padding-top:var(--space-6);
+          border-top:1px solid var(--gray-100);
+        ">
+
+          <a
+            href="javascript:history.back()"
+            class="btn btn-outline"
+          >
+            Cancelar
+          </a>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            ✓ Registrar proveedor
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}

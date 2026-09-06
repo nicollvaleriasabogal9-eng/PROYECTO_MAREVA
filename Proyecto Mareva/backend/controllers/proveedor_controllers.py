@@ -7,9 +7,6 @@ class ProveedorController:
     def __init__(self):
             self.service = ProveedorService()
 
-# =========================================================
-# REGISTRO DE PROVEEDOR - ADMIN
-# =========================================================
 
     def mostrar_registro(self):
 
@@ -84,9 +81,6 @@ class ProveedorController:
             error=resultado["error"]
         )
 
-# =========================================================
-# VALIDACIÓN DE PROVEEDOR
-# =========================================================
 
     def _obtener_proveedor_actual(self):
 
@@ -100,10 +94,6 @@ class ProveedorController:
 
         return usuario.get("id")
 
-# =========================================================
-# RF-127
-# RECEPCIÓN DE SOLICITUDES / CONTRATOS
-# =========================================================
 
     def listar_contratos(self):
 
@@ -121,10 +111,6 @@ class ProveedorController:
             contratos=contratos
         )
 
-# =========================================================
-# RF-128
-# CONSULTA DE TÉRMINOS
-# =========================================================
 
     def detalle_contrato(self, id_contrato):
 
@@ -153,10 +139,6 @@ class ProveedorController:
             contrato=contrato
         )
 
-# =========================================================
-# RF-129
-# ACEPTAR / RECHAZAR
-# =========================================================
 
     def responder_contrato(self, id_contrato):
 
