@@ -1,6 +1,7 @@
 # 🌊 MAREVA — Agencia de Viajes Digital
 
 > Plataforma web para la organización de planes vacacionales personalizados en Colombia.
+> Código del proyecto en la carpeta **`Mareva_Sustentacion/`**.
 
 ---
 
@@ -16,138 +17,181 @@ Hoy organizar unas vacaciones obliga a abrir decenas de pestañas: una para el t
 
 | Rol | Descripción |
 |---|---|
-| **Cliente / Viajero** | Navega destinos, reserva paquetes, gestiona su perfil y acumula insignias |
-| **Administrador** | Gestiona paquetes, proveedores, guías, promociones y audita el sistema |
-
----
-## 3. Instalación y Ejecución del Proyecto
-
-###  Crear un entorno virtual
-
-Abre una terminal en la carpeta del proyecto y ejecuta:
-
-### Windows
-```bash
-python -m venv venv
-```
-
-### Linux / macOS
-```bash
-python3 -m venv venv
-```
+| **Cliente / Viajero** | Navega destinos, reserva paquetes, gestiona su perfil, guarda favoritos y acumula insignias |
+| **Administrador** | Gestiona paquetes, destinos, proveedores, guías, niveles, reportes y audita el sistema |
+| **Guía turístico** | Consulta su panel de viajes y actualiza el estado de las reservas asignadas |
+| **Proveedor** | Consulta contratos y solicitudes de servicios |
 
 ---
 
-### Activar el entorno virtual
+## 3. Estructura del Proyecto
 
-### Windows (CMD)
-
-```bash
-venv\Scripts\activate
+```
+Mareva_Sustentacion/
+├── backend/            → Aplicación Flask (N-Capas)
+│   ├── config/         → Conexión a PostgreSQL
+│   ├── controllers/    → Lógica de presentación (Flask)
+│   ├── models/         → Entidades POO (Abstract Base Class + Factory)
+│   ├── repositories/   → Persistencia (consultas SQL directas)
+│   ├── routes/         → Definición de URLs (blueprints)
+│   ├── services/       → Reglas de negocio
+│   └── main.py         → Punto de entrada del servidor
+├── frontend/           → HTML5 · CSS3 · JavaScript (Jinja2)
+│   ├── static/         → CSS, JS, imágenes y videos
+│   └── templates/      → Plantillas HTML
+└── database/           → Scripts SQL y utilidades
+    ├── mareva_unificado.sql        → Modelo completo + datos iniciales
+    ├── migracion_caribe_2026.sql   → Migración de la versión Caribe
+    └── hashear_passwords.py        → Hashea contraseñas en texto plano
 ```
 
-### Windows (PowerShell)
+---
+
+## 4. Instalación y Ejecución
+
+### Requisitos previos
+
+- Python 3.10+
+- PostgreSQL (se usan `psycopg[binary]` 3.x)
+- Las dependencias del proyecto (`requirements.txt`)
+
+### 4.1 Crear la base de datos
+
+1. Crea una base de datos PostgreSQL (por ejemplo `mareva`).
+2. Ejecuta el script de creación completo:
+
+```sql
+psql -U tu_usuario -d mareva -f database/mareva_unificado.sql
+```
+
+3. Si vienes de una base existente de la versión Caribe, aplica la migración:
+
+```sql
+psql -U tu_usuario -d mareva -f database/migracion_caribe_2026.sql
+```
+
+### 4.2 Crear y activar el entorno virtual
+
+Entra a la carpeta del proyecto:
+
+```bash
+cd Mareva_Sustentacion
+```
+
+#### Windows (PowerShell)
 
 ```powershell
+python -m venv venv
 venv\Scripts\Activate.ps1
 ```
 
-### Linux / macOS
+#### Windows (CMD)
+
+```bat
+python -m venv venv
+venv\Scripts\activate
+```
+
+#### Linux / macOS
 
 ```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
 Cuando el entorno esté activo, verás el nombre `(venv)` al inicio de la terminal.
 
----
-
-## Instalar las dependencias
-
-Con el entorno virtual activado, instala todas las librerías necesarias:
+### 4.3 Instalar las dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+### 4.4 Configurar `.env`
 
-## Ejecutar la aplicación
+Crea un archivo `.env` en la raíz de `Mareva_Sustentacion/` (nunca lo subas al repositorio):
 
-Inicia el servidor de Flask con:
-
-```bash
-python app.py
+```env
+DB_HOST=localhost
+DB_NAME=mareva
+DB_USER=postgres
+DB_PASSWORD=tu_password
+DB_PORT=5432
 ```
 
-o, si el archivo principal tiene otro nombre:
+### 4.5 (Opcional) Hashear contraseñas legadas
+
+Si la BD tiene contraseñas en texto plano, corre el script de hasheo (desde `backend/`):
 
 ```bash
-python nombre_del_archivo.py
+cd backend
+python ../database/hashear_passwords.py
 ```
 
----
+### 4.6 Ejecutar la aplicación
 
-## Abrir el proyecto
+El servidor se inicia desde la carpeta `backend/`:
 
-Una vez iniciado el servidor, abre tu navegador y visita:
+```bash
+cd backend
+python main.py
+```
+
+### 4.7 Abrir el proyecto
+
+Una vez iniciado el servidor, visita en tu navegador:
 
 ```
 http://127.0.0.1:5000/
 ```
 
----
-
-## Si ocurre algún error
-
-Verifica que:
-
-- Estás dentro del entorno virtual (`(venv)` aparece en la terminal).
-- Instalaste las dependencias con `requirements.txt`.
-- Tienes instalada una versión compatible de Python.
-- Estás ejecutando el archivo principal del proyecto.
+> **Nota:** el video de portada `videoinicio.mp4` (318 MB) supera el límite de archivos de GitHub (100 MB) por lo que **no se incluye en el repositorio**. Debe copiarse manualmente a `frontend/static/videos/` si se desea ese video en particular. El video alternativo `video_inicio2.mp4` sí está incluido.
 
 ---
 
-## Desactivar el entorno virtual
+## 5. Usuarios de Prueba
 
-Cuando termines de trabajar, puedes salir del entorno virtual con:
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `nicoll@mareva.co` (o `cesar@mareva.co`, `andres@mareva.co`, `laura@mareva.co`, `sofia@mareva.co`) | `Admin_mareva01` |
+| Cliente | `yadira@test.co` | `cliente_prueba` |
+| Proveedor | (creado en `Proveedor_mareva01`) | `Proveedor_mareva01` |
 
-```bash
-deactivate
-```
+---
 
+## 6. Funcionalidades Principales
 
-## 4. Funcionalidades Principales
-
-- Registro e inicio de sesión (con bloqueo por intentos fallidos)
-- Catálogo de **20 paquetes turísticos** con filtro por categoría y búsqueda
-- Detalle del paquete con servicios incluidos y extras opcionales
-- Flujo de reserva con selección de viajeros, seguro y observaciones
+- Registro e inicio de sesión con hash de contraseña (werkzeug) y bloqueo por intentos fallidos
+- Catálogo de **20 paquetes turísticos** con búsqueda, filtros (categoría, destino, duración, precio, incluye) y ordenamiento
+- Detalle del paquete con calendario de salidas, servicios incluidos y extras opcionales
+- **Comparador de paquetes** (hasta 3)
+- **Favoritos**: agregar/quitar desde el catálogo, página de lista y contador en el navbar
+- Flujo de reserva completo: selección de fecha, alojamiento, alimentación, transporte, actividades, seguro y extras
+- Gestión de viajeros por reserva, confirmación en pantalla y **descarga de la reserva en PDF**
+- Panel de administración: paquetes, destinos, niveles de gamificación, encuestas, reportes y reservas
 - Perfil de usuario con nivel de gamificación e insignias
-- Sistema de **referidos** entre clientes
-- **Lista de sueños** (ahorro programado hacia un paquete)
-- Favoritos, historial de búsqueda, notificaciones
+- Historial de búsqueda reutilizable
 - **Encuestas de satisfacción** post-viaje
-- Auditoría de acciones del administrador
+- Roles de guía turístico y proveedor (contratos y solicitudes)
 
 ---
 
-## 5. Tecnologías Utilizadas
+## 7. Tecnologías Utilizadas
 
 | Capa | Tecnología |
 |---|---|
-| **Frontend** | HTML5 · CSS3 · JavaScript |
-| **Backend** | Python 3 · Flask |
-| **Base de Datos** | PostgreSQL |
+| **Frontend** | HTML5 · CSS3 · JavaScript (Jinja2) |
+| **Backend** | Python 3 · Flask 3 |
+| **Base de Datos** | PostgreSQL (psycopg 3) |
+| **PDF** | ReportLab |
 | **Patrón Backend** | Arquitectura N-Capas (Presentación → Negocio → Datos) |
-| **Patrón OOP** | Abstract Base Class + Factory Method (clases `Playa`, `Aventura`, `Ecoturismo`, `Cultural`) |
+| **Patrón OOP** | Abstract Base Class + Factory Method (clases `Playa`, `Aventura`, `Ecoturismo`, `Cultural`, `Ciudad`) |
 | **Control de versiones** | Git / GitHub |
 | **Gestión del proyecto** | GitHub Projects (Scrum) |
 
 ---
 
-## 6. Arquitectura — N-Capas
+## 8. Arquitectura — N-Capas
 
 El sistema está dividido en **6 capas**, agrupadas en FrontEnd y BackEnd:
 
@@ -171,33 +215,30 @@ El sistema está dividido en **6 capas**, agrupadas en FrontEnd y BackEnd:
 ║  ├───────────────────────────────────────────────┤  ║
 ║  │  Capa de Persistencia  │  PostgreSQL          │  ║
 ║  │  (Repositories)        │                      │  ║
-║  ├───────────────────────────────────────────────┤  ║
-║  │  Servicios Externos    │  APIs de terceros    │  ║
-║  │  (Adapters)            │                      │  ║
 ║  └───────────────────────────────────────────────┘  ║
 ╚══════════════════════════════════════════════════════╝
 ```
 
 ### Descripción de cada capa
 
-| Capa | Tecnología | Responsabilidad |
+| Capa | Ubicación | Responsabilidad |
 |---|---|---|
-| **Presentación** | HTML5 · CSS3 · JavaScript | Muestra la interfaz al usuario y gestiona la interacción visual |
-| **Aplicación** | Flask (routes · controllers) | Actúa como intermediaria entre el FrontEnd y la lógica de negocio. Define las URLs y recibe las solicitudes HTTP |
-| **Negocio (Services)** | Python · Flask | Contiene las reglas de negocio del sistema: validaciones, cálculos y procesamiento de información |
-| **Datos (Models)** | Python · POO | Representa las entidades de la base de datos, define atributos y relaciones entre tablas |
-| **Persistencia (Repositories)** | PostgreSQL | Se encarga de la comunicación directa con la base de datos: consultas, inserciones y actualizaciones |
-| **Servicios Externos (Adapters)** | APIs de terceros | Conectores con servicios externos. Actúan como intermediarios entre la aplicación y el mundo exterior |
+| **Presentación** | `frontend/` (HTML · CSS · JS) | Muestra la interfaz y gestiona la interacción visual |
+| **Aplicación** | `backend/routes/` y `backend/controllers/` | Define las URLs y recibe las solicitudes HTTP |
+| **Negocio (Services)** | `backend/services/` | Reglas de negocio: validaciones, cálculos y procesamiento |
+| **Datos (Models)** | `backend/models/` | Entidades POO del dominio (paquetes, clientes) |
+| **Persistencia (Repositories)** | `backend/repositories/` | Comunicación directa con PostgreSQL |
+| **Servicios Externos** | APIs de terceros | Conectores con el mundo exterior (en esta versión, proveedores y guías viven en la BD) |
 
 ### ¿Por qué elegimos Arquitectura N-Capas?
 
 El equipo optó por esta arquitectura por dos razones fundamentales:
 
 **1. Modificabilidad sin efecto cascada**
-Al separar cada responsabilidad en su propia capa, cualquier cambio queda contenido sin propagarse al resto del sistema. Si se cambia PostgreSQL por otro motor de base de datos, solo se toca la capa de Persistencia. Si se rediseña la interfaz, la lógica de negocio y los repositorios permanecen intactos. Si se agrega un nuevo servicio externo, basta con crear un nuevo adapter sin modificar nada más. Esto fue clave para un equipo de 5 personas trabajando en paralelo: cada integrante podía modificar su módulo sin romper el trabajo de los demás.
+Al separar cada responsabilidad en su propia capa, cualquier cambio queda contenido sin propagarse al resto del sistema. Si se cambia PostgreSQL por otro motor de base de datos, solo se toca la capa de Persistencia. Si se rediseña la interfaz, la lógica de negocio y los repositorios permanecen intactos. Esto fue clave para un equipo de 5 personas trabajando en paralelo: cada integrante podía modificar su módulo sin romper el trabajo de los demás.
 
 **2. Optimización y rendimiento del sistema**
-La separación de responsabilidades permite identificar y optimizar cada capa de forma independiente. Si hay lentitud en las consultas, se interviene únicamente en los repositorios sin tocar los servicios ni las rutas. Si hay un cuello de botella en la lógica de negocio, se refactoriza esa capa sin afectar la vista. Esto hace que el sistema sea más fácil de auditar, depurar y escalar a medida que crezca el catálogo de paquetes o la base de clientes.
+La separación de responsabilidades permite identificar y optimizar cada capa de forma independiente. Si hay lentitud en las consultas, se interviene únicamente en los repositorios sin tocar los servicios ni las rutas. Esto hace que el sistema sea más fácil de auditar, depurar y escalar.
 
 Esto garantiza:
 - **Separación de responsabilidades** — los cambios en la BD no afectan la vista ni los servicios
@@ -207,7 +248,7 @@ Esto garantiza:
 
 ---
 
-## 7. Base de Datos — Módulos
+## 9. Base de Datos — Módulos
 
 La base de datos final en PostgreSQL tiene **13 módulos** y más de **35 tablas**:
 
@@ -233,24 +274,13 @@ La base de datos final en PostgreSQL tiene **13 módulos** y más de **35 tablas
 - 20 destinos colombianos
 - 20 paquetes turísticos
 - 5 administradores + 1 cliente de prueba (`yadira@test.co`)
-- 5 proveedores, 3 guías, 3 promociones, 6 encuestas base
+- Proveedores, guías turísticos, promociones y encuestas base
 
 ---
 
-## 8. Diagrama de Componentes
+## 10. Patrón POO en el Backend
 
-El sistema sigue una arquitectura cliente-servidor donde:
-
-- El **navegador** consume las rutas Flask (`/`, `/paquetes`, `/login`, `/reserva/<slug>`, etc.)
-- El **backend Flask** contiene los controladores, servicios (POO con factory) y adaptadores
-- Los **repositorios** se conectan a **PostgreSQL** para persistir clientes, reservas y paquetes
-- Los **proveedores externos** (seguros, guías) son entidades de la BD, no servicios externos en esta versión
-
----
-
-## 9. Patrón POO en el Backend
-
-`app.py` implementa **Abstract Base Class + Factory Method**:
+`backend/models/paquete.py` implementa **Abstract Base Class + Factory Method**:
 
 ```python
 class PaqueteBase(ABC):
@@ -277,30 +307,41 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 10. Rutas Flask Implementadas
+## 11. Rutas Flask Implementadas
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/` | Página principal con 6 destacados |
-| GET | `/paquetes` | Catálogo completo con búsqueda |
-| GET | `/destinos` | Listado de los 20 destinos |
-| GET | `/detalle/<slug>` | Detalle de un paquete |
+| GET | `/` | Página principal (destacados, destinos, promociones) |
+| GET | `/paquetes` | Catálogo con búsqueda, filtros y ordenamiento |
+| GET | `/paquetes/<slug>` | Detalle de un paquete |
+| GET | `/comparar` | Comparador de paquetes |
 | GET/POST | `/login` | Inicio de sesión |
 | GET/POST | `/registro` | Registro de nuevo usuario |
-| GET | `/reserva/<slug>` | Formulario de reserva (requiere login) |
-| POST | `/confirmar-reserva` | Procesa la reserva |
-| GET | `/perfil` | Perfil del usuario logueado |
 | GET | `/logout` | Cierra sesión |
+| GET | `/favoritos` | Lista de paquetes favoritos |
+| POST | `/favoritos/<id_paquete>/alternar` | Agrega/quita un favorito (AJAX) |
+| GET | `/destinos` | Listado de destinos |
+| GET | `/destinos/<id_destino>` | Detalle de un destino |
+| GET | `/reserva/<slug>` | Formulario de reserva (requiere login) |
+| POST | `/reserva/preparar/<slug>` | Prepara y valida la selección de la reserva |
+| POST | `/reserva/guardar/<slug>` | Guarda la reserva |
+| GET | `/reserva/confirmacion` | Confirmación de reserva |
+| GET | `/reserva/confirmacion/pdf` | Descarga la reserva en PDF |
+| GET | `/perfil` | Perfil del usuario logueado (reservas, historial, niveles) |
+| GET | `/admin/dashboard` | Panel del administrador |
+| POST | `/admin/paquetes/suspender` | Suspende/activa paquetes |
+| POST | `/admin/reservas/<id_reserva>/reembolso` | Marca reembolso de una reserva |
+| GET | `/admin/encuestas/reporte` | Reporte de encuestas |
 
 ---
 
-## 11. Metodología de Desarrollo
+## 12. Metodología de Desarrollo
 
 **Scrum**
 
 ---
 
-## 12. Integrantes
+## 13. Integrantes
 
 | Nombre | Rol |
 |---|---|
@@ -312,27 +353,24 @@ Cada categoría aplica un ajuste de precio diferente, y la factory decide qué c
 
 ---
 
-## 13. Estado Actual del Proyecto
+## 14. Estado Actual del Proyecto
 
 ✅ Requisitos funcionales y no funcionales  
 ✅ Historias de usuario  
 ✅ Modelo Entidad-Relación (MER) y modelo lógico  
 ✅ Script SQL final PostgreSQL (13 módulos, 35+ tablas, datos iniciales)  
-✅ Prototipos HTML/CSS/JS funcionales  
-✅ Backend Flask con rutas y POO implementadas  
-✅ Sistema de sesiones (login/registro/logout)  
+✅ Aplicación Flask conectada a PostgreSQL  
+✅ Sistema de autenticación con hash de contraseñas y bloqueo por intentos fallidos  
 ✅ Catálogo de paquetes con Factory Method  
-✅ Repositorio colaborativo en GitHub  
-
-🚧 En desarrollo:  
-- Conexión real Flask ↔ PostgreSQL  
-- Sistema de autenticación con hash de contraseña  
-- Panel de administración  
-- Integración completa de reservas en BD  
+✅ Flujo completo de reservas con persistencia en BD y PDF  
+✅ Favoritos, comparador, historial y perfil de cliente  
+✅ Paneles de administración, guía y proveedor  
+✅ Encuestas post-viaje y reportes  
+✅ Repositorio colaborativo en GitHub
 
 ---
 
-## 14. Bootcamp
+## 15. Bootcamp
 
 **SENA — Arquitectura de Software**  
 Inicio: 25 de abril de 2026
