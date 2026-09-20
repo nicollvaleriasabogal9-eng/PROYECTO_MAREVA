@@ -1,1 +1,0 @@
-#example de routes
