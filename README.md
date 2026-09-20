@@ -178,13 +178,81 @@ http://127.0.0.1:5000/
 
 ## 7. Tecnologías Utilizadas
 
-| Capa | Tecnología |
+### 7.1 Frontend
+
+| Tecnología | Versión / Detalle | Uso en el proyecto |
+|---|---|---|
+| **HTML5** | Estándar | Estructura semántica de todas las vistas (etiquetas `<section>`, `<article>`, `<main>`, `data-*`) |
+| **CSS3** | Variables CSS (`:root`) + Flexbox + Grid | Sistema de diseño con paleta MAREVA en `frontend/static/css/` |
+| **JavaScript** | Vanilla JS (ES6+) | Interactividad: catálogo, comparador, favoritos, reserva, dashboard y reportes. Sin frameworks |
+| **Jinja2** | Motor de plantillas de Flask | Reutilización con `{% extends "base.html" %}` y `{% block %}`; renderizado de paquetes, destinos, reservas y paneles |
+| **Manrope** | Google Fonts | Tipografía principal (importada en `styles.css` y `dashboard.css`) |
+| **intl-tel-input** | v25.3.1 (CDN jsDelivr) | Validación y selección de prefijo telefónico en registro y formularios (usa `utils.js`) |
+| **Emojis / símbolos Unicode** | — | Iconografía del sitio (♥, ✈️, 🏨, 🍽️, 🚌…) sin librerías de iconos externas |
+
+**Archivos JS** (`frontend/static/js/`):
+
+| Archivo | Responsabilidad |
 |---|---|
-| **Frontend** | HTML5 · CSS3 · JavaScript (Jinja2) |
-| **Backend** | Python 3 · Flask 3 |
+| `app.js` | Comportamiento global: navbar, menús y utilidades |
+| `paquetes.js` | Filtros del catálogo, tarjetas clicables y **comparador** |
+| `comparar.js` | Lógica de la vista de comparación de paquetes |
+| `favoritos.js` | **Botones de favorito** (`.favorite-button` y `.package-favorite-btn`) + contador del navbar (AJAX) |
+| `reserva.js` | Formulario de reserva: cálculo en vivo de precios por persona y total |
+| `reserva_confirmar.js` | Confirmación de reserva |
+| `registro.js` | Validación de registro + integración con `intl-tel-input` |
+| `home_promos.js` | Carrusel de promociones de la página principal |
+| `dashboard.js` | Paneles del administrador |
+| `reportes.js` | Filtros de reportes |
+| `gamificacion_*.js` | (si aplica) Niveles e insignias |
+
+**Archivos CSS** (`frontend/static/css/`): `styles.css`, `index.css`, `auth.css`, `paquetes.css`, `mareva_redesign.css`, `reserva_flow.css`, `dashboard.css`, `reportes.css`, `perfil.css`, `niveles.css`, `gamificacion.css`, `gamificario.css`, `guia.css`.
+
+### 7.2 Backend
+
+| Tecnología | Versión / Detalle | Uso en el proyecto |
+|---|---|---|
+| **Python** | 3.10+ | Lenguaje de implementación de todo el backend |
+| **Flask** | 3.1.3 | Microframework web: rutas (`blueprints`), templates, sesiones, `before_request` y `context_processor` |
+| **psycopg** | 3.3.4 (`psycopg[binary]`) | Driver PostgreSQL moderno (conexión en `backend/config/conexion.py`) |
+| **Werkzeug** | (núcleo de Flask) `check_password_hash` / `generate_password_hash` | **Hash de contraseñas** (`pbkdf2:`/`scrypt:`) en `auth_services.py` |
+| **ReportLab** | 4.x (`reportlab`) | **Generación de PDF** de la reserva en `services/pdf_services.py` (A4, platypus) |
+| **openpyxl** | 3.1.5 | **Exportación de reportes a Excel** (`reporte_services.py`) con estilos (fuentes, relleno, bordes) |
+| **phonenumbers** | 9.0.36 | Validación de números de teléfono (Colombia) en `auth_controllers.py` y `proveedor_services.py` |
+| **python-dotenv** | 1.2.2 | Carga de credenciales desde `.env` (`DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`) |
+| **Jinja2** | (motor de Flask) | Templates HTML servidos por Flask (carpeta `frontend/templates`) |
+
+**Arquitectura backend (N-Capas):**
+
+| Capa | Carpeta | Responsabilidad |
+|---|---|---|
+| **Routes** | `backend/routes/` | Blueprints Flask por módulo: `auth`, `home`, `paquetes`, `destinos`, `reserva`, `favoritos`, `encuesta`, `gamificacion`, `guia`, `proveedores`, `reporte`, `dashboard` |
+| **Controllers** | `backend/controllers/` | Reciben peticiones, orquestan servicios y renderizan/re-direccionan |
+| **Services** | `backend/services/` | Reglas de negocio: `auth_services`, `paquete_services`, `reserva_services`, `reporte_services`, `pdf_services`, `proveedor_services`, `gamificacion_services`, `destinos_services`, `historial_services`, `guia_services`, `encuesta_services`, `dashboard_services` |
+| **Models** | `backend/models/` | POO: `PaqueteBase` (ABC) + `Playa`, `Aventura`, `Ecoturismo`, `Cultural`, `Ciudad` + `factory_paquete()`; clase `Cliente` |
+| **Repositories** | `backend/repositories/` | Consultas SQL directas a PostgreSQL por entidad (`auth`, `paquete`, `reserva`, `reporte`, `proveedor`, `destino`, `guia`, `encuesta`, `gamificacion`, `historial`, `salida`, `dashboard`) |
+| **Config** | `backend/config/` | Clase `Conexion` (pool de conexiones a PostgreSQL) |
+
+### 7.3 Versiones exactas (`requirements.txt`)
+
+```
+Flask==3.1.3
+python-dotenv==1.2.2
+phonenumbers==9.0.36
+psycopg[binary]==3.3.4
+openpyxl==3.1.5
+reportlab==4.4.1
+```
+
+| Capa | Resumen |
+|---|---|
+| **Frontend** | HTML5 · CSS3 · JavaScript vanilla · Jinja2 · Manrope · intl-tel-input |
+| **Backend** | Python 3.10+ · Flask 3.1.3 · psycopg 3 |
 | **Base de Datos** | PostgreSQL (psycopg 3) |
-| **PDF** | ReportLab |
-| **Patrón Backend** | Arquitectura N-Capas (Presentación → Negocio → Datos) |
+| **Seguridad** | Werkzeug (hash de contraseñas), intentos fallidos + bloqueo temporal |
+| **PDF / Reportes** | ReportLab (PDF) · openpyxl (Excel) |
+| **Validación** | phonenumbers · intl-tel-input |
+| **Patrón Backend** | Arquitectura N-Capas (Routes → Controllers → Services → Models → Repositories → BD) |
 | **Patrón OOP** | Abstract Base Class + Factory Method (clases `Playa`, `Aventura`, `Ecoturismo`, `Cultural`, `Ciudad`) |
 | **Control de versiones** | Git / GitHub |
 | **Gestión del proyecto** | GitHub Projects (Scrum) |
