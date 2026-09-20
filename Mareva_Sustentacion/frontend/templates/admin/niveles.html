@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero gamificacion-hero">
+  <div class="container">
+    <p class="section-label">Administración</p>
+    <h1 class="section-title">Gestión de niveles</h1>
+    <p class="section-desc">Configura los umbrales de monto, reservas y beneficios de cada nivel.</p>
+  </div>
+</section>
+
+<section class="section gamificacion-page">
+  <div class="container">
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% for categoria, mensaje in mensajes %}
+        <div class="alert {% if categoria == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ mensaje }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="admin-gamificacion-layout">
+      <aside class="admin-form-card">
+        <p class="section-label">Nuevo nivel</p>
+        <h2>Crear nivel</h2>
+        <form method="POST" action="{{ url_for('gamificacion.crear_nivel') }}" class="gamificacion-form">
+          <label>Nombre
+            <input class="form-input" name="nombre" maxlength="50" required>
+          </label>
+          <label>Monto mínimo
+            <input class="form-input" type="number" name="min_monto" min="0" step="1000" value="0" required>
+          </label>
+          <label>Reservas mínimas
+            <input class="form-input" type="number" name="min_reservas" min="0" value="0" required>
+          </label>
+          <label>Descuento (%)
+            <input class="form-input" type="number" name="porcentaje_descuento" min="0" max="100" step="0.01" value="0" required>
+          </label>
+          <label>Descripción
+            <textarea class="form-textarea" name="descripcion" rows="3"></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">Crear nivel</button>
+        </form>
+      </aside>
+
+      <div class="admin-items">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Configuración actual</p>
+            <h2>{{ niveles|length }} niveles</h2>
+          </div>
+          <a class="btn btn-outline" href="{{ url_for('paquetes.panel_admin') }}">Gestionar paquetes</a>
+        </div>
+
+        {% for nivel in niveles %}
+        <details class="admin-edit-card" {% if loop.first %}open{% endif %}>
+          <summary>
+            <span><strong>{{ nivel.nombre }}</strong> · {{ nivel.min_reservas }} reservas</span>
+            <span>${{ "{:,.0f}".format(nivel.min_monto) }}</span>
+          </summary>
+          <form method="POST" action="{{ url_for('gamificacion.actualizar_nivel', id_nivel=nivel.id_nivel) }}" class="gamificacion-form gamificacion-form--grid">
+            <label>Nombre
+              <input class="form-input" name="nombre" maxlength="50" value="{{ nivel.nombre }}" required>
+            </label>
+            <label>Monto mínimo
+              <input class="form-input" type="number" name="min_monto" min="0" step="1000" value="{{ nivel.min_monto }}" required>
+            </label>
+            <label>Reservas mínimas
+              <input class="form-input" type="number" name="min_reservas" min="0" value="{{ nivel.min_reservas }}" required>
+            </label>
+            <label>Descuento (%)
+              <input class="form-input" type="number" name="porcentaje_descuento" min="0" max="100" step="0.01" value="{{ nivel.porcentaje_descuento }}" required>
+            </label>
+            <label class="form-span-2">Descripción
+              <textarea class="form-textarea" name="descripcion" rows="2">{{ nivel.descripcion or '' }}</textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Guardar cambios</button>
+          </form>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

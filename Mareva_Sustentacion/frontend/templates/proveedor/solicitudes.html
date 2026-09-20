@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container">
+
+        <a href="{{ url_for('home.home') }}"
+           class="btn btn-ghost btn-sm"
+           style="margin-bottom:var(--space-4)">
+            ← Volver al panel
+        </a>
+
+        <div style="margin-bottom:var(--space-6)">
+
+            <p class="section-label">📋 Contratación</p>
+
+            <h1 class="section-title">
+                Solicitudes de contratación
+            </h1>
+
+            <p class="section-desc">
+                Aquí puedes consultar las solicitudes de contratación
+                enviadas por MAREVA.
+            </p>
+
+        </div>
+
+
+        {% if solicitudes %}
+
+            <div class="perfil-card">
+
+                {% for solicitud in solicitudes %}
+
+                    <div style="
+                        padding:var(--space-4) 0;
+                        border-bottom:1px solid var(--gray-200);
+                    ">
+
+                        <h3>
+                            {{ solicitud.paquete_nombre }}
+                        </h3>
+
+                        <p class="text-muted">
+                            Contrato #{{ solicitud.id_contrato }}
+                        </p>
+
+                        <p>
+                            <strong>Destino:</strong>
+                            {{ solicitud.destino_nombre or 'No especificado' }}
+                        </p>
+
+                        <p>
+                            <strong>Fecha de solicitud:</strong>
+                            {{ solicitud.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+
+                        <p>
+                            <strong>Vigencia:</strong>
+
+                            {% if solicitud.fecha_inicio and solicitud.fecha_fin %}
+
+                                {{ solicitud.fecha_inicio.strftime('%d/%m/%Y') }}
+                                -
+                                {{ solicitud.fecha_fin.strftime('%d/%m/%Y') }}
+
+                            {% else %}
+
+                                No definida
+
+                            {% endif %}
+                        </p>
+
+                        <p>
+                            <strong>Duración:</strong>
+                            {{ solicitud.duracion_dias }}
+                            días /
+                            {{ solicitud.duracion_noches }}
+                            noches
+                        </p>
+
+                        <p>
+                            <strong>Valor referencial:</strong>
+
+                            ${{ "{:,.0f}".format(solicitud.paquete_precio) }}
+                        </p>
+
+                        <p>
+                            <strong>Estado:</strong>
+
+                            {% if solicitud.estado_contrato == 'pendiente' %}
+
+                                <span class="badge badge-warning">
+                                    🟡 Pendiente
+                                </span>
+
+                            {% elif solicitud.estado_contrato == 'aceptado' %}
+
+                                <span class="badge badge-success">
+                                    🟢 Aceptado
+                                </span>
+
+                            {% elif solicitud.estado_contrato == 'rechazado' %}
+
+                                <span class="badge badge-danger">
+                                    🔴 Rechazado
+                                </span>
+
+                            {% elif solicitud.estado_contrato == 'vigente' %}
+
+                                <span class="badge badge-primary">
+                                    🔵 Vigente
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-secondary">
+                                    {{ solicitud.estado_contrato }}
+                                </span>
+
+                            {% endif %}
+
+                        </p>
+
+                        <details>
+
+                            <summary>
+                                Ver condiciones preliminares
+                            </summary>
+
+                            <p>
+                                <strong>Términos:</strong>
+                            </p>
+
+                            <p>
+                                {{ solicitud.descripcion_terminos }}
+                            </p>
+
+                            <p>
+                                <strong>Condiciones comerciales:</strong>
+                            </p>
+
+                            <p>
+                                {{ solicitud.condiciones_comerciales or
+                                   'No especificadas.' }}
+                            </p>
+
+                        </details>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="perfil-card">
+
+                <p class="text-muted">
+                    No tienes solicitudes de contratación.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+{% endblock %}

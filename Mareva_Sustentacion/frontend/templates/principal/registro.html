@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta · MAREVA{% endblock %}
+{% block content %}
+<main class="auth-main"><div class="auth-bg" aria-hidden="true"><div class="auth-bg__blob auth-bg__blob--1"></div><div class="auth-bg__blob auth-bg__blob--2"></div></div>
+<div class="registro-layout">
+  <div class="auth-card__header"><span class="eyebrow">ÚNETE A MAREVA</span><h1 class="auth-card__title text-display">Crea tu cuenta</h1><p class="auth-card__subtitle">Guarda favoritos, compara viajes y gestiona tus reservas.</p></div>
+  {% if error %}<div class="alert alert-error" role="alert">⚠️ {{ error }}</div>{% endif %}
+  <form method="POST" action="{{ url_for('auth.funcion_registro') }}">
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Nombres *</label><input type="text" name="nombre" class="form-input" placeholder="Tu nombre" required></div>
+      <div class="form-group"><label class="form-label">Apellidos *</label><input type="text" name="apellido" class="form-input" placeholder="Tus apellidos" required></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Tipo de documento *</label><select name="tipo" class="form-input" required><option value="" disabled selected>Selecciona</option><option value="CC">Cédula</option><option value="TI">Tarjeta de identidad</option><option value="CE">Cédula de extranjería</option><option value="PA">Pasaporte</option></select></div>
+      <div class="form-group"><label class="form-label">Número de documento *</label><input type="text" name="numero" class="form-input" required></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Teléfono *</label><input type="tel" id="telefono" class="form-input" placeholder="+57 300 000 0000" required><input type="hidden" id="telefono_completo" name="telefono"></div>
+      <div class="form-group"><label class="form-label">Código de referido <span class="muted">(opcional)</span></label><input type="text" name="codigo" class="form-input" placeholder="Si tienes uno"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Correo electrónico *</label><input type="email" name="correo" class="form-input" placeholder="tu@correo.com" required></div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Contraseña *</label><div class="form-input-wrap"><input type="password" id="registroPassword" name="password" class="form-input" placeholder="Mín. 8, mayúscula, número y símbolo" required><button type="button" class="form-toggle-pass" onclick="togglePassword('registroPassword',this)">👁</button></div></div>
+      <div class="form-group"><label class="form-label">Confirmar contraseña *</label><div class="form-input-wrap"><input type="password" id="confirmPassword" name="confirm_password" class="form-input" required><button type="button" class="form-toggle-pass" onclick="togglePassword('confirmPassword',this)">👁</button></div></div>
+    </div>
+    <div class="legal-consents">
+      <label class="legal-consent"><input type="checkbox" name="terminos" required> <span>Acepto los <button type="button" class="legal-link" onclick="document.getElementById('terminosModal').showModal()">Términos y condiciones</button> de MAREVA.</span></label>
+      <label class="legal-consent legal-consent--required"><input type="checkbox" name="politica_no_reembolso" required> <span><strong>He leído y acepto la Política de No Reembolso</strong> aplicable a las reservas de MAREVA, sin perjuicio de los derechos que la ley colombiana reconozca al consumidor.</span></label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center">Crear cuenta ✦</button>
+  </form>
+  <dialog id="terminosModal" class="legal-dialog">
+    <div class="legal-dialog__header"><div><span class="eyebrow">MAREVA · INFORMACIÓN LEGAL</span><h2>Política de No Reembolso y condiciones de reservas</h2></div><button type="button" class="legal-dialog__close" onclick="document.getElementById('terminosModal').close()" aria-label="Cerrar">×</button></div>
+    <div class="legal-dialog__body">
+      <p><strong>Versión 1.0 · Vigente desde 6 de septiembre de 2026.</strong></p>
+      <p>Esta política informa de manera previa, clara y visible las condiciones económicas asociadas a las reservas de experiencias y paquetes turísticos publicados en MAREVA. Su aceptación se realiza durante el registro y queda asociada a la cuenta; no se volverá a solicitar como una casilla repetida durante el formulario de reserva.</p>
+      <h3>1. Alcance de la política</h3>
+      <p>Los paquetes turísticos pueden integrar alojamiento, transporte, alimentación, actividades, guía, seguros u otros servicios ofrecidos por proveedores. Las condiciones particulares de cada paquete, sus fechas, cupos, tarifas, promociones, restricciones y servicios incluidos se mostrarán antes de iniciar una reserva. El usuario es responsable de revisar esa información y las condiciones específicas del proveedor.</p>
+      <h3>2. Regla general de no reembolso</h3>
+      <p>Una vez que el usuario haya realizado el pago al proveedor correspondiente, la tarifa contratada se considera <strong>no reembolsable</strong>, salvo que el propio proveedor haya ofrecido expresamente una condición distinta o que exista un derecho de devolución, retracto, desistimiento, reversión, compensación o cualquier otra protección que resulte obligatoria conforme a la legislación colombiana aplicable. La política no pretende eliminar ni reducir derechos irrenunciables del consumidor.</p>
+      <h3>3. Antes del pago</h3>
+      <p>Mientras una reserva se encuentre pendiente de pago, el usuario podrá consultar su estado y, cuando el sistema lo permita, solicitar su cancelación. La cancelación previa al pago no constituye una devolución de dinero porque no se ha efectuado el pago. Los cupos liberados podrán volver a estar disponibles de acuerdo con las reglas de disponibilidad del paquete.</p>
+      <h3>4. Incumplimiento del servicio</h3>
+      <p>Si un prestador incumple total o parcialmente los servicios ofrecidos o pactados, se aplicarán las medidas y derechos previstos por la normativa turística y de protección al consumidor. La Ley 300 de 1996 establece, entre otros aspectos, que frente al incumplimiento de servicios turísticos el turista puede tener derecho a otro servicio de la misma calidad o al reembolso o compensación por el servicio incumplido, según corresponda. Por ello, una condición comercial de no reembolso no puede utilizarse para desconocer un incumplimiento atribuible al prestador.</p>
+      <h3>5. Cambios o cancelación por parte del proveedor</h3>
+      <p>Cuando el proveedor modifique sustancialmente, cancele o no pueda prestar un servicio incluido en una reserva, MAREVA gestionará la situación conforme a las condiciones del paquete, del proveedor y de la normativa aplicable. Podrán existir alternativas de prestación, cambios de servicio, compensaciones o reembolsos cuando legal o contractualmente correspondan.</p>
+      <h3>6. No presentación del viajero</h3>
+      <p>Si el usuario no se presenta o no utiliza los servicios contratados, pueden aplicarse las consecuencias previstas para el servicio y el proveedor. La Ley 300 de 1996 contempla una regla específica para la no presentación del usuario turístico, por lo que las condiciones particulares deberán revisarse antes de pagar.</p>
+      <h3>7. Servicios aéreos</h3>
+      <p>Cuando una reserva incluya transporte aéreo, pueden existir reglas especiales del sector aeronáutico, de la tarifa adquirida y del transportador. En consecuencia, las condiciones de una tarifa aérea pueden diferir de las condiciones de otros componentes del paquete y prevalecerán las normas especiales que resulten aplicables.</p>
+      <h3>8. Promociones y tarifas especiales</h3>
+      <p>Las promociones estarán sujetas a las condiciones de tiempo, modo, lugar, disponibilidad y demás requisitos anunciados. El precio y las condiciones que se muestran al usuario antes de confirmar la reserva forman parte de la información que debe revisar antes del pago.</p>
+      <h3>9. Servicios adicionales y personalización</h3>
+      <p>Cuando un paquete permita personalización, la eliminación o adición de componentes podrá modificar el precio final y las condiciones de contratación. Antes de confirmar cualquier cambio, MAREVA mostrará el resumen actualizado y solicitará la confirmación del usuario.</p>
+      <h3>10. Reclamaciones</h3>
+      <p>Si el usuario considera que un servicio no fue prestado conforme a lo ofrecido, deberá presentar primero la reclamación directa al prestador o responsable correspondiente y conservar la confirmación de la reserva, comprobantes, comunicaciones y demás soportes. En Colombia existen mecanismos de protección administrativa y jurisdiccional para los consumidores de servicios turísticos.</p>
+      <h3>11. Aceptación informada</h3>
+      <p>Al marcar la casilla de aceptación durante el registro, el usuario declara que tuvo acceso a esta política y que comprende la regla general de no reembolso después del pago, así como las excepciones derivadas de la ley, del proveedor o de las condiciones particulares informadas para cada servicio. La aceptación queda registrada junto con la versión de la política y la fecha y hora de aceptación.</p>
+      <p class="legal-note"><strong>Importante:</strong> este texto es una política funcional para el prototipo académico de MAREVA y debe ser revisado por un abogado colombiano antes de utilizarse como documento contractual definitivo.</p>
+    </div>
+    <div class="legal-dialog__footer"><button type="button" class="btn btn-primary" onclick="document.getElementById('terminosModal').close();document.querySelector('input[name=politica_no_reembolso]').focus()">Entendido</button></div>
+  </dialog>
+  <p class="auth-card__footer">¿Ya tienes cuenta? <a href="{{ url_for('auth.mostrar_login') }}" class="form-link">Inicia sesión</a></p>
+</div></main>
+<script src="{{ url_for('static', filename='js/registro.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container" style="max-width:720px">
+
+        <a
+            href="{{ url_for('encuesta.panel_preguntas') }}"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver
+        </a>
+
+        <p class="section-label">
+            ⚙️ Administración de encuestas
+        </p>
+
+        <h1 class="section-title">
+
+            {% if pregunta %}
+                Editar pregunta
+            {% else %}
+                Nueva pregunta
+            {% endif %}
+
+        </h1>
+
+
+        {% if error %}
+
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <div class="perfil-card">
+
+            <form
+                method="POST"
+
+                {% if pregunta %}
+
+                    action="{{ url_for(
+                        'encuesta.actualizar_pregunta',
+                        id_pregunta=pregunta.id_pregunta
+                    ) }}"
+
+                {% else %}
+
+                    action="{{ url_for(
+                        'encuesta.crear_pregunta'
+                    ) }}"
+
+                {% endif %}
+            >
+
+                <div
+                    class="form-group"
+                    style="margin-bottom:var(--space-5)"
+                >
+
+                    <label class="form-label">
+                        Pregunta
+                    </label>
+
+                    <textarea
+                        name="texto"
+                        class="form-textarea"
+                        rows="4"
+                        required
+                        placeholder="Escribe la pregunta..."
+                    >{{ pregunta.texto if pregunta else '' }}</textarea>
+
+                </div>
+
+
+                <div
+                    class="form-group"
+                    style="margin-bottom:var(--space-5)"
+                >
+
+                    <label class="form-label">
+                        Tipo de respuesta
+                    </label>
+
+                    <select
+                        name="tipo_respuesta"
+                        class="form-select"
+                        required
+                    >
+
+                        <option
+                            value=""
+                            {% if not pregunta or not pregunta.tipo_respuesta %}
+                                selected
+                            {% endif %}
+                        >
+                            Selecciona un tipo
+                        </option>
+
+                        <option
+                            value="numero"
+                            {% if pregunta and pregunta.tipo_respuesta == "numero" %}
+                                selected
+                            {% endif %}
+                        >
+                            Calificación numérica (1-5)
+                        </option>
+
+                        <option
+                            value="opcion"
+                            {% if pregunta and pregunta.tipo_respuesta == "opcion" %}
+                                selected
+                            {% endif %}
+                        >
+                            Selección de opción
+                        </option>
+
+                        <option
+                            value="texto"
+                            {% if pregunta and pregunta.tipo_respuesta == "texto" %}
+                                selected
+                            {% endif %}
+                        >
+                            Respuesta abierta
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="form-group"
+                    style="margin-bottom:var(--space-6)"
+                >
+
+                    <label class="form-label">
+                        Orden
+                    </label>
+
+                    <input
+                        type="number"
+                        name="orden"
+                        class="form-input"
+                        min="1"
+                        required
+                        value="{{ pregunta.orden if pregunta else 1 }}"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    style="width:100%;justify-content:center"
+                >
+
+                    {% if pregunta %}
+                        💾 Guardar cambios
+                    {% else %}
+                        ➕ Crear pregunta
+                    {% endif %}
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}

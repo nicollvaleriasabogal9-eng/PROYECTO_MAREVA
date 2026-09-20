@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="guia-section">
+
+<div class="section-heading">
+    <div>
+        <p class="section-label">Itinerario</p>
+        <h2>Mis servicios asignados</h2>
+        <p>Consulta los paquetes, fechas y viajeros que tienes asignados.</p>
+    </div>
+</div>
+
+{% if paquetes %}
+
+<div class="guia-paquetes">
+
+    {% for paquete in paquetes %}
+
+    <article class="guia-paquete">
+
+        <div class="guia-paquete__icon">
+            {{ paquete.emoji or '🧳' }}
+        </div>
+
+        <div class="guia-paquete__info">
+
+            <span class="badge {{ 'badge-green' if paquete.estado == 'activo' else 'badge-purple' }}">
+                {{ paquete.estado|replace('_', ' ')|title }}
+            </span>
+
+            <h3>{{ paquete.nombre }}</h3>
+
+            <small>
+                📅 {{ paquete.fecha_inicio or 'Fecha por definir' }}
+                —
+                {{ paquete.fecha_fin or 'Fecha por definir' }}
+            </small>
+
+        </div>
+
+        <div class="guia-paquete__numbers">
+
+            <strong>{{ paquete.total_reservas }}</strong>
+            <span>servicios asignados</span>
+
+        </div>
+
+    </article>
+
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+
+    <span>🗺️</span>
+
+    <h3>No tienes servicios asignados</h3>
+
+    <p>
+        Cuando el administrador te asigne un paquete con reservas,
+        aparecerá aquí.
+    </p>
+
+</div>
+
+{% endif %}
+
+</section>
+
+<section class="guia-section">
+
+<div class="section-heading guia-heading-reservas">
+
+    <div>
+
+        <p class="section-label">Información del servicio</p>
+
+        <h2>Mis viajeros</h2>
+
+        <p>
+            Aquí puedes consultar las personas que debes atender
+            y los idiomas registrados en cada reserva.
+        </p>
+
+    </div>
+
+    <form method="GET" class="guia-filter">
+
+        <label for="estado">Estado</label>
+
+        <select
+            name="estado"
+            id="estado"
+            class="form-select"
+            onchange="this.form.submit()"
+        >
+
+            <option
+                value=""
+                {% if filtro_estado == 'todos' %}selected{% endif %}
+            >
+                Todos
+            </option>
+
+            {% for estado in [
+                'solicitada',
+                'confirmada',
+                'en_proceso',
+                'completada',
+                'cancelada'
+            ] %}
+
+            <option
+                value="{{ estado }}"
+                {% if filtro_estado == estado %}selected{% endif %}
+            >
+                {{ estado|replace('_', ' ')|title }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </form>
+
+</div>
+
+
+{% if reservas %}
+
+<div class="guia-reservas">
+
+    {% for reserva in reservas %}
+
+    <article class="guia-reserva">
+
+        <header>
+
+            <div>
+
+                <span class="guia-reserva__code">
+                    Reserva {{ reserva.codigo_unico }}
+                </span>
+
+                <h3>
+                    {{ reserva.paquete_emoji or '🧳' }}
+                    {{ reserva.paquete_nombre }}
+                </h3>
+
+                <p>
+                    📅 Viaje:
+                    {{ reserva.fecha_viaje or 'Fecha por definir' }}
+                </p>
+
+            </div>
+
+            <span class="estado estado--{{ reserva.estado }}">
+                {{ reserva.estado|replace('_', ' ')|title }}
+            </span>
+
+        </header>
+
+
+        <div class="guia-reserva__grid">
+
+            <div>
+
+                <small>RESPONSABLE DE LA RESERVA</small>
+
+                <strong>
+                    {{ reserva.cliente_nombre }}
+                </strong>
+
+                {% if reserva.cliente_telefono %}
+                <a href="tel:{{ reserva.cliente_telefono }}">
+                    📞 {{ reserva.cliente_telefono }}
+                </a>
+                {% endif %}
+
+                {% if reserva.cliente_correo %}
+                <a href="mailto:{{ reserva.cliente_correo }}">
+                    ✉️ {{ reserva.cliente_correo }}
+                </a>
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <small>VIAJEROS</small>
+
+                <strong>
+                    {{ reserva.total_viajeros }}
+                </strong>
+
+                <span>
+                    {{ reserva.cant_adultos }} adultos
+                    ·
+                    {{ reserva.cant_menores }} menores
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <small>FECHA DEL SERVICIO</small>
+
+                <strong>
+                    {{ reserva.fecha_viaje or 'Por definir' }}
+                </strong>
+
+                <span>
+                    Código: {{ reserva.codigo_unico }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="guia-language-box">
+
+            <div>
+
+                <span>🌐</span>
+
+                <div>
+
+                    <small>
+                        IDIOMAS DE LOS VIAJEROS
+                    </small>
+
+                    <strong>
+                        {{ reserva.viajeros_idiomas|length }}
+                        registro(s)
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="guia-language-list">
+
+                {% if reserva.viajeros_idiomas %}
+
+                    {% for persona in reserva.viajeros_idiomas %}
+
+                        <span>
+                            {{ persona }}
+                        </span>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <span>
+                        No hay información detallada de idiomas.
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        {% if reserva.observaciones %}
+
+        <div class="guia-reserva__notes">
+
+            <strong>Observaciones importantes</strong>
+
+            <p>
+                {{ reserva.observaciones }}
+            </p>
+
+        </div>
+
+        {% endif %}
+
+
+    </article>
+
+    {% endfor %}
+
+</div>
+
+
+{% else %}
+
+<div class="empty-state">
+
+    <span>👥</span>
+
+    <h3>No tienes viajeros asignados</h3>
+
+    <p>
+        Cuando tengas reservas asociadas a tus servicios,
+        aparecerán aquí.
+    </p>
+
+</div>
+
+{% endif %}
+
+</section>
+
+{% endblock %}

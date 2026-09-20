@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="reportes-container">
+  <div class="reportes-header">
+    <h1>📊 Reportes Administrativos</h1>
+    <p style="color: #666;">Analiza datos de reservas, ingresos y destinos</p>
+  </div>
+
+  <!-- Filtros Generales -->
+  <div class="filtros-seccion">
+    <div class="filtros-contenedor">
+      <div class="filtro-grupo">
+        <label for="fecha-inicio">Fecha Inicio</label>
+        <input 
+          type="date" 
+          id="fecha-inicio" 
+          value="{{ fecha_inicio }}"
+        >
+      </div>
+      <div class="filtro-grupo">
+        <label for="fecha-fin">Fecha Fin</label>
+        <input 
+          type="date" 
+          id="fecha-fin" 
+          value="{{ fecha_fin }}"
+        >
+      </div>
+      <button 
+        class="btn btn-primary" 
+        onclick="actualizarReportes()"
+        style="margin-bottom: 0;"
+      >
+        🔄 Actualizar
+      </button>
+      <button 
+        class="btn btn-outline" 
+        onclick="limpiarFiltros()"
+        style="margin-bottom: 0;"
+      >
+        ✕ Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs de Reportes -->
+  <div class="tabs-container">
+    <button class="tab-btn active" onclick="mostrarTab('reporte-reservas')">
+      📋 Reservas por Período
+    </button>
+    <button class="tab-btn" onclick="mostrarTab('reporte-paquetes')">
+      🏆 Paquetes Top
+    </button>
+    <button class="tab-btn" onclick="mostrarTab('reporte-canceladas')">
+      ❌ Canceladas
+    </button>
+    <button class="tab-btn" onclick="mostrarTab('reporte-ingresos')">
+      💰 Ingresos Esperados
+    </button>
+    <button class="tab-btn" onclick="mostrarTab('reporte-destinos')">
+      🌍 Destinos por Temporada
+    </button>
+  </div>
+
+  <!-- RF-89: Reporte de Reservas por Período -->
+  <div id="reporte-reservas" class="tab-content active">
+    <div class="reporte-seccion">
+      <div class="reporte-titulo">📋 Reporte de Reservas por Período</div>
+
+      <div class="acciones-seccion">
+        <button class="btn-descargar" onclick="descargarReservas()" id="btn-descargar-reservas">
+          📥 Descargar Excel
+        </button>
+        <select id="filtro-estado" onchange="actualizarReportes()">
+          <option value="">Todos los estados</option>
+          <option value="solicitada">Solicitada</option>
+          <option value="pendiente a pago">Pendiente a pago</option>
+          <option value="confirmada">Confirmada</option>
+          <option value="completada">Completada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div id="error-reservas" class="error-mensaje"></div>
+      <div id="loading-reservas" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="estadisticas-reservas" class="estadisticas-grid"></div>
+
+      <div class="table-contenedor">
+        <table class="tabla-reporte" id="tabla-reservas">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Fecha Viaje</th>
+              <th>Fecha Reserva</th>
+              <th>Estado</th>
+              <th>Cliente</th>
+              <th>Paquete</th>
+              <th>Adultos</th>
+              <th>Menores</th>
+              <th>Precio</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RF-90: Reporte de Paquetes Top -->
+  <div id="reporte-paquetes" class="tab-content">
+    <div class="reporte-seccion">
+      <div class="reporte-titulo">🏆 Paquetes Más Reservados</div>
+
+      <div class="acciones-seccion">
+        <button class="btn-descargar" onclick="descargarPaquetes()" id="btn-descargar-paquetes">
+          📥 Descargar Excel
+        </button>
+      </div>
+
+      <div id="error-paquetes" class="error-mensaje"></div>
+      <div id="loading-paquetes" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="estadisticas-paquetes" class="estadisticas-grid"></div>
+
+      <div id="ranking-paquetes"></div>
+    </div>
+  </div>
+
+  <!-- RF-91: Reporte de Canceladas -->
+  <div id="reporte-canceladas" class="tab-content">
+    <div class="reporte-seccion">
+      <div class="reporte-titulo">❌ Reservas Canceladas</div>
+
+      <div class="acciones-seccion">
+        <button class="btn-descargar" onclick="descargarCanceladas()" id="btn-descargar-canceladas">
+          📥 Descargar Excel
+        </button>
+      </div>
+
+      <div id="error-canceladas" class="error-mensaje"></div>
+      <div id="loading-canceladas" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="estadisticas-canceladas" class="estadisticas-grid"></div>
+
+      <div class="table-contenedor">
+        <table class="tabla-reporte" id="tabla-canceladas">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Paquete</th>
+              <th>Fecha Viaje</th>
+              <th>Fecha Cancelación</th>
+              <th>Motivo</th>
+              <th>Precio</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RF-92: Reporte de Ingresos -->
+  <div id="reporte-ingresos" class="tab-content">
+    <div class="reporte-seccion">
+      <div class="reporte-titulo">💰 Ingresos Esperados</div>
+
+      <div class="acciones-seccion">
+        <button class="btn-descargar" onclick="descargarIngresos()" id="btn-descargar-ingresos">
+          📥 Descargar Excel
+        </button>
+      </div>
+
+      <div id="error-ingresos" class="error-mensaje"></div>
+      <div id="loading-ingresos" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="estadisticas-ingresos" class="estadisticas-grid"></div>
+
+      <div id="desglose-estados"></div>
+    </div>
+  </div>
+
+  <!-- RF-93: Reporte de Destinos -->
+  <div id="reporte-destinos" class="tab-content">
+    <div class="reporte-seccion">
+      <div class="reporte-titulo">🌍 Destinos por Temporada</div>
+
+      <div class="acciones-seccion">
+        <button class="btn-descargar" onclick="descargarDestinos()" id="btn-descargar-destinos">
+          📥 Descargar Excel
+        </button>
+      </div>
+
+      <div id="error-destinos" class="error-mensaje"></div>
+      <div id="loading-destinos" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="estadisticas-destinos" class="estadisticas-grid"></div>
+
+      <div id="destinos-contenedor"></div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
+
+{% endblock %}

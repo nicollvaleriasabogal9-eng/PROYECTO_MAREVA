@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-hero favorites-hero">
+  <div class="container">
+    <p class="section-label">❤️ TU COLECCIÓN</p>
+
+    <h1>Mis paquetes favoritos</h1>
+
+    <p>
+      Guarda tus viajes favoritos y vuelve a ellos cuando quieras desde tu cuenta.
+    </p>
+  </div>
+</section>
+
+<main class="section favorites-page">
+  <div class="container">
+
+    {% if paquetes %}
+
+      <div class="favorites-heading">
+        <div>
+          <span class="section-label">MIS FAVORITOS</span>
+          <h2>Viajes que quieres guardar</h2>
+        </div>
+
+        <p class="favorites-total">
+          {{ paquetes|length }}
+          {{ "favorito" if paquetes|length == 1 else "favoritos" }}
+        </p>
+      </div>
+
+      <div class="grid-3 favoritos-grid">
+
+        {% for paquete in paquetes %}
+
+          <article
+            class="card favorite-card"
+            data-favorite-card="{{ paquete.id_paquete }}"
+          >
+
+            <!-- Imagen -->
+            <div class="favorite-card__media">
+
+              {% if paquete.imagen_url %}
+
+                <img
+                  src="{{ url_for('static', filename=paquete.imagen_url) }}"
+                  alt="{{ paquete.nombre }}"
+                  loading="lazy"
+                >
+
+              {% else %}
+
+                <div class="favorite-card__placeholder">
+                  <span>🌴</span>
+                  <span>MAREVA</span>
+                </div>
+
+              {% endif %}
+
+
+            </div>
+
+            <!-- Información -->
+            <div class="card__body">
+
+              {% if paquete.departamento %}
+                <span class="card__tag">
+                  {{ paquete.departamento }}
+                </span>
+              {% endif %}
+
+              <h2 class="card__title">
+                {{ paquete.nombre }}
+              </h2>
+
+              {% if paquete.descripcion %}
+                <p class="card__desc">
+                  {{ paquete.descripcion|truncate(150, True, '...') }}
+                </p>
+              {% endif %}
+
+              <div class="favorite-card__actions">
+
+                <a
+                  href="{{ url_for('paquetes.ver_detalle', slug=paquete.slug) }}"
+                  class="btn btn-primary btn-sm"
+                >
+                  Ver detalles
+                </a>
+
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm favorite-button is-favorite"
+                  data-paquete-id="{{ paquete.id_paquete }}"
+                  data-url="{{ url_for(
+                    'favoritos.alternar',
+                    id_paquete=paquete.id_paquete
+                  ) }}"
+                  aria-pressed="true"
+                  title="Quitar de favoritos"
+                >
+                  <span aria-hidden="true">♥</span>
+                  Quitar
+                </button>
+
+              </div>
+
+            </div>
+
+            <!-- Precio -->
+            <div class="card__footer">
+
+              <div>
+                <span class="favorite-card__price-label">
+                  Desde
+                </span>
+
+                <strong class="card__price">
+                  ${{ "{:,.0f}".format(paquete.precio) }}
+                </strong>
+              </div>
+
+            </div>
+
+          </article>
+
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      <section class="empty-state favorites-empty">
+
+        <div class="favorites-empty__icon" aria-hidden="true">
+          🤍
+        </div>
+
+        <span class="section-label">
+          TU COLECCIÓN
+        </span>
+
+        <h2>
+          Todavía no tienes favoritos
+        </h2>
+
+        <p>
+          Explora nuestros paquetes y guarda los viajes que más te gusten
+          para encontrarlos fácilmente después.
+        </p>
+
+        <a
+          href="{{ url_for('paquetes.listar_catalogo') }}"
+          class="btn btn-primary"
+        >
+          Explorar paquetes
+        </a>
+
+      </section>
+
+    {% endif %}
+
+  </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/favoritos.js') }}"></script>
+
+{% endblock %}

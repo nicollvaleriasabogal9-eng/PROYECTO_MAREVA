@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MAREVA · Viajes por Colombia{% endblock %}</title>
+  <meta name="description" content="MAREVA: descubre, compara y reserva experiencias inolvidables por Colombia.">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/paquetes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gamificacion.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/guia.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/reportes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mareva_redesign.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/niveles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/reserva_flow.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
+</head>
+
+<body>
+
+<div class="mareva-sunline" aria-hidden="true"></div>
+<header>
+  <nav class="navbar">
+    <div class="container navbar__inner">
+
+<a href="{{ url_for('home.home') }}" class="navbar__logo">
+  <img src="{{ url_for('static', filename='img/logo_mareva.png') }}"
+       alt="Logo MAREVA"
+       class="navbar__logo-img"
+       style="height: 50px; width: auto;">
+  MAREVA
+</a>
+
+      <ul class="navbar__nav" id="mainNav">
+        {% set rol_actual = session.get('usuario', {}).get('rol') %}
+        {% if rol_actual == 'admin' %}
+          <li><a href="{{ url_for('dashboard.mostrar_panel') }}" class="navbar__link">Panel</a></li>
+          <li><a href="{{ url_for('paquetes.panel_admin') }}" class="navbar__link">Paquetes</a></li>
+          <li><a href="{{ url_for('destinos.panel_admin') }}" class="navbar__link">Destinos</a></li>
+          <li><a href="{{ url_for('gamificacion.admin_niveles') }}" class="navbar__link">Niveles</a></li>
+          <li><a href="{{ url_for('proveedor.registrar_proveedor') }}" class="navbar__link">Proveedores</a></li>
+          <li><a href="{{ url_for('reporte.mostrar_panel') }}" class="navbar__link">Reportes</a></li>
+          <li><a href="{{ url_for('reserva.listar_reservas_admin') }}" class="navbar__link">Reservas</a></li>
+        {% elif rol_actual == 'guia' %}
+          <li><a href="{{ url_for('guia.panel') }}" class="navbar__link active">Mi viaje</a></li>
+        {% elif rol_actual == 'proveedor' %}
+          <li><a href="{{ url_for('home.home') }}" class="navbar__link">Inicio</a></li>
+          <li><a href="{{ url_for('proveedor.contratos') }}" class="navbar__link">Contratos</a></li>
+        {% elif rol_actual == 'cliente' %}
+          <li><a href="{{ url_for('home.home') }}" class="navbar__link {% if request.path == '/' %}active{% endif %}">Inicio</a></li>
+          <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path.startswith('/paquetes') %}active{% endif %}">Paquetes</a></li>
+          <li><a href="{{ url_for('destinos.listar_catalogo') }}" class="navbar__link {% if request.path.startswith('/destinos') %}active{% endif %}">Destinos</a></li>
+          <li><a href="{{ url_for('favoritos.listar') }}" class="{% if request.path == '/favoritos'%}active{% endif %} navbar__link">Favoritos (<span data-favoritos-total>{{ session.get('favoritos', [])|length }}</span>)</a></li>
+        {% else %}
+          <li><a href="{{ url_for('home.home') }}" class="navbar__link {% if request.path == '/' %}active{% endif %}">Inicio</a></li>
+          <li><a href="{{ url_for('paquetes.listar_catalogo') }}" class="navbar__link {% if request.path.startswith('/paquetes') %}active{% endif %}">Paquetes</a></li>
+          <li><a href="{{ url_for('destinos.listar_catalogo') }}" class="navbar__link {% if request.path.startswith('/destinos') %}active{% endif %}">Destinos</a></li>
+        {% endif %}
+      </ul>
+
+<div class="navbar__actions">
+
+
+  {% if session.get('usuario') %}
+
+    {% set usuario = session.get('usuario', {}) %}
+    {% set rol = usuario.get('rol', '') %}
+
+    <a href="
+        {% if rol == 'cliente' %}
+            {{ url_for('home.perfil') }}
+        {% elif rol == 'admin' %}
+            {{ url_for('home.perfil') }}
+        {% elif rol == 'guia' %}
+          {{ url_for('home.perfil') }}
+        {% elif rol == 'proveedor' %}
+          {{ url_for('home.perfil') }}
+        {% else %}
+          {{ url_for('home.home') }}
+        {% endif %}" class="user-chip">
+
+    <span class="user-chip__avatar">👤</span>
+    <span>{{ usuario.get('nombre', 'Usuario') }}</span>
+
+</a>
+
+    <a href="{{ url_for('home.logout') }}" class="btn btn-ghost btn-sm">
+      Salir
+    </a>
+
+  {% else %}
+
+    <a href="{{ url_for('auth.mostrar_login') }}" class="btn btn-outline btn-sm">
+      Iniciar sesión
+    </a>
+
+    <a href="{{ url_for('auth.mostrar_registro') }}" class="btn btn-primary btn-sm">
+      Crear cuenta
+    </a>
+
+  {% endif %}
+
+</div>
+
+    </div>
+  </nav>
+</header>
+
+<main>
+  {% block content %}
+
+  {% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand"><img src="{{ url_for('static', filename='img/logo_mareva.png') }}" alt="MAREVA"><p>Viajes por Colombia con más claridad, más opciones y una experiencia más humana.</p></div>
+      <div><span class="site-footer__label">Explora</span><a href="{{ url_for('paquetes.listar_catalogo') }}">Paquetes</a><a href="{{ url_for('destinos.listar_catalogo') }}">Destinos</a><a href="{{ url_for('paquetes.comparar') }}">Comparar</a></div>
+      <div><span class="site-footer__label">Ayuda</span><a href="{{ url_for('auth.mostrar_login') }}">Iniciar sesión</a><a href="{{ url_for('auth.mostrar_registro') }}">Crear cuenta</a></div>
+<div class="payment-block">
+    <span class="site-footer__label">Medio de pago</span>
+    <div class="payment-direct">
+        <span>💳</span>
+        <strong>Pago directo al proveedor</strong>
+    </div>
+    <small>MAREVA no procesa el pago dentro de la plataforma. El proveedor te indicará directamente el medio de pago disponible y las instrucciones correspondientes.</small>
+</div>
+    </div>
+    <div class="site-footer__bottom"><span>© 2026 MAREVA · Caribe colombiano</span><span>🔒 Navegación segura · Información clara antes de reservar</span></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>

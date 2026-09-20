@@ -1,0 +1,800 @@
+{% extends "base.html" %}
+
+{% block title %}Paquetes turísticos · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="catalog-video-banner">
+
+    <video
+        class="catalog-video-banner__media"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-hidden="true"
+    >
+        <source
+            src="{{ url_for('static', filename='videos/videoinicio.mp4') }}"
+            type="video/mp4"
+        >
+    </video>
+
+    <div class="catalog-video-banner__overlay"></div>
+
+    <div class="container catalog-video-banner__content">
+        <span class="eyebrow">MAREVA · PAQUETES</span>
+
+        <h1>
+            Elige tu paquete. Revisa disponibilidad. Decide con calma.
+        </h1>
+
+        <p>
+            Consulta precios, fechas y servicios sin necesidad de registrarte.
+        </p>
+    </div>
+
+</section>
+
+
+<section class="package-category-strip">
+
+    <div class="container">
+
+        <span class="package-category-strip__label">
+            VER PAQUETES POR ESTILO
+        </span>
+
+        <div class="package-category-strip__items">
+
+            {% for cat, icon in [
+                ('playa', '🏖️'),
+                ('montaña', '⛰️'),
+                ('aventura', '🧗'),
+                ('ecoturismo', '🌿'),
+                ('cultural', '🏛️'),
+                ('ciudad', '🌆')
+            ] %}
+
+                <a
+                    href="{{ url_for('paquetes.listar_catalogo') }}?categoria={{ cat }}"
+                    class="package-category-chip category-{{ cat }}"
+                >
+                    {{ icon }} {{ cat|capitalize }}
+                </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="catalog-shell">
+
+    <div class="container catalog-layout">
+
+        <!-- =========================================
+             FILTROS
+             ========================================= -->
+
+        <form
+            method="GET"
+            action="{{ url_for('paquetes.listar_catalogo') }}"
+            class="catalog-filters"
+        >
+
+            <div class="catalog-filters__header">
+
+                <div>
+                    <span class="eyebrow">BUSCA MEJOR</span>
+                    <h2>Filtros</h2>
+                </div>
+
+                <a href="{{ url_for('paquetes.listar_catalogo') }}">
+                    Limpiar
+                </a>
+
+            </div>
+
+
+            <!-- Búsqueda -->
+
+            <div class="filter-block">
+
+                <label for="catalog-search">
+                    Destino o palabra clave
+                </label>
+
+                <input
+                    id="catalog-search"
+                    type="search"
+                    name="q"
+                    value="{{ termino|default('') }}"
+                    class="form-input"
+                    placeholder="Cartagena, playa..."
+                >
+
+            </div>
+
+
+            <!-- Destino -->
+
+            <div class="filter-block">
+
+                <label for="catalog-destino">
+                    Destino
+                </label>
+
+                <select
+                    id="catalog-destino"
+                    name="destino"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    {% for d in destinos %}
+
+                        <option
+                            value="{{ d.id_destino }}"
+                            {% if filtros.destino|string == d.id_destino|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ d.nombre_destino }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Categoría -->
+
+            <div class="filter-block">
+
+                <label>
+                    Categoría
+                </label>
+
+                <div class="filter-pills">
+
+                    {% for cat in [
+                        'playa',
+                        'montaña',
+                        'aventura',
+                        'ecoturismo',
+                        'cultural',
+                        'ciudad'
+                    ] %}
+
+                        <label class="filter-pill category-{{ cat }}">
+
+                            <input
+                                type="radio"
+                                name="categoria"
+                                value="{{ cat }}"
+                                {% if filtros.categoria == cat %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <span>
+                                {{ cat|capitalize }}
+                            </span>
+
+                        </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Duración -->
+
+            <div class="filter-block">
+
+                <label>
+                    Duración
+                </label>
+
+                {% for val, label in [
+                    ('corto', '1–3 días'),
+                    ('medio', '4–7 días'),
+                    ('largo', '8+ días')
+                ] %}
+
+                    <label class="check-row">
+
+                        <input
+                            type="checkbox"
+                            name="duracion"
+                            value="{{ val }}"
+                            {% if val in filtros.duracion %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span>
+                            {{ label }}
+                        </span>
+
+                    </label>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- Precio -->
+
+            <div class="filter-block">
+
+                <label>
+                    Rango de precio
+                </label>
+
+                <div class="filter-price-row">
+
+                    <input
+                        class="form-input"
+                        type="number"
+                        name="precio_min"
+                        min="0"
+                        step="100000"
+                        value="{{ filtros.precio_min }}"
+                        placeholder="Mínimo"
+                    >
+
+                    <input
+                        class="form-input"
+                        type="number"
+                        name="precio_max"
+                        min="0"
+                        step="100000"
+                        value="{{ filtros.precio_max }}"
+                        placeholder="Máximo"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- Fecha -->
+
+            <div class="filter-block">
+
+                <label for="fecha-desde">
+                    Fecha de viaje
+                </label>
+
+                <input
+                    id="fecha-desde"
+                    class="form-input"
+                    type="date"
+                    name="fecha_desde"
+                    value="{{ filtros.fecha_desde }}"
+                >
+
+            </div>
+
+
+            <!-- Disponibilidad -->
+
+            <label class="check-row">
+
+                <input
+                    type="checkbox"
+                    name="solo_disponibles"
+                    value="1"
+                    {% if filtros.solo_disponibles %}
+                        checked
+                    {% endif %}
+                >
+
+                <span>
+                    Solo paquetes disponibles
+                </span>
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary btn-lg"
+            >
+                Aplicar filtros →
+            </button>
+
+        </form>
+
+
+        <!-- =========================================
+             RESULTADOS
+             ========================================= -->
+
+        <div class="catalog-results">
+
+            <div class="catalog-results__top">
+
+                <div>
+
+                    <span class="eyebrow">
+                        CATÁLOGO MAREVA
+                    </span>
+
+                    <h2>
+                        {{ paquetes|length }}
+                        {{ "paquete" if paquetes|length == 1 else "paquetes" }}
+                        encontrados
+                    </h2>
+
+                </div>
+
+
+                <div class="paquetes-toolbar">
+
+                    <div>
+
+                        <strong class="paquetes-toolbar__count">
+                            {{ paquetes|length }} experiencias
+                        </strong>
+
+                        <span class="muted">
+                            · selecciona hasta 3 para comparar
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 GRID DE PAQUETES
+                 ========================================= -->
+
+            <div class="grid-2">
+
+                {% for p in paquetes %}
+
+                    <article
+                        class="travel-card travel-card--clickable"
+                        data-href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}"
+                    >
+
+                        <!-- Imagen -->
+
+                        <div class="travel-card__media">
+
+                            {% if p.imagen_url %}
+
+                                <img
+                                    src="{{ url_for('static', filename=p.imagen_url) }}"
+                                    alt="{{ p.nombre }}"
+                                    loading="lazy"
+                                >
+
+                            {% else %}
+
+                                <div class="travel-card__fallback">
+                                    {{ p.emoji|default('✈️') }}
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- Categoría -->
+
+                            <span
+                                class="travel-card__category category-{{ p.categoria|lower }}"
+                            >
+                                {{ p.categoria|capitalize }}
+                            </span>
+
+
+                            <!-- Favorito -->
+
+                            <button
+                                type="button"
+                                class="package-favorite-btn{% if p.id_paquete in favoritos_ids|default([]) %} is-active{% endif %}"
+                                data-paquete-id="{{ p.id_paquete }}"
+                                data-id-paquete="{{ p.id_paquete }}"
+                                data-url="{{ url_for('favoritos.alternar', id_paquete=p.id_paquete) }}"
+                                title="{% if p.id_paquete in favoritos_ids|default([]) %}Quitar de favoritos{% else %}Agregar a favoritos{% endif %}"
+                                aria-label="{% if p.id_paquete in favoritos_ids|default([]) %}Quitar {{ p.nombre }} de favoritos{% else %}Agregar {{ p.nombre }} a favoritos{% endif %}"
+                                aria-pressed="{% if p.id_paquete in favoritos_ids|default([]) %}true{% else %}false{% endif %}"
+                            >
+
+                                {% if p.id_paquete in favoritos_ids|default([]) %}
+                                    ♥
+                                {% else %}
+                                    ♡
+                                {% endif %}
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- Información -->
+
+                        <div class="travel-card__body">
+
+                            {% if not rol_actual or rol_actual == 'cliente' %}
+
+                                <label class="package-compare-check">
+
+                                    <input
+                                        type="checkbox"
+                                        name="paquetes_comparar"
+                                        value="{{ p.id_paquete }}"
+                                        class="compare-package"
+                                    >
+
+                                    <span>
+                                        Comparar
+                                    </span>
+
+                                </label>
+
+                            {% endif %}
+
+
+                            <span class="muted">
+                                📍 {{ p.nombre_destino }} · {{ p.departamento }}
+                            </span>
+
+
+                            <h3>
+                                {{ p.nombre }}
+                            </h3>
+
+
+                            <p>
+                                {{ p.descripcion }}
+                            </p>
+
+
+                            <!-- Características -->
+
+                            <div class="package-specs">
+
+                                <span>
+                                    🗓️ {{ p.duracion_dias }} días
+                                </span>
+
+                                <span>
+                                    🌙 {{ p.duracion_noches }} noches
+                                </span>
+
+                                {% if p.personalizable %}
+
+                                    <span>
+                                        ⚙️ Personalizable
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Footer -->
+
+                        <div class="travel-card__footer">
+
+                            <div>
+
+                                <small>
+                                    Desde
+                                </small>
+
+                                <strong>
+                                    ${{ "{:,.0f}".format(p.precio) }}
+                                </strong>
+
+                            </div>
+
+
+                            <a
+                                class="btn btn-primary btn-sm"
+                                href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}"
+                            >
+                                Ver detalles
+                            </a>
+
+                        </div>
+
+                    </article>
+
+
+                {% else %}
+
+                    <!-- Sin resultados -->
+
+                    <div class="empty-state">
+
+                        <span>
+                            🔎
+                        </span>
+
+                        <h3>
+                            No encontramos paquetes
+                        </h3>
+
+                        <p>
+                            Prueba quitando algún filtro.
+                        </p>
+
+                        <a
+                            href="{{ url_for('paquetes.listar_catalogo') }}"
+                            class="btn btn-primary"
+                        >
+                            Ver todos
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         BARRA FLOTANTE DE COMPARACIÓN
+         ========================================= -->
+
+    <div
+        id="compareFloatingBar"
+        class="compare-floating-bar"
+        style="display: none;"
+    >
+
+        <div class="compare-floating-bar__inner">
+
+            <span class="compare-floating-bar__count">
+
+                <span id="compareCount">
+                    0
+                </span>
+
+                /3 seleccionados
+
+            </span>
+
+
+            <div class="compare-floating-bar__actions">
+
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    id="compareClearBtn"
+                >
+                    Limpiar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    id="compareGoBtn"
+                    disabled
+                >
+                    ⚖️ Comparar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const MAX_COMPARE = 3;
+
+    const floatingBar = document.getElementById("compareFloatingBar");
+    const countEl = document.getElementById("compareCount");
+    const goBtn = document.getElementById("compareGoBtn");
+    const clearBtn = document.getElementById("compareClearBtn");
+
+    const checkboxes = document.querySelectorAll(".compare-package");
+
+
+    /* =========================================
+       ACTUALIZAR BARRA DE COMPARACIÓN
+       ========================================= */
+
+    function updateCompareBar() {
+
+        const checkedBoxes = document.querySelectorAll(
+            ".compare-package:checked"
+        );
+
+        const checkedCount = checkedBoxes.length;
+
+        if (countEl) {
+            countEl.textContent = checkedCount;
+        }
+
+        if (goBtn) {
+            goBtn.disabled = checkedCount < 2;
+        }
+
+        if (floatingBar) {
+            floatingBar.style.display =
+                checkedCount > 0 ? "flex" : "none";
+        }
+
+
+        /* Limitar selección a 3 */
+
+        checkboxes.forEach(function (cb) {
+
+            if (
+                !cb.checked &&
+                checkedCount >= MAX_COMPARE
+            ) {
+                cb.disabled = true;
+            } else {
+                cb.disabled = false;
+            }
+
+        });
+
+    }
+
+
+    /* =========================================
+       CAMBIO DE CHECKBOX
+       ========================================= */
+
+    checkboxes.forEach(function (cb) {
+
+        cb.addEventListener(
+            "change",
+            updateCompareBar
+        );
+
+    });
+
+
+    /* =========================================
+       IR A COMPARACIÓN
+       ========================================= */
+
+    if (goBtn) {
+
+        goBtn.addEventListener("click", function () {
+
+            const selected = document.querySelectorAll(
+                ".compare-package:checked"
+            );
+
+            const ids = Array.from(selected).map(
+                function (input) {
+                    return input.value;
+                }
+            );
+
+
+            if (ids.length < 2) {
+
+                alert(
+                    "Selecciona al menos 2 paquetes para comparar."
+                );
+
+                return;
+            }
+
+
+            const params = new URLSearchParams();
+
+            ids.forEach(function (id) {
+                params.append("ids", id);
+            });
+
+
+            window.location.href =
+                "{{ url_for('paquetes.comparar') }}" +
+                "?" +
+                params.toString();
+
+        });
+
+    }
+
+
+    /* =========================================
+       LIMPIAR COMPARACIÓN
+       ========================================= */
+
+    if (clearBtn) {
+
+        clearBtn.addEventListener("click", function () {
+
+            document
+                .querySelectorAll(".compare-package:checked")
+                .forEach(function (cb) {
+
+                    cb.checked = false;
+
+                });
+
+
+            updateCompareBar();
+
+        });
+
+    }
+
+
+    /* =========================================
+       TARJETAS CLICABLES
+       ========================================= */
+
+    document
+        .querySelectorAll(".travel-card--clickable")
+        .forEach(function (card) {
+
+            card.addEventListener("click", function (event) {
+
+                /*
+                 * No redireccionar cuando el usuario
+                 * interactúa con botones, enlaces
+                 * o el checkbox de comparación.
+                 */
+
+                if (
+                    event.target.closest(
+                        ".package-compare-check, " +
+                        ".package-favorite-btn, " +
+                        "a, button, input"
+                    )
+                ) {
+                    return;
+                }
+
+
+                const href =
+                    card.getAttribute("data-href");
+
+
+                if (href) {
+                    window.location.href = href;
+                }
+
+            });
+
+        });
+
+    updateCompareBar();
+
+});
+</script>
+
+<script src="{{ url_for('static', filename='js/favoritos.js') }}"></script>
+
+
+{% endblock %}

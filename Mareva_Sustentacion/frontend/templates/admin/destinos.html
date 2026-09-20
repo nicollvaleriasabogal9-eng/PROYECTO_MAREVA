@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-8);flex-wrap:wrap;gap:var(--space-4)">
+      <div>
+        <span class="section-label">Administración</span>
+        <h1 class="section-title" style="margin-bottom:0">Destinos</h1>
+      </div>
+      <a href="{{ url_for('destinos.mostrar_form_crear') }}" class="btn btn-primary">+ Nuevo destino</a>
+    </div>
+
+    <div class="grid-3">
+      {% for d in destinos %}
+        <div class="card">
+          {% if d.imagen_principal %}
+            <img class="card__img" src="{{ url_for('static', filename=d.imagen_principal) }}" alt="{{ d.nombre_destino }}" style="object-fit:cover">
+          {% endif %}
+          <div class="card__body">
+            <span class="card__tag">{{ d.emoji }} {{ d.categoria|capitalize }}</span>
+            <h3 class="card__title">{{ d.nombre_destino }}</h3>
+            <p class="card__desc">{{ d.ciudad }}, {{ d.departamento }}</p>
+            <span class="badge {% if d.estado %}badge-blue{% else %}badge-yellow{% endif %}">
+              {{ "Activo" if d.estado else "Suspendido" }}
+            </span>
+          </div>
+          <div class="card__footer" style="gap:var(--space-2)">
+            <a href="{{ url_for('destinos.mostrar_form_editar', id_destino=d.id_destino) }}" class="btn btn-outline btn-sm">Editar</a>
+            {% if d.estado %}
+              <form method="POST" action="{{ url_for('destinos.suspender', id_destino=d.id_destino) }}">
+                <button type="submit" class="btn btn-ghost btn-sm">Suspender</button>
+              </form>
+            {% else %}
+              <form method="POST" action="{{ url_for('destinos.activar', id_destino=d.id_destino) }}">
+                <button type="submit" class="btn btn-ghost btn-sm">Activar</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <p class="text-muted">Todavía no hay destinos registrados.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

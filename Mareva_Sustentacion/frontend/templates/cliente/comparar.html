@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}Comparar paquetes · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="section compare-page">
+
+    <div class="container">
+
+        <!-- =====================================================
+             ENCABEZADO
+             ===================================================== -->
+
+        <div class="section-heading-row compare-header">
+
+            <div class="compare-header__content">
+
+                <span class="eyebrow">
+                    COMPARADOR MAREVA
+                </span>
+
+                <h1 class="section-title">
+                    Compara antes de decidir
+                </h1>
+
+                <p class="section-desc">
+                    Revisa las características, precios y disponibilidad
+                    de tus paquetes favoritos antes de elegir tu próxima aventura.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('paquetes.listar_catalogo') }}"
+                class="btn btn-outline"
+            >
+                ← Volver al catálogo
+            </a>
+
+        </div>
+
+
+        {% if paquetes %}
+
+        <!-- =====================================================
+             RESUMEN
+             ===================================================== -->
+
+        <div class="compare-summary">
+
+            <div class="compare-summary__icon">
+                ⚖️
+            </div>
+
+            <div class="compare-summary__content">
+
+                <strong>
+                    {{ paquetes|length }}
+                    paquete{{ 's' if paquetes|length != 1 else '' }}
+                    seleccionado{{ 's' if paquetes|length != 1 else '' }}
+                </strong>
+
+                <span>
+                    Compara hasta 3 opciones lado a lado.
+                </span>
+
+            </div>
+
+            <div class="compare-summary__limit">
+                Máximo 3
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             COMPARACIÓN
+             ===================================================== -->
+
+        <div class="compare-grid">
+
+            {% for p in paquetes %}
+
+            <article class="compare-card">
+
+                <!-- Imagen -->
+
+                <div class="compare-card__media">
+
+                    {% if p.imagen_url %}
+
+                    <img
+                        src="{{ url_for('static', filename=p.imagen_url) }}"
+                        alt="{{ p.nombre }}"
+                        loading="lazy"
+                    >
+
+                    {% else %}
+
+                    <div class="compare-card__placeholder">
+                        {{ p.emoji|default('✈️') }}
+                    </div>
+
+                    {% endif %}
+
+                    <span class="compare-card__badge">
+                        {{ p.categoria|default('Viaje')|capitalize }}
+                    </span>
+
+                </div>
+
+
+                <!-- Contenido -->
+
+                <div class="compare-card__body">
+
+                    <h2 class="compare-card__title">
+                        {{ p.nombre }}
+                    </h2>
+
+
+                    <div class="compare-card__destination">
+
+                        <span aria-hidden="true">
+                            📍
+                        </span>
+
+                        <span>
+                            {{ p.nombre_destino|default('Destino por confirmar') }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Precio -->
+
+                    <div class="compare-price">
+
+                        <span class="compare-price__label">
+                            Desde
+                        </span>
+
+                        <div class="compare-price__main">
+
+                            <strong>
+                                ${{ "{:,.0f}".format(p.precio|float) }}
+                            </strong>
+
+                            <span class="compare-price__currency">
+                                COP
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Características -->
+
+                    <div class="compare-details">
+
+                        <!-- Duración -->
+
+                        <div class="compare-row">
+
+                            <div class="compare-row__label">
+
+                                <span
+                                    class="compare-row__icon"
+                                    aria-hidden="true"
+                                >
+                                    🗓️
+                                </span>
+
+                                <span>
+                                    Duración
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                {{ p.duracion_dias|default(0) }} días
+                                /
+                                {{ p.duracion_noches|default(0) }} noches
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Cupos -->
+
+                        <div class="compare-row">
+
+                            <div class="compare-row__label">
+
+                                <span
+                                    class="compare-row__icon"
+                                    aria-hidden="true"
+                                >
+                                    👥
+                                </span>
+
+                                <span>
+                                    Cupos disponibles
+                                </span>
+
+                            </div>
+
+                            <strong>
+                                {{ p.cupos_disponibles|default(0) }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Personalizable -->
+
+                        <div class="compare-row">
+
+                            <div class="compare-row__label">
+
+                                <span
+                                    class="compare-row__icon"
+                                    aria-hidden="true"
+                                >
+                                    ✨
+                                </span>
+
+                                <span>
+                                    Personalizable
+                                </span>
+
+                            </div>
+
+                            <strong
+                                class="{% if p.personalizable %}compare-value--yes{% else %}compare-value--no{% endif %}"
+                            >
+                                {% if p.personalizable %}
+                                    ✓ Sí
+                                {% else %}
+                                    ✕ No
+                                {% endif %}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Disponibilidad -->
+
+                        <div class="compare-row">
+
+                            <div class="compare-row__label">
+
+                                <span
+                                    class="compare-row__icon"
+                                    aria-hidden="true"
+                                >
+                                    📅
+                                </span>
+
+                                <span>
+                                    Disponibilidad
+                                </span>
+
+                            </div>
+
+                            <strong class="compare-row__dates">
+
+                                <span>
+                                    {{ p.fecha_inicio|default('Por confirmar') }}
+                                </span>
+
+                                <span class="compare-row__arrow">
+                                    →
+                                </span>
+
+                                <span>
+                                    {{ p.fecha_fin|default('Por confirmar') }}
+                                </span>
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Acción -->
+
+                    <div class="compare-card__actions">
+
+                        <a
+                            href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}"
+                            class="btn btn-primary compare-card__button"
+                        >
+                            Ver detalles
+                            <span aria-hidden="true">
+                                →
+                            </span>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =====================================================
+             AYUDA INFERIOR
+             ===================================================== -->
+
+        <div class="compare-footer">
+
+            <div class="compare-footer__icon">
+                💡
+            </div>
+
+            <div class="compare-footer__content">
+
+                <strong>
+                    ¿Todavía no estás seguro?
+                </strong>
+
+                <p>
+                    Revisa los detalles de cada paquete para conocer
+                    todos los servicios incluidos antes de reservar.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('paquetes.listar_catalogo') }}"
+                class="btn btn-outline"
+            >
+                Explorar más paquetes
+            </a>
+
+        </div>
+
+
+        {% else %}
+
+        <!-- =====================================================
+             ESTADO VACÍO
+             ===================================================== -->
+
+        <div class="empty-state compare-empty">
+
+            <div class="compare-empty__icon">
+                ⚖️
+            </div>
+
+            <span class="eyebrow">
+                COMPARADOR
+            </span>
+
+            <h3>
+                No seleccionaste paquetes
+            </h3>
+
+            <p>
+                Selecciona hasta tres paquetes desde el catálogo
+                para comparar sus características, precios y disponibilidad.
+            </p>
+
+            <a
+                href="{{ url_for('paquetes.listar_catalogo') }}"
+                class="btn btn-primary"
+            >
+                Explorar paquetes →
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

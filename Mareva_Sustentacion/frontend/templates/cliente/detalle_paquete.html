@@ -1,0 +1,806 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ paquete.nombre }} · MAREVA
+{% endblock %}
+
+{% block content %}
+
+<section class="package-detail-hero">
+    <div class="container package-detail-hero__grid">
+
+        <div class="package-detail-hero__image">
+
+            {% if paquete.imagen_url %}
+                <img
+                    src="{{ url_for('static', filename=paquete.imagen_url) }}"
+                    alt="{{ paquete.nombre }}"
+                >
+
+            {% elif paquete.imagen_principal %}
+                <img
+                    src="{{ url_for('static', filename=paquete.imagen_principal) }}"
+                    alt="{{ paquete.nombre }}"
+                >
+
+            {% else %}
+                <div class="travel-card__fallback">
+                    {{ paquete.emoji|default('✈️') }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="package-detail-hero__content">
+
+            <span class="eyebrow">
+                {{ paquete.categoria|default('Experiencia')|capitalize }}
+            </span>
+
+            <h1>{{ paquete.nombre }}</h1>
+
+            <p class="package-location">
+                📍 {{ paquete.nombre_destino|default('Destino MAREVA') }}
+                {% if paquete.departamento %}
+                    , {{ paquete.departamento }}
+                {% endif %}
+            </p>
+
+            <p>
+                {{ paquete.descripcion }}
+            </p>
+
+            <div class="package-detail-stats">
+
+                <div>
+                    <span>🗓️</span>
+                    <strong>{{ paquete.duracion_dias|default(0) }} días</strong>
+                    <small>Duración</small>
+                </div>
+
+                <div>
+                    <span>🌙</span>
+                    <strong>{{ paquete.duracion_noches|default(0) }} noches</strong>
+                    <small>Alojamiento</small>
+                </div>
+
+                <div>
+                    <span>✨</span>
+                    <strong>{{ paquete.incluye|length }}</strong>
+                    <small>Servicios incluidos</small>
+                </div>
+
+            </div>
+
+            <div class="package-detail-price">
+                <small>Precio por persona</small>
+                <strong>${{ "{:,.0f}".format(paquete.precio|float) }}</strong>
+            </div>
+
+            <div class="public-booking-note">
+                ✓ Selecciona tu alojamiento, alimentación, transporte y extras.
+                <strong>Al finalizar, si no has iniciado sesión, te pediremos
+                entrar para confirmar tu reserva.</strong>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="section">
+
+    <div class="container package-detail-layout">
+
+        {% if error %}
+            <div class="alert alert-error" style="grid-column: 1 / -1;">
+                ⚠️ {{ error }}
+            </div>
+        {% endif %}
+
+        <form
+            id="formDetalleReserva"
+            method="POST"
+            action="{{ url_for('reserva.preparar', slug=paquete.slug) }}"
+            class="package-detail-layout"
+        >
+
+        <main>
+
+            <!-- =====================================================
+                 RESUMEN
+            ====================================================== -->
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">INFORMACIÓN DEL VIAJE</span>
+                <h2>¿Qué incluye esta experiencia?</h2>
+
+                <div class="detail-includes">
+
+                    {% if paquete.alojamientos %}
+                    <div>
+                        🏨
+                        <strong>Alojamiento</strong>
+                        <span>{{ paquete.alojamientos|length }} opción(es)</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.alimentacion %}
+                    <div>
+                        🍽️
+                        <strong>Alimentación</strong>
+                        <span>{{ paquete.alimentacion|length }} servicio(s)</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.transportes %}
+                    <div>
+                        🚌
+                        <strong>Transporte</strong>
+                        <span>{{ paquete.transportes|length }} traslado(s)</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.actividades %}
+                    <div>
+                        🎟️
+                        <strong>Actividades</strong>
+                        <span>{{ paquete.actividades|length }} actividad(es)</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.guia %}
+                    <div>
+                        🧭
+                        <strong>Guía turístico</strong>
+                        <span>Servicio de guía incluido</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.seguros %}
+                    <div>
+                        🛡️
+                        <strong>Seguro</strong>
+                        <span>Cobertura incluida</span>
+                    </div>
+                    {% endif %}
+
+                    {% if paquete.servicios_extra %}
+                    <div>
+                        ✨
+                        <strong>Servicios adicionales</strong>
+                        <span>Opciones disponibles</span>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+                 FECHAS DISPONIBLES
+            ====================================================== -->
+
+            {% if salidas %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">📅 FECHAS DISPONIBLES</span>
+                <h2>Elige cuándo viajar</h2>
+
+                {% if not salidas %}
+                    <p>No hay fechas disponibles por el momento.</p>
+                {% else %}
+
+                <div class="calendar-months">
+
+                    {% for clave, grupo in salidas_por_mes.items() %}
+
+                    <div class="calendar-month">
+
+                        <div class="calendar-month__title">
+                            {{ grupo[0].fecha_salida.strftime('%B %Y')|capitalize }}
+                        </div>
+
+                        <div class="calendar-weekdays">
+                            {% for d in ['L','M','X','J','V','S','D'] %}
+                            <span class="calendar-weekday">{{ d }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="calendar-days">
+                            {% set primer = grupo[0].fecha_salida.replace(day=1) %}
+                            {% set offset = (primer.weekday()) % 7 %}
+                            {% for _ in range(offset) %}
+                            <span class="calendar-day calendar-day--empty"></span>
+                            {% endfor %}
+                            {% for salida in grupo %}
+                            <label class="calendar-day calendar-day--available">
+                                <input
+                                    type="radio"
+                                    name="id_salida"
+                                    value="{{ salida.id_salida }}"
+                                    required
+                                >
+                                <span class="calendar-day__num">{{ salida.fecha_salida.day }}</span>
+                                <small>R: {{ salida.fecha_regreso.strftime('%d/%m') }}</small>
+                            </label>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 ALOJAMIENTO
+            ====================================================== -->
+
+            {% if paquete.alojamientos %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🏨 ALOJAMIENTO</span>
+                <h2>Elige dónde te hospedarás</h2>
+
+                <div class="package-service-grid">
+
+                    {% for hotel in paquete.alojamientos %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="radio"
+                            name="alojamiento"
+                            value="{{ hotel.id_alojamiento }}"
+                            required
+                            data-price="{{ hotel.precio|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">🏨</span>
+
+                        <div>
+
+                            <h3>{{ hotel.nombre }}</h3>
+
+                            {% if hotel.tipo_alojamiento %}
+                            <p><strong>{{ hotel.tipo_alojamiento }}</strong></p>
+                            {% endif %}
+
+                            {% if hotel.ciudad %}
+                            <p>📍 {{ hotel.ciudad }}</p>
+                            {% endif %}
+
+                            {% if hotel.servicios %}
+                            <p>{{ hotel.servicios }}</p>
+                            {% endif %}
+
+                            {% if hotel.proveedor %}
+                            <small>Proveedor: {{ hotel.proveedor }}</small>
+                            {% endif %}
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 ALIMENTACIÓN
+            ====================================================== -->
+
+            {% if paquete.alimentacion %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🍽️ ALIMENTACIÓN</span>
+                <h2>Selecciona tus comidas</h2>
+
+                <div class="package-service-grid">
+
+                    {% for comida in paquete.alimentacion %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="checkbox"
+                            name="alimentacion"
+                            value="{{ comida.id_alimentacion }}"
+                            data-price="{{ comida.precio|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">🍽️</span>
+
+                        <div>
+
+                            <h3>{{ comida.restaurante|default('Restaurante incluido') }}</h3>
+
+                            {% if comida.tipo_comida %}
+                            <p><strong>{{ comida.tipo_comida }}</strong></p>
+                            {% endif %}
+
+                            {% if comida.tipo_servicio %}
+                            <p>Servicio: {{ comida.tipo_servicio }}</p>
+                            {% endif %}
+
+                            {% if comida.incluye_bebidas %}
+                            <span class="status-positive">✓ Bebidas incluidas</span>
+                            {% else %}
+                            <span class="status-neutral">Bebidas no incluidas</span>
+                            {% endif %}
+
+                            {% if comida.precio and comida.precio > 0 %}
+                            <p class="pick-price">+${{ "{:,.0f}".format(comida.precio|float) }}</p>
+                            {% endif %}
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 TRANSPORTE
+            ====================================================== -->
+
+            {% if paquete.transportes %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🚌 TRANSPORTE</span>
+                <h2>Cómo te desplazarás</h2>
+
+                <div class="package-service-grid">
+
+                    {% for transporte in paquete.transportes %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="checkbox"
+                            name="transporte"
+                            value="{{ transporte.id_transporte }}"
+                            data-price="{{ transporte.precio|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">
+                            {% if transporte.tipo == 'Aéreo' %}✈️{% else %}🚌{% endif %}
+                        </span>
+
+                        <div>
+
+                            <h3>{{ transporte.empresa }}</h3>
+
+                            {% if transporte.tipo %}
+                            <p><strong>{{ transporte.tipo }}</strong></p>
+                            {% endif %}
+
+                            {% if transporte.ruta %}
+                            <p>📍 {{ transporte.ruta }}</p>
+                            {% endif %}
+
+                            <div class="service-times">
+
+                                {% if transporte.hora_salida %}
+                                <span>🕐 Salida: <strong>{{ transporte.hora_salida }}</strong></span>
+                                {% endif %}
+
+                                {% if transporte.hora_regreso %}
+                                <span>🕐 Regreso: <strong>{{ transporte.hora_regreso }}</strong></span>
+                                {% endif %}
+
+                            </div>
+
+                            {% if transporte.proveedor %}
+                            <small>Proveedor: {{ transporte.proveedor }}</small>
+                            {% endif %}
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 ACTIVIDADES
+            ====================================================== -->
+
+            {% if paquete.actividades %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🎟️ ACTIVIDADES</span>
+                <h2>Selecciona tus experiencias</h2>
+
+                <div class="package-service-grid">
+
+                    {% for actividad in paquete.actividades %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="checkbox"
+                            name="actividades"
+                            value="{{ actividad.id_actividad }}"
+                            data-price="{{ actividad.costo|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">🎟️</span>
+
+                        <div>
+
+                            <h3>{{ actividad.nombre }}</h3>
+
+                            {% if actividad.tipo %}
+                            <p><strong>{{ actividad.tipo }}</strong></p>
+                            {% endif %}
+
+                            {% if actividad.destino %}
+                            <p>📍 {{ actividad.destino }}</p>
+                            {% endif %}
+
+                            {% if actividad.duracion_horas %}
+                            <p>⏱️ {{ actividad.duracion_horas }} horas</p>
+                            {% endif %}
+
+                            {% if actividad.costo and actividad.costo > 0 %}
+                            <p class="pick-price">+${{ "{:,.0f}".format(actividad.costo|float) }}</p>
+                            {% endif %}
+
+                            {% if actividad.guia %}
+                            <p>🧭 Guía: {{ actividad.guia }}</p>
+                            {% endif %}
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 SEGURO
+            ====================================================== -->
+
+            {% if paquete.seguros %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🛡️ SEGURO</span>
+                <h2>Protege tu viaje</h2>
+
+                <div class="package-service-grid">
+
+                    {% for seguro in paquete.seguros %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="checkbox"
+                            name="seguros"
+                            value="{{ seguro.id_seguro }}"
+                            {% if seguro.es_obligatorio %}checked disabled{% endif %}
+                            data-price="{{ seguro.precio|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">🛡️</span>
+
+                        <div>
+
+                            <h3>{{ seguro.nombre }}</h3>
+
+                            {% if seguro.tipo_seguro %}
+                            <p>{{ seguro.tipo_seguro }}</p>
+                            {% endif %}
+
+                            <p>{{ seguro.cobertura }}</p>
+
+                            {% if seguro.descripcion %}
+                            <small>{{ seguro.descripcion }}</small>
+                            {% endif %}
+
+                            {% if seguro.es_obligatorio %}
+                            <span class="status-positive">✓ Incluido obligatoriamente</span>
+                            {% endif %}
+
+                            {% if seguro.precio and seguro.precio > 0 %}
+                            <p class="pick-price">+${{ "{:,.0f}".format(seguro.precio|float) }}</p>
+                            {% endif %}
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 EXTRAS
+            ====================================================== -->
+
+            {% if paquete.servicios_extra %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">✨ SERVICIOS ADICIONALES</span>
+                <h2>Agrega algo especial</h2>
+
+                <div class="package-service-grid">
+
+                    {% for extra in paquete.servicios_extra %}
+
+                    <label class="package-service-card pick-card">
+                        <input
+                            type="checkbox"
+                            name="extras"
+                            value="{{ extra.id }}"
+                            data-price="{{ extra.precio|default(0)|float }}"
+                        >
+
+                        <span class="package-service-card__icon">✨</span>
+
+                        <div>
+
+                            <h3>{{ extra.nombre }}</h3>
+
+                            {% if extra.descripcion %}
+                            <p>{{ extra.descripcion }}</p>
+                            {% endif %}
+
+                            <p class="pick-price">+${{ "{:,.0f}".format(extra.precio|float) }}</p>
+
+                        </div>
+
+                        <b class="pick-check">✓</b>
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 GUÍA
+            ====================================================== -->
+
+            {% if paquete.guia %}
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">🧭 GUÍA TURÍSTICO</span>
+                <h2>Tu acompañamiento</h2>
+
+                <div class="guide-detail-card">
+
+                    <div class="package-service-card__icon">🧭</div>
+
+                    <div>
+
+                        <h3>{{ paquete.guia.nombre_completo }}</h3>
+
+                        {% if paquete.guia.especialidad %}
+                        <p><strong>Especialidad:</strong> {{ paquete.guia.especialidad }}</p>
+                        {% endif %}
+
+                        {% if paquete.guia.idiomas %}
+                        <p>🌎 <strong>Idiomas:</strong> {{ paquete.guia.idiomas }}</p>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =====================================================
+                 PERSONALIZACIÓN (informativa)
+            ====================================================== -->
+
+            <div class="detail-panel">
+
+                <span class="eyebrow">PERSONALIZACIÓN</span>
+                <h2>Adapta tu experiencia</h2>
+
+                {% if paquete.personalizable %}
+
+                    <p>
+                        Este paquete permite solicitar ajustes y
+                        servicios adicionales durante el proceso de reserva.
+                    </p>
+
+                    <span class="status-positive">✓ Paquete personalizable</span>
+
+                {% else %}
+
+                    <p>
+                        Este paquete cuenta con una configuración definida
+                        de servicios.
+                    </p>
+
+                    <span class="status-neutral">Configuración estándar</span>
+
+                {% endif %}
+
+            </div>
+
+        </main>
+
+
+        <!-- =========================================================
+             LATERAL
+        ========================================================== -->
+
+        <aside>
+            <div class="detail-panel detail-side-card js-selection-summary">
+                <span class="eyebrow">TU SELECCIÓN</span>
+                <h3>{{ paquete.nombre }}</h3>
+                <p>📍 {{ paquete.nombre_destino }}</p>
+                <hr>
+                <div class="summary-line"><span>Fecha</span><strong class="js-summary-fecha">Por elegir</strong></div>
+                <div class="summary-line"><span>Alojamiento</span><strong class="js-summary-alojamiento">0</strong></div>
+                <div class="summary-line"><span>Alimentación</span><strong class="js-summary-alimentacion">0</strong></div>
+                <div class="summary-line"><span>Transporte</span><strong class="js-summary-transporte">0</strong></div>
+                <div class="summary-line"><span>Actividades</span><strong class="js-summary-actividades">0</strong></div>
+                <div class="summary-line"><span>Seguro</span><strong class="js-summary-seguros">0</strong></div>
+                <div class="summary-line"><span>Servicios extra</span><strong class="js-summary-extras">0</strong></div>
+                <hr>
+                <div class="price-breakdown" id="priceBreakdown">
+                    <div class="price-breakdown__line"><span>Base por persona</span><strong id="priceBase">${{ "{:,.0f}".format(paquete.precio|float) }}</strong></div>
+                    <div class="price-breakdown__line"><span>Servicios seleccionados</span><strong id="priceServices">$0</strong></div>
+                    <hr>
+                    <div class="price-breakdown__total"><span>Total por persona</span><h2 id="priceTotal">${{ "{:,.0f}".format(paquete.precio|float) }}</h2></div>
+                    <div class="price-breakdown__line" id="travelersLine" style="display:none;">
+                        <span>Total <span id="travelerCount">1</span> viajero(s)</span>
+                        <strong id="priceGrandTotal" style="color:var(--mareva-coral, #e74c3c);font-size:1.1rem;"></strong>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Hacer reserva →</button>
+                <hr>
+                <h3>Pago directo al proveedor</h3>
+                <p>MAREVA no procesa el pago. El proveedor te indicará el medio de pago.</p>
+            </div>
+        </aside>
+
+        </form>
+
+    </div>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("formDetalleReserva");
+    if (!form) return;
+
+    const BASE_PRICE = {{ paquete.precio|float }};
+    const PrecioPersona = document.getElementById("priceBase");
+    const PrecioServicios = document.getElementById("priceServices");
+    const PrecioTotal = document.getElementById("priceTotal");
+    const PrecioGrandTotal = document.getElementById("priceGrandTotal");
+    const TravelersLine = document.getElementById("travelersLine");
+    const TravelerCount = document.getElementById("travelerCount");
+
+    const resumen = {
+        fecha: form.querySelector(".js-summary-fecha"),
+        alojamiento: form.querySelector(".js-summary-alojamiento"),
+        alimentacion: form.querySelector(".js-summary-alimentacion"),
+        transporte: form.querySelector(".js-summary-transporte"),
+        actividades: form.querySelector(".js-summary-actividades"),
+        seguros: form.querySelector(".js-summary-seguros"),
+        extras: form.querySelector(".js-summary-extras"),
+    };
+
+    function contar(campo) {
+        let n = 0;
+        form.querySelectorAll('input[name="' + campo + '"]').forEach(i => { if (i.checked) n++; });
+        return n;
+    }
+
+    function seleccionadosPorGrupo(campo) {
+        const arr = [];
+        form.querySelectorAll('input[name="' + campo + '"]').forEach(i => {
+            if (i.checked) arr.push(parseFloat(i.dataset.price) || 0);
+        });
+        return arr;
+    }
+
+    function fmt(v) { return "$" + Math.round(v).toLocaleString("es-CO"); }
+
+    function actualizarResumen() {
+        let fecha = "Por elegir";
+        form.querySelectorAll('input[name="id_salida"]').forEach(r => {
+            if (r.checked) fecha = r.closest(".pick-date")?.querySelector("strong")?.textContent || "Seleccionada";
+        });
+        resumen.fecha.textContent = fecha;
+        resumen.alojamiento.textContent = contar("alojamiento");
+        resumen.alimentacion.textContent = contar("alimentacion");
+        resumen.transporte.textContent = contar("transporte");
+        resumen.actividades.textContent = contar("actividades");
+        resumen.seguros.textContent = contar("seguros");
+        resumen.extras.textContent = contar("extras");
+
+        let servicesTotal = 0;
+        ["alimentacion","transporte","actividades","seguros","extras"].forEach(c => {
+            seleccionadosPorGrupo(c).forEach(p => servicesTotal += p);
+        });
+
+        const perPerson = BASE_PRICE + servicesTotal;
+        PrecioServicios.textContent = fmt(servicesTotal);
+        PrecioTotal.textContent = fmt(perPerson);
+
+        const travelers = parseInt(form.dataset.travelers) || 1;
+        if (travelers > 1) {
+            TravelersLine.style.display = "flex";
+            TravelerCount.textContent = travelers;
+            PrecioGrandTotal.textContent = fmt(perPerson * travelers);
+        } else {
+            TravelersLine.style.display = "none";
+        }
+    }
+
+    form.addEventListener("change", actualizarResumen);
+    form.addEventListener("submit", event => {
+        if (!form.querySelector('input[name="id_salida"]:checked')) {
+            event.preventDefault(); alert("Debes elegir una fecha de salida."); return;
+        }
+        if (!form.querySelector('input[name="alojamiento"]:checked')) {
+            event.preventDefault(); alert("Debes elegir un alojamiento."); return;
+        }
+    });
+    actualizarResumen();
+});
+</script>
+
+{% endblock %}

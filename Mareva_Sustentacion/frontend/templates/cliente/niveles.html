@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Niveles · MAREVA{% endblock %}
+{% block content %}
+<section class="section levels-page">
+    <div class="container">
+        <div class="section-heading-row">
+            <div>
+                <span class="eyebrow">PROGRAMA MAREVA</span>
+                <h1 class="section-title">Viaja y sube de nivel</h1>
+                <p class="section-desc">Tu nivel combina tus reservas y el monto acumulado de tus viajes.</p>
+            </div>
+        </div>
+        <div class="current-level-card">
+            <div>
+                <span class="eyebrow">TU NIVEL ACTUAL</span>
+                <h2>{{ nivel_actual.nombre|default('Explorador') }}</h2>
+                <p>{{ nivel_actual.descripcion|default('Nivel inicial de MAREVA.') }}</p>
+            </div>
+
+        </div>
+        <div class="levels-grid">
+            {% for nivel in niveles %}
+            <article class="level-card {% if nivel.id_nivel==nivel_actual.id_nivel %}is-current{% endif %}">
+                <span class="level-icon">🏆</span>
+                <h2>{{ nivel.nombre }}</h2>
+                <p>{{ nivel.descripcion }}</p>
+                <div class="level-requirements">
+                    <span>💰 ${{ "{:,.0f}".format(nivel.min_to|default(0)|float) }}</span>
+                    <span>🧳 {{ nivel.min_reservas|default(0) }} reservas</span>
+                    <span>🎁 {{ nivel.porcentaje_descuento|default(0) }}% descuento</span>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state"><h3>Aún no hay niveles configurados.</h3></div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}mon

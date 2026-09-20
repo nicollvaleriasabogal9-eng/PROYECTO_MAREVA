@@ -1,0 +1,1400 @@
+/* =========================================================
+   FLUJO DE SELECCIÓN DE RESERVA MAREVA
+   Selección en detalle del paquete + confirmación editable
+   ========================================================= */
+
+/* ---------- Layout general del detalle ---------- */
+
+.package-detail-hero__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 44px;
+  align-items: center;
+  margin-top: 26px;
+}
+
+.package-detail-hero__image img,
+.package-detail-image img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 26px;
+  box-shadow: 0 24px 60px rgba(31,62,71,.15);
+}
+
+.package-detail-hero__content h1,
+.package-detail-copy h1 {
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  line-height: 1.05;
+  margin: 10px 0 15px;
+  color: var(--mareva-ink);
+}
+
+.package-detail-hero__content p {
+  color: var(--mareva-muted);
+  line-height: 1.7;
+}
+
+.package-location {
+  font-weight: 700;
+  color: var(--mareva-sea-deep) !important;
+}
+
+.package-detail-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.package-detail-stats > div {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e3ebe8;
+  border-radius: 16px;
+  padding: 13px 17px;
+}
+
+.package-detail-stats > div > span {
+  font-size: 1.4rem;
+}
+
+.package-detail-stats strong {
+  color: var(--mareva-sea-deep);
+  font-size: 1rem;
+}
+
+.package-detail-stats small {
+  color: #8491a0;
+  font-size: .72rem;
+}
+
+.package-detail-price {
+  margin: 14px 0;
+}
+
+.package-detail-price small {
+  display: block;
+  color: #7b8997;
+  font-size: .75rem;
+}
+
+.package-detail-price strong {
+  font-size: 2rem;
+  color: var(--mareva-sea-deep);
+}
+
+.package-detail-layout {
+  display: grid;
+  grid-template-columns: 1.6fr .8fr;
+  gap: 25px;
+  align-items: start;
+}
+
+/* ---------- Paneles ---------- */
+
+.detail-panel {
+  background: #fff;
+  border: 1px solid #e1ebe8;
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 10px 30px rgba(35,60,68,.06);
+  margin-bottom: 20px;
+}
+
+.detail-panel h2 {
+  font-size: 1.45rem;
+  margin: 4px 0 18px;
+  color: var(--mareva-ink);
+}
+
+.detail-side-card {
+  position: sticky;
+  top: 100px;
+}
+
+.detail-side-card h2 {
+  font-size: 1.8rem;
+  color: var(--mareva-sea-deep);
+}
+
+.detail-side-card hr {
+  border: none;
+  border-top: 1px solid #edf1ef;
+  margin: 16px 0;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: .8rem;
+  color: #7b8997;
+}
+
+.summary-line strong {
+  color: var(--mareva-ink);
+  text-align: right;
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---------- Resumen de "qué incluye" ---------- */
+
+.detail-includes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.detail-includes > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 9px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f5faf8;
+}
+
+.detail-includes strong {
+  color: var(--mareva-ink);
+  font-size: .9rem;
+}
+
+.detail-includes span {
+  grid-column: 2;
+  color: #7a8998;
+  font-size: .72rem;
+}
+
+/* ---------- Cuadrícula de servicios ---------- */
+
+.package-service-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.package-service-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 17px;
+  background: #fbfdfc;
+  border: 1px solid #e5ecea;
+  border-radius: 16px;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.package-service-card__icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  background: #f0f7f5;
+  border-radius: 13px;
+}
+
+.package-service-card h3 {
+  font-size: 1rem;
+  color: var(--mareva-ink);
+  margin-bottom: 4px;
+}
+
+.package-service-card p {
+  font-size: .8rem;
+  color: var(--mareva-muted);
+  margin: 2px 0;
+}
+
+.package-service-card small {
+  font-size: .72rem;
+  color: #8a97a6;
+}
+
+.service-times {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: .78rem;
+  color: var(--mareva-muted);
+}
+
+.pick-price {
+  font-weight: 800;
+  color: var(--mareva-sea-deep) !important;
+}
+
+.status-positive {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e5f6ee;
+  color: #17683d;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.status-neutral {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f0f2f4;
+  color: #66758a;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+/* ---------- Tarjetas seleccionables ---------- */
+
+.pick-card {
+  cursor: pointer;
+}
+
+.pick-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pick-card .pick-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid #dce7e4;
+  color: transparent;
+  font-size: .8rem;
+  font-weight: 900;
+  transition: all var(--transition);
+}
+
+.pick-card:has(input:checked) {
+  border-color: var(--mareva-sea);
+  background: #effaf7;
+  box-shadow: 0 6px 18px rgba(15,143,164,.12);
+}
+
+.pick-card:has(input:checked) .pick-check {
+  background: var(--mareva-sea);
+  border-color: var(--mareva-sea);
+  color: #fff;
+}
+
+.pick-card input[type="radio"]:required:invalid ~ .pick-check {
+  border-color: #dce7e4;
+}
+
+.guide-detail-card {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  background: #f7f4ff;
+  border: 1px solid #e4dcfa;
+  border-radius: 16px;
+}
+
+.guide-detail-card p {
+  font-size: .82rem;
+  color: var(--mareva-muted);
+  margin: 3px 0;
+}
+
+/* ---------- Selección de fechas ---------- */
+
+.pick-date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.pick-date {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px;
+  background: #fbfdfc;
+  border: 1px solid #e5ecea;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.pick-date input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pick-date__icon {
+  font-size: 1.4rem;
+}
+
+.pick-date strong {
+  color: var(--mareva-ink);
+  font-size: 1rem;
+}
+
+.pick-date small {
+  color: #7a8998;
+  font-size: .74rem;
+}
+
+.pick-date b {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid #dce7e4;
+  color: transparent;
+  font-size: .8rem;
+  transition: all var(--transition);
+}
+
+.pick-date:has(input:checked) {
+  border-color: var(--mareva-sea);
+  background: #effaf7;
+  box-shadow: 0 6px 18px rgba(15,143,164,.12);
+}
+
+.pick-date:has(input:checked) b {
+  background: var(--mareva-sea);
+  border-color: var(--mareva-sea);
+  color: #fff;
+}
+
+/* ---------- Alertas ---------- */
+
+.alert-error {
+  background: #fff0ec;
+  border: 1px solid #f5c6bb;
+  color: #a03524;
+  padding: 13px 16px;
+  border-radius: 14px;
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   PÁGINA CONFIRMAR RESERVA
+   ========================================================= */
+
+.confirmar-hero {
+  background: linear-gradient(135deg,#edf9f6,#f9f1e2 62%,#f0ebfa);
+  padding: 40px 0 30px;
+}
+
+.confirmar-hero h1 {
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  color: var(--mareva-ink);
+  margin: 6px 0 8px;
+}
+
+.confirmar-hero p {
+  color: var(--mareva-muted);
+  max-width: 720px;
+}
+
+.confirmar-layout {
+  display: grid;
+  grid-template-columns: 1.6fr .8fr;
+  gap: 25px;
+  align-items: start;
+  padding-top: 26px;
+}
+
+.confirm-card {
+  background: #fff;
+  border: 1px solid #e1ebe8;
+  border-radius: 22px;
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 28px rgba(35,60,68,.05);
+}
+
+.confirm-card__header {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.confirm-step {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #e9f7f3;
+  color: #167e76;
+  font-weight: 900;
+  flex: 0 0 auto;
+  font-size: .9rem;
+}
+
+.confirm-card__header h2 {
+  font-size: 1.3rem;
+  margin: 3px 0;
+  color: var(--mareva-ink);
+}
+
+.confirm-card__header p {
+  font-size: .82rem;
+  color: #718093;
+}
+
+.sel-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #e5ecea;
+  border-radius: 14px;
+  background: #fbfdfc;
+  margin-bottom: 9px;
+}
+
+.sel-item__icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  background: #f0f7f5;
+  border-radius: 11px;
+}
+
+.sel-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sel-item__body strong {
+  display: block;
+  color: var(--mareva-ink);
+  font-size: .92rem;
+}
+
+.sel-item__body span {
+  color: #7a8998;
+  font-size: .76rem;
+}
+
+.sel-item__remove {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #fff0ec;
+  color: #c0392b;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sel-item__remove:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+.sel-none {
+  color: #91a0ae;
+  font-size: .82rem;
+  font-style: italic;
+}
+
+.confirm-checkout {
+  position: sticky;
+  top: 100px;
+  background: #fff;
+  border: 1px solid #e1ebe8;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(35,60,68,.06);
+}
+
+.confirm-checkout h2 {
+  font-size: 1.3rem;
+  color: var(--mareva-ink);
+  margin-bottom: 12px;
+}
+
+.confirm-checkout hr {
+  border: none;
+  border-top: 1px solid #edf1ef;
+  margin: 14px 0;
+}
+
+.confirm-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .82rem;
+  color: #7b8997;
+}
+
+.confirm-total strong {
+  font-size: 1.4rem;
+  color: var(--mareva-sea-deep);
+}
+
+.policy-confirmed {
+  display: flex;
+  gap: 10px;
+  padding: 13px;
+  background: #effaf7;
+  border: 1px solid #c8efd8;
+  border-radius: 14px;
+  margin: 14px 0;
+}
+
+.policy-confirmed > span {
+  color: #1d8a70;
+  font-weight: 900;
+}
+
+.policy-confirmed strong {
+  display: block;
+  font-size: .82rem;
+  color: #17683d;
+}
+
+.policy-confirmed p {
+  font-size: .74rem;
+  color: #5c7b79;
+  margin-top: 2px;
+}
+
+/* Viajeros en confirmación */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.booking-input-grid {
+  margin-bottom: 8px;
+}
+
+.traveler-form {
+  background: #fbfdfc;
+  border: 1px solid #e5ecea;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.traveler-form__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.traveler-form__title strong {
+  color: var(--mareva-ink);
+}
+
+.traveler-form__title span {
+  font-size: .7rem;
+  font-weight: 900;
+  color: #167e76;
+  background: #e9f7f3;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.traveler-form .form-label {
+  font-size: .76rem;
+  font-weight: 700;
+  color: #66758a;
+}
+
+.traveler-form .form-input,
+.traveler-form .form-select {
+  font-size: .86rem;
+  padding: 9px 11px;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+  .package-detail-layout,
+  .confirmar-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-side-card,
+  .confirm-checkout {
+    position: static;
+  }
+}
+
+/* ---------- Calendario de fechas disponibles ---------- */
+
+.calendar-months {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.calendar-month {
+  background: var(--mareva-bg, #f9fbfd);
+  border: 1px solid #e1ebe8;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.calendar-month__title {
+  font-weight: 800;
+  color: var(--mareva-ink);
+  font-size: .95rem;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: .65rem;
+  font-weight: 800;
+  color: var(--mareva-muted);
+  text-transform: uppercase;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: .8rem;
+}
+
+.calendar-day--empty {
+  visibility: hidden;
+}
+
+.calendar-day--available {
+  background: #fff;
+  border: 1px solid #d8e7e3;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.calendar-day--available:hover {
+  border-color: var(--mareva-sea);
+  box-shadow: 0 2px 8px rgba(22, 126, 118, .15);
+}
+
+.calendar-day--available input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calendar-day--available:has(input:checked) {
+  background: var(--mareva-sea, #167e76);
+  border-color: var(--mareva-sea, #167e76);
+  color: #fff;
+}
+
+.calendar-day__num {
+  font-weight: 800;
+}
+
+.calendar-day small {
+  font-size: .55rem;
+  opacity: .85;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .package-detail-hero__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .package-detail-hero__image img {
+    height: 280px;
+  }
+
+  .package-service-grid,
+  .detail-includes {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-months {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CONFIRMACIÓN DE RESERVA · MAREVA
+   ========================================================= */
+
+.confirmation-page{
+    padding: 55px 0 80px;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(84,198,169,.10), transparent 28%),
+        radial-gradient(circle at 90% 10%, rgba(15,143,164,.08), transparent 30%),
+        var(--mareva-bg);
+}
+
+.confirmation-container{
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   SUCCESS
+   ========================================================= */
+
+.confirmation-success{
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 32px;
+}
+
+.confirmation-icon{
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: linear-gradient(
+        135deg,
+        var(--mareva-mint),
+        var(--mareva-sea)
+    );
+
+    color: white;
+    font-size: 38px;
+    font-weight: 900;
+
+    box-shadow:
+        0 16px 35px rgba(15,143,164,.20);
+}
+
+.confirmation-success h1{
+    margin: 8px 0 12px;
+
+    color: var(--mareva-ink);
+
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    line-height: 1.08;
+    font-weight: 900;
+}
+
+.confirmation-success p{
+    margin: 0 auto;
+
+    max-width: 650px;
+
+    color: var(--mareva-muted);
+
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.confirmation-card{
+    margin-bottom: 20px;
+    padding: 28px;
+
+    background: #fff;
+
+    border: 1px solid rgba(32,50,72,.08);
+    border-radius: 24px;
+
+    box-shadow:
+        0 12px 35px rgba(32,50,72,.06);
+}
+
+.confirmation-card__top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.confirmation-card__header{
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    margin-bottom: 25px;
+}
+
+.confirmation-card__header h2{
+    margin: 4px 0 5px;
+
+    color: var(--mareva-ink);
+
+    font-size: 1.45rem;
+    line-height: 1.2;
+}
+
+.confirmation-card__header p{
+    margin: 0;
+
+    color: var(--mareva-muted);
+
+    font-size: .92rem;
+    line-height: 1.55;
+}
+
+.confirm-step{
+    flex: 0 0 auto;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(84,198,169,.18),
+        rgba(15,143,164,.12)
+    );
+
+    font-size: 23px;
+}
+
+
+/* =========================================================
+   CÓDIGO
+   ========================================================= */
+
+.confirmation-code-card{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(15,143,164,.07),
+            rgba(84,198,169,.08)
+        ),
+        #fff;
+}
+
+.reservation-code{
+    margin: 7px 0 0;
+
+    color: var(--mareva-sea-deep);
+
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 900;
+
+    letter-spacing: .08em;
+}
+
+.reservation-status{
+    display: inline-flex;
+    align-items: center;
+
+    padding: 8px 15px;
+
+    border-radius: 999px;
+
+    background: rgba(84,198,169,.15);
+    color: #147a63;
+
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   INFORMACIÓN
+   ========================================================= */
+
+.confirmation-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.confirmation-info{
+    min-width: 0;
+
+    padding: 17px;
+
+    background: #f8fbfa;
+
+    border: 1px solid rgba(32,50,72,.07);
+    border-radius: 16px;
+}
+
+.confirmation-info small{
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--mareva-muted);
+
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.confirmation-info strong{
+    display: block;
+
+    color: var(--mareva-ink);
+
+    font-size: .94rem;
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   TOTAL
+   ========================================================= */
+
+.confirmation-total{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-top: 20px;
+    padding-top: 22px;
+
+    border-top: 1px solid rgba(32,50,72,.10);
+}
+
+.confirmation-total span{
+    display: block;
+
+    color: var(--mareva-ink);
+
+    font-weight: 800;
+}
+
+.confirmation-total small{
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--mareva-muted);
+
+    font-size: .78rem;
+}
+
+.confirmation-total strong{
+    color: var(--mareva-sea-deep);
+
+    font-size: 1.7rem;
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SERVICIOS / VIAJEROS
+   ========================================================= */
+
+.traveler-list{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.traveler-list__item{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 15px 16px;
+
+    background: #fbfcfc;
+
+    border: 1px solid rgba(32,50,72,.07);
+    border-radius: 16px;
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.traveler-list__item:hover{
+    transform: translateY(-1px);
+
+    border-color: rgba(15,143,164,.20);
+
+    box-shadow:
+        0 8px 20px rgba(32,50,72,.05);
+}
+
+.confirmation-service-icon{
+    flex: 0 0 auto;
+
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(15,143,164,.11),
+        rgba(84,198,169,.13)
+    );
+
+    font-size: 21px;
+}
+
+.confirmation-service-content{
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.confirmation-service-type{
+    color: var(--mareva-sea);
+
+    font-size: .68rem;
+    font-weight: 900;
+
+    letter-spacing: .08em;
+}
+
+.confirmation-service-content strong{
+    color: var(--mareva-ink);
+
+    font-size: .95rem;
+}
+
+.confirmation-service-content > span:last-child{
+    color: var(--mareva-muted);
+
+    font-size: .84rem;
+    line-height: 1.45;
+}
+
+.confirmation-extra-price{
+    color: var(--mareva-sea-deep) !important;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   PERSONALIZACIÓN
+   ========================================================= */
+
+.confirmation-notes{
+    padding: 18px;
+
+    background: #f8fbfa;
+
+    border-left: 4px solid var(--mareva-sea);
+
+    border-radius: 12px;
+
+    color: var(--mareva-muted);
+
+    font-size: .92rem;
+    line-height: 1.7;
+
+    white-space: pre-line;
+}
+
+
+/* =========================================================
+   PAGO
+   ========================================================= */
+
+.confirmation-payment{
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    margin: 25px 0;
+
+    padding: 22px 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(246,201,76,.13),
+            rgba(248,232,197,.28)
+        );
+
+    border: 1px solid rgba(246,201,76,.30);
+    border-radius: 20px;
+}
+
+.confirmation-payment__icon{
+    flex: 0 0 auto;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+
+    border-radius: 14px;
+
+    font-size: 23px;
+
+    box-shadow:
+        0 6px 15px rgba(32,50,72,.06);
+}
+
+.confirmation-payment strong{
+    display: block;
+
+    margin: 5px 0 5px;
+
+    color: var(--mareva-ink);
+
+    font-size: .98rem;
+}
+
+.confirmation-payment p{
+    margin: 0;
+
+    color: var(--mareva-muted);
+
+    font-size: .86rem;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+
+.confirmation-actions{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 28px;
+}
+
+.confirmation-actions .btn{
+    min-width: 220px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.confirmation-footer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-top: 28px;
+
+    text-align: center;
+
+    color: var(--mareva-muted);
+
+    font-size: .85rem;
+}
+
+.confirmation-footer span{
+    font-size: 18px;
+}
+
+.confirmation-footer p{
+    margin: 0;
+}
+
+.confirmation-footer strong{
+    color: var(--mareva-sea-deep);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px){
+
+    .confirmation-grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .confirmation-actions{
+        flex-direction: column;
+    }
+
+    .confirmation-actions .btn{
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 600px){
+
+    .confirmation-page{
+        padding: 35px 0 60px;
+    }
+
+    .confirmation-card{
+        padding: 20px;
+
+        border-radius: 19px;
+    }
+
+    .confirmation-success{
+        margin-bottom: 25px;
+    }
+
+    .confirmation-icon{
+        width: 68px;
+        height: 68px;
+
+        font-size: 32px;
+    }
+
+    .confirmation-success h1{
+        font-size: 2rem;
+    }
+
+    .confirmation-card__top{
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .confirmation-grid{
+        grid-template-columns: 1fr;
+    }
+
+    .confirmation-total{
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .confirmation-total strong{
+        font-size: 1.5rem;
+    }
+
+    .confirmation-service-icon{
+        width: 40px;
+        height: 40px;
+
+        font-size: 18px;
+    }
+}
+
+
+@media (max-width: 480px){
+
+    .confirmation-page{
+        padding-top: 25px;
+    }
+
+    .confirmation-card{
+        padding: 17px;
+    }
+
+    .confirmation-card__header{
+        gap: 11px;
+    }
+
+    .confirm-step{
+        width: 42px;
+        height: 42px;
+
+        border-radius: 12px;
+
+        font-size: 19px;
+    }
+
+    .confirmation-card__header h2{
+        font-size: 1.25rem;
+    }
+
+    .confirmation-payment{
+        padding: 18px;
+    }
+
+    .confirmation-payment__icon{
+        width: 42px;
+        height: 42px;
+    }
+
+    .traveler-list__item{
+        align-items: flex-start;
+    }
+
+    .reservation-code{
+        font-size: 1.4rem;
+    }
+
+}

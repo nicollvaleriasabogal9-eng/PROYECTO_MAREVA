@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="section">
+
+    <div class="container">
+
+        <a
+            href="{{ url_for('home.home') }}"
+            class="btn btn-ghost btn-sm"
+            style="margin-bottom:var(--space-4)"
+        >
+            ← Volver
+        </a>
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:var(--space-6)
+            "
+        >
+
+            <div>
+
+                <p class="section-label">
+                    ⚙️ Administración
+                </p>
+
+                <h1 class="section-title">
+                    Preguntas de encuesta
+                </h1>
+
+                <p class="section-desc">
+                    Administra las preguntas que se mostrarán
+                    en las encuestas de satisfacción.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('encuesta.nueva_pregunta') }}"
+                class="btn btn-primary"
+            >
+                + Nueva pregunta
+            </a>
+
+        </div>
+
+
+        {% if preguntas %}
+
+            <div class="perfil-card">
+
+                {% for pregunta in preguntas %}
+
+                    <div
+                        style="
+                            padding:var(--space-4) 0;
+                            border-bottom:1px solid var(--gray-200)
+                        "
+                    >
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                gap:var(--space-4)
+                            "
+                        >
+
+                            <div style="flex:1">
+
+                                <p style="margin-bottom:var(--space-2)">
+
+                                    <strong>
+                                        {{ pregunta.orden }}.
+                                    </strong>
+
+                                    {{ pregunta.texto }}
+
+                                </p>
+
+                                <small class="text-muted">
+
+                                    Tipo:
+                                    {{ pregunta.tipo_respuesta }}
+
+                                    &nbsp; | &nbsp;
+
+                                    {% if pregunta.estado %}
+
+                                        <span>
+                                            🟢 Activa
+                                        </span>
+
+                                    {% else %}
+
+                                        <span>
+                                            🔴 Inactiva
+                                        </span>
+
+                                    {% endif %}
+
+                                </small>
+
+                            </div>
+
+
+                            <div
+                                style="
+                                    display:flex;
+                                    gap:var(--space-2);
+                                    align-items:center
+                                "
+                            >
+
+                                <a
+                                    href="{{ url_for('encuesta.editar_pregunta', id_pregunta=pregunta.id_pregunta) }}"
+                                    class="btn btn-outline btn-sm"
+                                >
+                                    ✏️ Editar
+                                </a>
+
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'encuesta.cambiar_estado_pregunta',
+                                        id_pregunta=pregunta.id_pregunta
+                                    ) }}"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline btn-sm"
+                                    >
+
+                                        {% if pregunta.estado %}
+                                            Desactivar
+                                        {% else %}
+                                            Activar
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="perfil-card">
+
+                <p class="text-muted">
+                    No existen preguntas registradas.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+{% endblock %}

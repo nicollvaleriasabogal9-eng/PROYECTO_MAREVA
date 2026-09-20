@@ -1,0 +1,75 @@
+from flask import Flask, request, session, redirect, url_for
+from routes.auth_routes import auth_bp
+from routes.home_routes import home_bp
+from routes.paquetes_routes import paquetes_bp
+from routes.reserva_routes import reserva_bp
+from routes.destino_routes import destinos_bp
+from routes.encuesta_routes import encuesta_bp
+from routes.favoritos_routes import favoritos_bp
+from routes.gamificacion_routes import gamificacion_bp
+from routes.guia_routes import guia_bp
+from routes.proveedores_routes import proveedor_bp
+from routes.reporte_routes import reporte_bp
+from routes.dashboard_routes import dashboard_bp
+
+from services.paquete_services import PaqueteService
+
+from datetime import timedelta, datetime
+
+
+main = Flask(__name__, template_folder="../frontend/templates", static_folder="../frontend/static")
+
+main.secret_key = "mareva_secret_2026"
+
+main.register_blueprint(proveedor_bp)
+main.register_blueprint(guia_bp)
+main.register_blueprint(gamificacion_bp)
+main.register_blueprint(favoritos_bp)
+main.register_blueprint(encuesta_bp)
+main.register_blueprint(reserva_bp)
+main.register_blueprint(paquetes_bp)
+main.register_blueprint(auth_bp)
+main.register_blueprint(destinos_bp)
+main.register_blueprint(home_bp)
+main.register_blueprint(reporte_bp)
+main.register_blueprint(dashboard_bp)
+main.permanent_session_lifetime = timedelta(days=30)
+
+@main.before_request
+def controlar_inactividad():
+    if request.endpoint == "static":
+        return
+    usuario = session.get("usuario")
+    if not usuario:
+        return
+    ultima = session.get("ultima_actividad")
+    ahora = datetime.utcnow()
+    if ultima:
+        try:
+            if (ahora - datetime.fromisoformat(ultima)).total_seconds() > 3600:
+                session.clear()
+                return redirect(url_for("auth.mostrar_login", next=request.path))
+        except (ValueError, TypeError):
+            session.pop("ultima_actividad", None)
+    session["ultima_actividad"] = ahora.isoformat()
+
+
+@main.context_processor
+def inyectar_favoritos_total():
+    usuario = session.get("usuario")
+    if usuario and usuario.get("rol") == "cliente":
+        try:
+            ids = PaqueteService().obtener_favoritos_cliente(usuario["id"])
+            session["favoritos"] = ids
+            total = len(ids)
+        except Exception:
+            total = 0
+    else:
+        total = sum(
+            1 for i in session.get("favoritos", []) if str(i).isdigit()
+        )
+    return {"favoritos_total": total}
+
+
+if __name__ == "__main__":
+    main.run(debug=True)

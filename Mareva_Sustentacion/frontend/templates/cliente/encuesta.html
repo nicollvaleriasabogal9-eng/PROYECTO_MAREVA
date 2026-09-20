@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Encuesta de satisfacción · MAREVA{% endblock %}
+{% block content %}
+<section class="section survey-page">
+    <div class="container narrow-container">
+        <div class="survey-header">
+            <div class="survey-icon">💬</div>
+            <span class="eyebrow">MAREVA · TU OPINIÓN</span>
+            <h1>¿Cómo fue tu viaje?</h1>
+            <p>Ayúdanos a mejorar las experiencias de MAREVA.</p>
+        </div>
+        {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+        <form method="POST" class="survey-card">
+            <input type="hidden" name="id_reserva" value="{{ reserva.id_reserva|default('') }}">
+            {% for pregunta in preguntas %}
+            <div class="survey-question">
+                <label><span>{{ loop.index }}</span><strong>{{ pregunta.texto }}</strong></label>
+                {% if pregunta.tipo_respuesta in ['numero','rating','calificacion'] %}
+                <div class="rating-options">
+                    {% for n in range(1,6) %}
+                    <label><input type="radio" name="respuesta_{{ pregunta.id_pregunta }}" value="{{ n }}" required><span>{{ n }}</span></label>
+                    {% endfor %}
+                </div>
+                {% elif pregunta.tipo_respuesta in ['texto','abierta'] %}
+                <textarea class="form-input" name="respuesta_{{ pregunta.id_pregunta }}" rows="4" placeholder="Escribe tu respuesta..." required></textarea>
+                {% else %}
+                <textarea class="form-input" name="respuesta_{{ pregunta.id_pregunta }}" rows="3" placeholder="Tu respuesta..." required></textarea>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button class="btn btn-primary btn-lg" type="submit">Enviar encuesta →</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
