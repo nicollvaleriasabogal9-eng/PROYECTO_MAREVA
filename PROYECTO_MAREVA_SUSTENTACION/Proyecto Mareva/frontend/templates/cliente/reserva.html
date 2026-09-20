@@ -1,0 +1,321 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+
+<a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">
+  ← Volver
+</a>
+
+<main class="section">
+  <div class="container" style="max-width:720px">
+
+    <p class="section-label">📋 Formulario de reserva</p>
+
+    <h1 class="section-title">
+      {{ paquete.nombre }}
+    </h1>
+
+    <p class="section-desc">
+      {{ paquete.descripcion }}
+    </p>
+
+    {% if error %}
+    <div style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:var(--space-4);border-radius:var(--radius-md);margin-bottom:var(--space-6)">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:var(--space-4);margin-bottom:var(--space-6)">
+      <strong>📅 Fechas disponibles:</strong>
+      {{ paquete.fecha_inicio.strftime('%d/%m/%Y') if paquete.fecha_inicio else 'Sin fecha inicial' }}
+      -
+      {{ paquete.fecha_fin.strftime('%d/%m/%Y') if paquete.fecha_fin else 'Sin fecha final' }}
+      <br>
+      <strong>🪑 Cupos disponibles:</strong>
+      {{ paquete.cupos_disponibles }}
+    </div>
+
+    <div class="divider"></div>
+
+    <form method="POST" action="{{ url_for('confirmar_reserva') }}" id="form-reserva">
+
+      <input type="hidden" name="paquete" value="{{ paquete.slug }}">
+
+      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">
+        👥 Viajeros
+      </h2>
+
+      <div class="grid-3" style="margin-bottom:var(--space-6)">
+
+        <div class="form-group">
+          <label class="form-label">Adultos</label>
+
+          <input
+            type="number"
+            name="adultos"
+            id="adultos"
+            class="form-input"
+            min="1"
+            value="1"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Menores (2–17 años)</label>
+
+          <input
+            type="number"
+            name="menores"
+            id="menores"
+            class="form-input"
+            min="0"
+            value="0"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bebés (0–2 años)</label>
+
+          <input
+            type="number"
+            name="bebes"
+            id="bebes"
+            class="form-input"
+            min="0"
+            value="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="form-group" style="margin-bottom:var(--space-6)">
+
+        <label class="form-label">
+          ¿Viaja con mascotas?
+        </label>
+
+        <select name="mascotas" class="form-select">
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">
+        📅 Fechas
+      </h2>
+
+      <div class="reserva-fechas">
+
+        <div class="form-group">
+
+          <label class="form-label">
+            Fecha de inicio
+          </label>
+
+          <input
+            type="date"
+            name="fecha_inicio"
+            id="fecha_inicio"
+            class="form-input"
+            min="{{ paquete.fecha_inicio.strftime('%Y-%m-%d') if paquete.fecha_inicio else '' }}"
+            max="{{ paquete.fecha_fin.strftime('%Y-%m-%d') if paquete.fecha_fin else '' }}"
+            required
+          >
+
+          <div class="fecha-info">
+            📅 Disponible dentro del periodo del paquete
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="form-label">
+            Días de estancia
+          </label>
+
+          <input
+            type="number"
+            name="dias"
+            id="dias"
+            class="form-input"
+            min="1"
+            value="{{ paquete.duracion_dias }}"
+            readonly
+            required
+          >
+
+        </div>
+
+      </div>
+
+      <div class="form-group" style="margin-bottom:var(--space-6)">
+
+        <label class="form-label">
+          Fecha de regreso
+        </label>
+
+        <input
+          type="date"
+          name="fecha_regreso"
+          id="fecha_regreso"
+          class="form-input fecha-regreso"
+          readonly
+        >
+
+        <div id="fecha-regreso-texto" class="fecha-info">
+          📅 Selecciona tu fecha de inicio
+        </div>
+
+      </div>
+
+      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">
+        🧳 ¿Qué incluye tu viaje?
+      </h2>
+
+      <div class="form-group" style="margin-bottom:var(--space-6)">
+
+        <label class="form-label">
+          Selecciona tu plan
+        </label>
+
+        <select name="plan" class="form-select">
+
+          <option value="completo">
+            Paquete completo (todo incluido)
+          </option>
+
+          <option value="solo_alojamiento">
+            Solo alojamiento
+          </option>
+
+          <option value="solo_vuelos">
+            Solo vuelos
+          </option>
+
+          <option value="solo_alimentacion">
+            Solo alimentación
+          </option>
+
+          <option value="personalizado">
+            Personalizado
+          </option>
+
+        </select>
+
+      </div>
+
+      {% if paquete.servicios_extra %}
+
+      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">
+        ✨ Servicios extra
+      </h2>
+
+      <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-6)">
+
+        {% for s in paquete.servicios_extra %}
+
+        <label
+          class="filtro-check"
+          style="background:var(--white);border:1px solid var(--gray-200);padding:var(--space-3);border-radius:var(--radius-md)"
+        >
+
+          <input
+            type="checkbox"
+            name="extras"
+            value="{{ s.nombre }}"
+            data-precio="{{ s.precio }}"
+            class="extra-checkbox"
+          >
+
+          <span>
+            {{ s.nombre }} —
+            <strong>
+              ${{ "{:,.0f}".format(s.precio) }}
+            </strong>
+          </span>
+
+        </label>
+
+        {% endfor %}
+
+      </div>
+
+      {% endif %}
+
+      <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:var(--space-5);margin-bottom:var(--space-6)">
+
+        <h2 style="font-size:var(--text-xl);margin-bottom:var(--space-4)">
+          💰 Resumen de la reserva
+        </h2>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-2)">
+          <span>Precio del paquete:</span>
+          <strong id="precio-paquete">$0</strong>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-2)">
+          <span>Viajeros:</span>
+          <strong id="cantidad-viajeros">1</strong>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-2)">
+          <span>Servicios extra:</span>
+          <strong id="precio-extras">$0</strong>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-2)">
+          <span>Cupos disponibles:</span>
+          <strong>{{ paquete.cupos_disponibles }}</strong>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex;justify-content:space-between;font-size:var(--text-xl)">
+          <strong>Valor total:</strong>
+          <strong id="valor-total">$0</strong>
+        </div>
+
+      </div>
+
+      <div class="form-group" style="margin-bottom:var(--space-8)">
+
+        <label class="form-label">
+          Notas o solicitudes especiales
+        </label>
+
+        <textarea
+          name="notas"
+          class="form-textarea"
+          rows="3"
+          placeholder="Alergias, preferencias, celebraciones..."
+        ></textarea>
+
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg"
+        style="width:100%;justify-content:center"
+      >
+        Guardar reserva ✈
+      </button>
+
+    </form>
+
+  </div>
+</main>
+
+<script>
+  const precioPaquete = Number("{{ paquete.precio }}");
+  const duracionPaquete = Number("{{ paquete.duracion_dias }}");
+  const cuposDisponibles = Number("{{ paquete.cupos_disponibles }}");
+</script>
+
+<script src="{{ url_for('static', filename='js/reserva.js') }}"></script>
+
+{% endblock %}
+```
