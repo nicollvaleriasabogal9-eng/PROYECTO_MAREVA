@@ -2,9 +2,7 @@ async function cargarPanelDashboard() {
 
   try {
 
-    const res = await fetch(
-      "{{ url_for('dashboard.obtener_panel_completo') }}"
-    );
+    const res = await fetch(window.DASHBOARD_PANEL_URL);
 
     if (!res.ok) {
       throw new Error("Error cargando el panel");

@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar reserva · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="confirmar-hero">
+    <div class="container">
+        <a href="{{ url_for('paquetes.ver_detalle', slug=paquete.slug) }}" class="booking-back">
+            ← Volver al paquete
+        </a>
+        <h1>Confirma tu reserva</h1>
+        <p>
+            Revisa tu selección. Puedes quitar o agregar servicios antes de
+            guardar la reserva. Después de guardarla podrás descargar el PDF.
+        </p>
+    </div>
+</section>
+
+<main class="section confirmar-page">
+    <div class="container">
+
+        {% if error %}
+            <div class="alert alert-error" style="margin-bottom: 18px;">
+                ⚠️ {{ error }}
+            </div>
+        {% endif %}
+
+        <form
+            method="POST"
+            action="{{ url_for('reserva.guardar', slug=paquete.slug) }}"
+            id="formConfirmarReserva"
+            class="confirmar-layout"
+        >
+
+            <input type="hidden" name="id_salida" value="{{ seleccion.id_salida }}">
+
+            <main>
+
+                <!-- ================= FECHA ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">📅</span>
+                        <div>
+                            <span class="eyebrow">FECHA DE VIAJE</span>
+                            <h2>Cuándo viajas</h2>
+                        </div>
+                    </div>
+
+                    {% if salida %}
+                        <div class="sel-item">
+                            <span class="sel-item__icon">🗓️</span>
+                            <div class="sel-item__body">
+                                <strong>{{ salida.fecha_salida.strftime('%d/%m/%Y') }}</strong>
+                                <span>
+                                    Regreso:
+                                    {{ salida.fecha_regreso.strftime('%d/%m/%Y') }}
+                                </span>
+                            </div>
+                            {% if salidas|length > 1 %}
+                            <button type="button" class="sel-item__remove"
+                                    onclick="toggleFecha(this)" title="Cambiar fecha">↻</button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if salidas|length > 1 %}
+                    <div id="cambiarFecha" hidden>
+                        <p style="margin-bottom: 10px; font-size:.8rem; color:#718093;">
+                            Elige otra fecha:
+                        </p>
+                        <div class="pick-date-grid">
+                            {% for s in salidas %}
+                            <label class="pick-date">
+                                <input type="radio"
+                                       name="id_salida_alt"
+                                       value="{{ s.id_salida }}"
+                                       {% if s.id_salida == seleccion.id_salida %}checked{% endif %}>
+                                <strong>{{ s.fecha_salida.strftime('%d/%m/%Y') }}</strong>
+                                <small>Regreso {{ s.fecha_regreso.strftime('%d/%m/%Y') }}</small>
+                                <b>✓</b>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block"
+                                style="margin-top: 10px;"
+                                onclick="aplicarFecha()">
+                            Aplicar fecha
+                        </button>
+                    </div>
+                    {% endif %}
+                </section>
+
+                <!-- ================= ALOJAMIENTO ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">🏨</span>
+                        <div>
+                            <span class="eyebrow">ALOJAMIENTO</span>
+                            <h2>Elige tu hotel</h2>
+                        </div>
+                    </div>
+
+                    <div class="package-service-grid">
+                        {% for hotel in paquete.alojamientos %}
+                        <label class="package-service-card pick-card">
+                            <input type="radio"
+                                   name="alojamiento"
+                                   value="{{ hotel.id_alojamiento }}"
+                                   {% if hotel.id_alojamiento in seleccion.alojamiento %}checked{% endif %}
+                                   required>
+                            <span class="package-service-card__icon">🏨</span>
+                            <div>
+                                <h3>{{ hotel.nombre }}</h3>
+                                {% if hotel.tipo_alojamiento %}<p><strong>{{ hotel.tipo_alojamiento }}</strong></p>{% endif %}
+                                {% if hotel.ciudad %}<p>📍 {{ hotel.ciudad }}</p>{% endif %}
+                                {% if hotel.servicios %}<p>{{ hotel.servicios }}</p>{% endif %}
+                            </div>
+                            <b class="pick-check">✓</b>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= ALIMENTACIÓN ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">🍽️</span>
+                        <div>
+                            <span class="eyebrow">ALIMENTACIÓN</span>
+                            <h2>Tus comidas</h2>
+                            <p>Desmarca para quitar una comida de tu reserva.</p>
+                        </div>
+                    </div>
+
+                    {% if paquete.alimentacion %}
+                    <div class="package-service-grid">
+                        {% for comida in paquete.alimentacion %}
+                        <label class="package-service-card pick-card">
+                            <input type="checkbox"
+                                   name="alimentacion"
+                                   value="{{ comida.id_alimentacion }}"
+                                   {% if comida.id_alimentacion in seleccion.alimentacion %}checked{% endif %}>
+                            <span class="package-service-card__icon">🍽️</span>
+                            <div>
+                                <h3>{{ comida.restaurante|default('Restaurante') }}</h3>
+                                {% if comida.tipo_comida %}<p><strong>{{ comida.tipo_comida }}</strong></p>{% endif %}
+                                {% if comida.tipo_servicio %}<p>{{ comida.tipo_servicio }}</p>{% endif %}
+                            </div>
+                            <b class="pick-check">✓</b>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="sel-none">Este paquete no incluye alimentación seleccionable.</p>
+                    {% endif %}
+                </section>
+
+                <!-- ================= TRANSPORTE ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">🚌</span>
+                        <div>
+                            <span class="eyebrow">TRANSPORTE</span>
+                            <h2>Tus traslados</h2>
+                        </div>
+                    </div>
+
+                    {% if paquete.transportes %}
+                    <div class="package-service-grid">
+                        {% for transporte in paquete.transportes %}
+                        <label class="package-service-card pick-card">
+                            <input type="checkbox"
+                                   name="transporte"
+                                   value="{{ transporte.id_transporte }}"
+                                   {% if transporte.id_transporte in seleccion.transporte %}checked{% endif %}>
+                            <span class="package-service-card__icon">
+                                {% if transporte.tipo == 'Aéreo' %}✈️{% else %}🚌{% endif %}
+                            </span>
+                            <div>
+                                <h3>{{ transporte.empresa }}</h3>
+                                {% if transporte.tipo %}<p><strong>{{ transporte.tipo }}</strong></p>{% endif %}
+                                {% if transporte.ruta %}<p>📍 {{ transporte.ruta }}</p>{% endif %}
+                                <span class="service-times">
+                                    {% if transporte.hora_salida %}🕐 {{ transporte.hora_salida }}{% endif %}
+                                    {% if transporte.hora_regreso %}· {{ transporte.hora_regreso }}{% endif %}
+                                </span>
+                            </div>
+                            <b class="pick-check">✓</b>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="sel-none">Sin transporte adicional seleccionable.</p>
+                    {% endif %}
+                </section>
+
+                <!-- ================= ACTIVIDADES ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">🎟️</span>
+                        <div>
+                            <span class="eyebrow">ACTIVIDADES</span>
+                            <h2>Tus experiencias</h2>
+                        </div>
+                    </div>
+
+                    {% if paquete.actividades %}
+                    <div class="package-service-grid">
+                        {% for actividad in paquete.actividades %}
+                        <label class="package-service-card pick-card">
+                            <input type="checkbox"
+                                   name="actividades"
+                                   value="{{ actividad.id_actividad }}"
+                                   {% if actividad.id_actividad in seleccion.actividades %}checked{% endif %}>
+                            <span class="package-service-card__icon">🎟️</span>
+                            <div>
+                                <h3>{{ actividad.nombre }}</h3>
+                                {% if actividad.tipo %}<p><strong>{{ actividad.tipo }}</strong></p>{% endif %}
+                                {% if actividad.destino %}<p>📍 {{ actividad.destino }}</p>{% endif %}
+                                {% if actividad.costo and actividad.costo > 0 %}
+                                <p class="pick-price">+${{ "{:,.0f}".format(actividad.costo|float) }}</p>
+                                {% endif %}
+                            </div>
+                            <b class="pick-check">✓</b>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="sel-none">Sin actividades seleccionables.</p>
+                    {% endif %}
+                </section>
+
+                <!-- ================= SEGURO ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">🛡️</span>
+                        <div>
+                            <span class="eyebrow">SEGURO</span>
+                            <h2>Protección del viaje</h2>
+                        </div>
+                    </div>
+
+                    {% if paquete.seguros %}
+                    <div class="package-service-grid">
+                        {% for seguro in paquete.seguros %}
+                        <label class="package-service-card pick-card">
+                            <input type="checkbox"
+                                   name="seguros"
+                                   value="{{ seguro.id_seguro }}"
+                                   {% if seguro.id_seguro in seleccion.seguros or seguro.es_obligatorio %}checked{% endif %}
+                                   {% if seguro.es_obligatorio %}disabled{% endif %}>
+                            <span class="package-service-card__icon">🛡️</span>
+                            <div>
+                                <h3>{{ seguro.nombre }}</h3>
+                                <p>{{ seguro.cobertura }}</p>
+                                {% if seguro.es_obligatorio %}
+                                <span class="status-positive">Incluido obligatoriamente</span>
+                                {% endif %}
+                            </div>
+                            <b class="pick-check">✓</b>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="sel-none">Sin seguro seleccionable.</p>
+                    {% endif %}
+                </section>
+
+                <!-- ================= EXTRAS ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">✨</span>
+                        <div>
+                            <span class="eyebrow">SERVICIOS ADICIONALES</span>
+                            <h2>Extras de tu reserva</h2>
+                            <p>Desmarca para quitar un extra de tu reserva.</p>
+                        </div>
+                    </div>
+
+                    <div id="extrasLista">
+                    {% if paquete.servicios_extra %}
+                        <div class="package-service-grid">
+                            {% for extra in paquete.servicios_extra %}
+                            <label class="package-service-card pick-card">
+                                <input type="checkbox"
+                                       name="extras"
+                                       value="{{ extra.id }}"
+                                       {% if extra.id in seleccion.extras %}checked{% endif %}>
+                                <span class="package-service-card__icon">✨</span>
+                                <div>
+                                    <h3>{{ extra.nombre }}</h3>
+                                    {% if extra.descripcion %}<p>{{ extra.descripcion }}</p>{% endif %}
+                                    <p class="pick-price">+${{ "{:,.0f}".format(extra.precio|float) }}</p>
+                                </div>
+                                <b class="pick-check">✓</b>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="sel-none">Este paquete no tiene servicios extra.</p>
+                    {% endif %}
+                    </div>
+                </section>
+
+                <!-- ================= VIAJEROS ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">👥</span>
+                        <div>
+                            <span class="eyebrow">VIAJEROS</span>
+                            <h2>¿Quiénes viajan?</h2>
+                            <p>Indica la cantidad y los datos de cada viajero.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-3 booking-input-grid">
+                        <div class="form-group">
+                            <label class="form-label">Adultos</label>
+                            <input type="number"
+                                   name="adultos"
+                                   id="inputAdultos"
+                                   class="form-input"
+                                   min="1" max="20" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Menores (2–17)</label>
+                            <input type="number"
+                                   name="menores"
+                                   id="inputMenores"
+                                   class="form-input"
+                                   min="0" max="20" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mascotas</label>
+                            <select name="mascotas" class="form-select">
+                                <option value="no">No</option>
+                                <option value="si">Sí</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="viajerosContainer" class="traveler-builder"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Alergias, movilidad o necesidades especiales
+                        </label>
+                        <input type="text"
+                               name="alergias"
+                               class="form-input"
+                               placeholder="Ej. alergia al maní, movilidad reducida, ninguna...">
+                    </div>
+                </section>
+
+                <!-- ================= NOTAS ================= -->
+                <section class="confirm-card">
+                    <div class="confirm-card__header">
+                        <span class="confirm-step">📝</span>
+                        <div>
+                            <span class="eyebrow">INDICACIONES</span>
+                            <h2>Notas o solicitudes especiales</h2>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea name="observaciones"
+                                  class="form-textarea"
+                                  rows="4"
+                                  placeholder="Celebraciones, preferencias, horarios, necesidades..."></textarea>
+                    </div>
+                </section>
+
+            </main>
+
+            <aside>
+                <div class="confirm-checkout">
+                    <span class="eyebrow">RESUMEN</span>
+                    <h2>{{ paquete.nombre }}</h2>
+
+                    <div class="summary-line">
+                        <span>📍 Destino</span>
+                        <strong>{{ paquete.nombre_destino }}</strong>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>🗓️ Duración</span>
+                        <strong>{{ paquete.duracion_dias }} días</strong>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>👥 Viajeros</span>
+                        <strong id="resumenViajeros">1</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="policy-confirmed">
+                        <span>✓</span>
+                        <div>
+                            <strong>Política de no reembolso</strong>
+                            <p>Al guardar la reserva aceptas la política
+                               aceptada al crear tu cuenta.</p>
+                        </div>
+                    </div>
+
+                    <div class="confirm-total">
+                        <span>Precio por persona</span>
+                        <strong>${{ "{:,.0f}".format(paquete.precio|float) }}</strong>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block"
+                            style="margin-top: 14px;">
+                        Guardar reserva →
+                    </button>
+
+                    <small style="display:block; margin-top:10px; color:#8a97a6; font-size:.72rem; text-align:center;">
+                        🔒 Después de guardarla podrás descargar el comprobante PDF.
+                    </small>
+                </div>
+            </aside>
+
+        </form>
+
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/reserva_confirmar.js') }}"></script>
+
+{% endblock %}

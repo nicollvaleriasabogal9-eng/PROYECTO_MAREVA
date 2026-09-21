@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}Reserva confirmada · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="confirmation-page">
+
+    <div class="container confirmation-container">
+
+        <!-- =====================================================
+             HERO / ÉXITO
+             ===================================================== -->
+
+        <div class="confirmation-success">
+
+            <div class="confirmation-icon">
+                ✓
+            </div>
+
+            <span class="eyebrow">
+                RESERVA GUARDADA
+            </span>
+
+            <h1>
+                ¡Tu reserva está lista!
+            </h1>
+
+            <p>
+                Tu solicitud quedó registrada correctamente.
+                El proveedor te indicará directamente los próximos pasos.
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             CÓDIGO DE RESERVA
+             ===================================================== -->
+
+        <div class="confirmation-card confirmation-code-card">
+
+            <div class="confirmation-card__top">
+
+                <div>
+                    <span class="eyebrow">
+                        CÓDIGO DE RESERVA
+                    </span>
+
+                    <h2 class="reservation-code">
+                        {{ reserva.codigo_unico|default(reserva.codigo|default('Pendiente')) }}
+                    </h2>
+                </div>
+
+                <span class="reservation-status">
+                    {{ reserva.estado|default('solicitada')|capitalize }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RESUMEN DEL VIAJE
+             ===================================================== -->
+
+        <div class="confirmation-card">
+
+            <div class="confirmation-card__header">
+
+                <span class="confirm-step">
+                    🌴
+                </span>
+
+                <div>
+                    <span class="eyebrow">
+                        RESUMEN DEL VIAJE
+                    </span>
+
+                    <h2>
+                        Tu reserva
+                    </h2>
+
+                    <p>
+                        Estos son los datos principales de tu viaje.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="confirmation-grid">
+
+                <div class="confirmation-info">
+                    <small>
+                        Paquete
+                    </small>
+
+                    <strong>
+                        {{ reserva.paquete.nombre|default(reserva.nombre_paquete|default('')) }}
+                    </strong>
+                </div>
+
+
+                <div class="confirmation-info">
+                    <small>
+                        Destino
+                    </small>
+
+                    <strong>
+                        {{ reserva.paquete.nombre_destino|default(reserva.nombre_destino|default('')) }}
+                    </strong>
+                </div>
+
+
+                <div class="confirmation-info">
+                    <small>
+                        Fecha de viaje
+                    </small>
+
+                    <strong>
+                        {{ reserva.fecha_viaje|default('Por confirmar') }}
+                    </strong>
+                </div>
+
+
+                <div class="confirmation-info">
+                    <small>
+                        Adultos
+                    </small>
+
+                    <strong>
+                        {{ reserva.cant_adultos|default(1) }}
+                    </strong>
+                </div>
+
+
+                <div class="confirmation-info">
+                    <small>
+                        Menores
+                    </small>
+
+                    <strong>
+                        {{ reserva.cant_menores|default(0) }}
+                    </strong>
+                </div>
+
+
+                <div class="confirmation-info">
+                    <small>
+                        Total viajeros
+                    </small>
+
+                    <strong>
+                        {{ reserva.total_personas|default(1) }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="confirmation-total">
+
+                <div>
+                    <span>
+                        Valor referencial
+                    </span>
+
+                    <small>
+                        El valor puede variar según los servicios seleccionados.
+                    </small>
+                </div>
+
+                <strong>
+                    ${{ "{:,.0f}".format(reserva.valor_referencial|default(0)|float) }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SERVICIOS
+             ===================================================== -->
+
+        {% set hay_servicios =
+            (reserva.alojamientos is defined and reserva.alojamientos)
+            or
+            (reserva.alimentacion is defined and reserva.alimentacion)
+            or
+            (reserva.transportes is defined and reserva.transportes)
+            or
+            (reserva.actividades is defined and reserva.actividades)
+            or
+            (reserva.seguros is defined and reserva.seguros)
+            or
+            (reserva.extras is defined and reserva.extras)
+        %}
+
+
+        {% if hay_servicios %}
+
+        <div class="confirmation-card">
+
+            <div class="confirmation-card__header">
+
+                <span class="confirm-step">
+                    ✨
+                </span>
+
+                <div>
+                    <span class="eyebrow">
+                        SERVICIOS SELECCIONADOS
+                    </span>
+
+                    <h2>
+                        Tu itinerario
+                    </h2>
+
+                    <p>
+                        Revisa los servicios que forman parte de tu reserva.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="traveler-list">
+
+
+                <!-- ALOJAMIENTO -->
+
+                {% for a in reserva.alojamientos|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        🏨
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            ALOJAMIENTO
+                        </span>
+
+                        <strong>
+                            {{ a.nombre }}
+                        </strong>
+
+                        <span>
+                            {{ a.tipo_alojamiento|default('') }}
+
+                            {% if a.ciudad %}
+                                · {{ a.ciudad }}
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+                <!-- ALIMENTACIÓN -->
+
+                {% for a in reserva.alimentacion|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        🍽️
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            ALIMENTACIÓN
+                        </span>
+
+                        <strong>
+                            {{ a.restaurante }}
+                        </strong>
+
+                        <span>
+                            {{ a.tipo_comida|default('') }}
+
+                            {% if a.tipo_servicio %}
+                                · {{ a.tipo_servicio }}
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+                <!-- TRANSPORTE -->
+
+                {% for t in reserva.transportes|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        🚌
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            TRANSPORTE
+                        </span>
+
+                        <strong>
+                            {{ t.empresa }}
+                        </strong>
+
+                        <span>
+                            {{ t.tipo|default('') }}
+
+                            {% if t.ruta %}
+                                · {{ t.ruta }}
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+                <!-- ACTIVIDADES -->
+
+                {% for a in reserva.actividades|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        🎟️
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            ACTIVIDAD
+                        </span>
+
+                        <strong>
+                            {{ a.nombre }}
+                        </strong>
+
+                        <span>
+                            {{ a.tipo|default('') }}
+
+                            {% if a.destino %}
+                                · {{ a.destino }}
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+                <!-- SEGURO -->
+
+                {% for s in reserva.seguros|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        🛡️
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            SEGURO
+                        </span>
+
+                        <strong>
+                            {{ s.nombre }}
+                        </strong>
+
+                        <span>
+                            {{ s.cobertura|default('') }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+                <!-- EXTRAS -->
+
+                {% for e in reserva.extras|default([]) %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        ✨
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <span class="confirmation-service-type">
+                            SERVICIO EXTRA
+                        </span>
+
+                        <strong>
+                            {{ e.nombre }}
+                        </strong>
+
+                        <span class="confirmation-extra-price">
+                            +${{ "{:,.0f}".format(e.precio|default(0)|float) }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             PERSONALIZACIÓN
+             ===================================================== -->
+
+        {% if reserva.personalizacion %}
+
+        <div class="confirmation-card">
+
+            <div class="confirmation-card__header">
+
+                <span class="confirm-step">
+                    📝
+                </span>
+
+                <div>
+                    <span class="eyebrow">
+                        RESUMEN DE TU SELECCIÓN
+                    </span>
+
+                    <h2>
+                        Detalle de la reserva
+                    </h2>
+                </div>
+
+            </div>
+
+            <div class="confirmation-notes">
+                {{ reserva.personalizacion }}
+            </div>
+
+        </div>
+
+        {% endif %}
+
+        {% endif %}
+
+
+        <!-- =====================================================
+             VIAJEROS
+             ===================================================== -->
+
+        {% if reserva.viajeros %}
+
+        <div class="confirmation-card">
+
+            <div class="confirmation-card__header">
+
+                <span class="confirm-step">
+                    👥
+                </span>
+
+                <div>
+                    <span class="eyebrow">
+                        VIAJEROS
+                    </span>
+
+                    <h2>
+                        Personas registradas
+                    </h2>
+
+                    <p>
+                        Estos son los viajeros asociados a tu reserva.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="traveler-list">
+
+                {% for viajero in reserva.viajeros %}
+
+                <div class="traveler-list__item">
+
+                    <div class="confirmation-service-icon">
+                        👤
+                    </div>
+
+                    <div class="confirmation-service-content">
+
+                        <strong>
+                            {{ viajero.nombre }} {{ viajero.apellido }}
+                        </strong>
+
+                        <span>
+                            {{ viajero.tipo_documento }}
+                            ·
+                            {{ viajero.numero_documento }}
+
+                            {% if viajero.idioma %}
+                                · {{ viajero.idioma }}
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- =====================================================
+             INFORMACIÓN DE PAGO
+             ===================================================== -->
+
+        <div class="confirmation-payment">
+
+            <div class="confirmation-payment__icon">
+                💳
+            </div>
+
+            <div>
+
+                <span class="eyebrow">
+                    INFORMACIÓN DE PAGO
+                </span>
+
+                <strong>
+                    El pago se realiza directamente con el proveedor
+                </strong>
+
+                <p>
+                    MAREVA no procesa pagos dentro de la plataforma.
+                    El proveedor te comunicará el medio de pago disponible
+                    y sus instrucciones.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ACCIONES
+             ===================================================== -->
+
+        <div class="confirmation-actions">
+
+            <a
+                href="{{ url_for('reserva.descargar_pdf') }}"
+                class="btn btn-primary btn-lg"
+            >
+                📄 Descargar comprobante PDF
+            </a>
+
+            <a
+                href="{{ url_for('paquetes.listar_catalogo') }}"
+                class="btn btn-outline btn-lg"
+            >
+                Explorar más paquetes
+            </a>
+
+        </div>
+
+
+        <!-- =====================================================
+             MENSAJE FINAL
+             ===================================================== -->
+
+        <div class="confirmation-footer">
+
+            <span>
+                🌊
+            </span>
+
+            <p>
+                Gracias por viajar con <strong>MAREVA</strong>.
+                Guarda tu código de reserva para futuras consultas.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

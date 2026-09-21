@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:700px">
+
+    <span class="section-label">Administración</span>
+    <h1 class="section-title">
+      {% if destino and destino.id_destino %}Editar destino{% else %}Nuevo destino{% endif %}
+    </h1>
+
+    {% if error %}
+      <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="card" style="padding:var(--space-8);display:flex;flex-direction:column;gap:var(--space-6)">
+
+      <div class="form-group">
+        <label class="form-label">Nombre del destino *</label>
+        <input class="form-input" type="text" name="nombre_destino" required
+               value="{{ destino.nombre_destino if destino else '' }}">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <input class="form-input" type="text" name="departamento"
+                 value="{{ destino.departamento if destino else '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad</label>
+          <input class="form-input" type="text" name="ciudad"
+                 value="{{ destino.ciudad if destino else '' }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <select class="form-select" name="categoria">
+          <option value="">Selecciona una categoría</option>
+          {% for c in categorias %}
+            <option value="{{ c }}" {% if destino and destino.categoria == c %}selected{% endif %}>{{ c|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" name="descripcion" rows="4">{{ destino.descripcion if destino else '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Atracciones (separadas por comas)</label>
+        <input class="form-input" type="text" name="atracciones"
+               value="{{ destino.atracciones if destino else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Documentos requeridos</label>
+        <input class="form-input" type="text" name="docs_requeridos"
+               value="{{ destino.docs_requeridos if destino else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ruta de la imagen principal</label>
+        <input class="form-input" type="text" name="imagen_principal"
+               placeholder="img/destinos/ejemplo.jpg"
+               value="{{ destino.imagen_principal if destino else '' }}">
+      </div>
+
+      <div style="display:flex;gap:var(--space-3);justify-content:flex-end">
+        <a href="{{ url_for('destinos.panel_admin') }}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if destino and destino.id_destino %}Guardar cambios{% else %}Crear destino{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}

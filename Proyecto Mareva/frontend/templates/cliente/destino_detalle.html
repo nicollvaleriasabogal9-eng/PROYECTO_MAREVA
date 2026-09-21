@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ destino.nombre_destino }} · MAREVA{% endblock %}
+{% block content %}
+<section class="destination-detail-hero">
+    <div class="container">
+        <a href="{{ url_for('destinos.listar_catalogo') }}" class="btn btn-ghost btn-sm">← Todos los destinos</a>
+    <div class="destination-detail-hero__grid">
+        <div>
+            {% if destino.imagen_principal %}
+            <img src="{{ url_for('static',filename=destino.imagen_principal) }}" alt="{{ destino.nombre_destino }}">
+            {% else %}
+            <div class="destination-detail-placeholder">{{ destino.emoji }}
+        </div>
+            {% endif %}
+    </div>
+        <div>
+            <span class="category-badge category-{{ destino.categoria|lower }}">{{ destino.emoji }} {{ destino.categoria|capitalize }}</span>
+            <span class="eyebrow">{{ destino.departamento }} · {{ destino.ciudad }}</span>
+            <h1>{{ destino.nombre_destino }}</h1>
+            <p>{{ destino.descripcion }}</p>
+            <a href="#paquetesDestino" class="btn btn-primary btn-lg">Ver paquetes de este destino →</a>
+        </div>
+    </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container destination-info-grid">
+        <div class="destination-info-card">
+            <span>📍</span>
+            <small>Ubicación</small>
+            <strong>{{ destino.ciudad }}, {{ destino.departamento }}</strong>
+        </div>
+        <div class="destination-info-card">
+            <span>✨</span>
+            <small>Qué hacer</small>
+            <strong>{{ destino.atracciones or 'Experiencias seleccionadas' }}</strong>
+        </div>
+        <div class="destination-info-card">
+            <span>📄</span>
+            <small>Información</small>
+            <strong>{{ destino.docs_requeridos or 'Consulta requisitos antes de viajar' }}</strong>
+        </div>
+    </div>
+</section>
+<section class="section" id="paquetesDestino">
+    <div class="container">
+        <div class="section-heading-row">
+            <div>
+                <span class="eyebrow">PLANES PARA ESTE DESTINO</span>
+                <h2 class="section-title">Paquetes relacionados</h2>
+                <p class="section-desc">Aquí sí puedes pasar directamente del destino a una experiencia concreta.</p>
+            </div><a class="btn btn-outline" href="{{ url_for('paquetes.listar_catalogo') }}?destino={{ destino.id_destino }}">Ver todos →</a>
+        </div>{% if paquetes %}
+        <div class="grid-3">
+            {% for p in paquetes %}
+            <article class="travel-card">
+                <div class="travel-card__media">{% if p.imagen_url %}
+                    <img src="{{ url_for('static',filename=p.imagen_url) }}" alt="{{ p.nombre }}">
+                    {% endif %}
+                    <span class="travel-card__category category-{{ p.categoria|lower }}">{{ p.categoria }}</span>
+                </div>
+                <div class="travel-card__body">
+                    <span class="muted">{{ p.duracion_dias }} días · {{ p.duracion_noches }} noches</span>
+                    <h3>{{ p.nombre }}</h3>
+                    <p>{{ p.descripcion }}</p>
+                </div>
+                <div class="travel-card__footer"><strong>${{ "{:,.0f}".format(p.precio) }}</strong>
+                    <a href="{{ url_for('paquetes.ver_detalle',slug=p.slug) }}" class="btn btn-primary btn-sm">Ver y reservar →</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span>🧭</span>
+            <h3>Aún no hay paquetes para este destino</h3>
+            <a class="btn btn-primary" href="{{ url_for('paquetes.listar_catalogo') }}">Explorar otros viajes</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

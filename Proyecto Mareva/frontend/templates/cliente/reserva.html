@@ -1,114 +1,461 @@
 {% extends "base.html" %}
 
+{% block title %}Reservar {{ paquete.nombre }} · MAREVA{% endblock %}
+
 {% block content %}
 
-<a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-4)">← Volver</a>
+<section class="booking-hero">
+    <div class="container booking-hero__inner">
+        <a href="javascript:history.back()" class="booking-back">
+            ← Volver al paquete
+        </a>
 
-<main class="section">
-  <div class="container" style="max-width:720px">
-    <p class="section-label">📋 Formulario de reserva</p>
-    <h1 class="section-title">{{ paquete.nombre }}</h1>
-    <p class="section-desc">{{ paquete.descripcion }}</p>
+        <div class="booking-hero__grid">
+            <div>
+                {% if paquete.imagen_url %}
+                    <img src="{{ url_for('static', filename=paquete.imagen_url) }}"
+                         alt="{{ paquete.nombre }}">
+                {% endif %}
+            </div>
 
-    {% if error %}
-    <div class="alert alert-error">{{ error }}</div>
-    {% endif %}
+            <div>
+                <span class="eyebrow">RESERVA MAREVA</span>
 
-    <div class="divider"></div>
+                <h1>{{ paquete.nombre }}</h1>
 
-    <div id="resumenPaquete" style="background:var(--gray-100);border-radius:var(--radius-md);padding:var(--space-4);margin-bottom:var(--space-6)">
-      <p style="font-size:var(--text-sm)"><strong>Incluye:</strong> {{ paquete.incluye|join(', ') if paquete.incluye else 'Consulta con tu asesor' }}</p>
-      <p style="font-size:var(--text-sm);color:var(--gray-600)">No incluye: gastos personales, propinas, servicios no listados arriba.</p>
-      <p style="font-size:var(--text-sm)"><strong>Cupos disponibles:</strong> <span id="cuposLabel">{{ paquete.cupos_disponibles }}</span></p>
+                <p>{{ paquete.descripcion }}</p>
+
+                <div class="booking-summary-pills">
+                    <span>📍 {{ paquete.nombre_destino }}</span>
+                    <span>
+                        ⏱ {{ paquete.duracion_dias }} días /
+                        {{ paquete.duracion_noches }} noches
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
+</section>
 
-    <form method="POST" action="{{ url_for('reserva.confirmar') }}" id="formReserva">
-      <input type="hidden" name="paquete" value="{{ paquete.slug }}">
-      <input type="hidden" name="fecha_inicio" id="fechaInicioInput" required>
+<main class="section booking-page">
+    <div class="container">
 
-      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">👥 Viajeros</h2>
-      <div class="grid-3" style="margin-bottom:var(--space-6)">
-        <div class="form-group">
-          <label class="form-label">Adultos</label>
-          <input type="number" name="adultos" id="inputAdultos" class="form-input" min="1" value="1" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Menores (2–17 años)</label>
-          <input type="number" name="menores" id="inputMenores" class="form-input" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">¿Viaja con mascotas?</label>
-          <select name="mascotas" class="form-select">
-            <option value="no">No</option>
-            <option value="si">Sí</option>
-          </select>
-        </div>
-      </div>
+        {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+        {% endif %}
 
-      <div id="viajerosContainer" style="margin-bottom:var(--space-6)"></div>
+        <form method="POST"
+              action="{{ url_for('reserva.confirmar') }}"
+              id="formReserva"
+              class="booking-layout">
 
-      <div class="form-group" style="margin-bottom:var(--space-6)">
-        <label class="form-label">Alergias o condiciones médicas</label>
-        <input type="text" name="alergias" class="form-input" placeholder="Ej: alergia al maní, asma, ninguna...">
-      </div>
+            <input type="hidden"
+                   name="slug"
+                   value="{{ paquete.slug }}">
 
-      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">📅 Selecciona tu fecha de viaje</h2>
-      <div id="reservaData" data-id-paquete="{{ paquete.id_paquete }}"></div>
-      <div id="calendario" style="margin-bottom:var(--space-2)"></div>
-      <div style="display:flex;gap:var(--space-4);font-size:var(--text-xs);margin-bottom:var(--space-6)">
-        <span><span style="display:inline-block;width:12px;height:12px;background:#10B981;border-radius:3px;margin-right:4px"></span>Disponible</span>
-        <span><span style="display:inline-block;width:12px;height:12px;background:#EF4444;border-radius:3px;margin-right:4px"></span>No disponible</span>
-      </div>
-      <p id="fechaSeleccionadaTexto" class="text-muted" style="font-size:var(--text-sm);margin-bottom:var(--space-6)"></p>
+            <input type="hidden"
+                   name="id_salida"
+                   id="idSalidaInput"
+                   required>
 
-      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">🧳 ¿Qué incluye tu viaje?</h2>
-      <div class="form-group" style="margin-bottom:var(--space-6)">
-        <label class="form-label">Selecciona tu plan</label>
-        <select name="plan" class="form-select">
-          <option value="completo">Paquete completo (todo incluido)</option>
-          <option value="solo_alojamiento">Solo alojamiento</option>
-          <option value="solo_vuelos">Solo vuelos</option>
-          <option value="solo_alimentacion">Solo alimentación</option>
-          <option value="personalizado">Personalizado</option>
-        </select>
-      </div>
+            <input type="hidden"
+                   name="fecha_viaje"
+                   id="fechaViajeInput"
+                   required>
 
-      {% if paquete.servicios_extra %}
-      <h2 style="margin-bottom:var(--space-4);font-size:var(--text-xl)">✨ Servicios extra</h2>
-      <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-6)">
-        {% for s in paquete.servicios_extra %}
-        <label class="filtro-check" style="background:var(--white);border:1px solid var(--gray-200);padding:var(--space-3);border-radius:var(--radius-md)">
-          <input type="checkbox" name="extras" value="{{ s.id }}">
-          <span>{{ s.nombre }} — <strong>${{ "{:,.0f}".format(s.precio) }}</strong></span>
-        </label>
-        {% endfor %}
-      </div>
-      {% endif %}
+            <div id="reservaData"
+                 data-id-paquete="{{ paquete.id_paquete }}">
 
-      <div class="form-group" style="margin-bottom:var(--space-6)"> 
-        <label class="form-label"> 💳 Política de no reembolso </label> 
-          <p class="text-muted" style="font-size:var(--text-sm);margin-bottom:var(--space-3)"> Al aceptar esta política, reconoces que el valor pagado por la reserva no será reembolsable en caso de cancelación. </p> 
-            <select name="acepta_no_reembolso" class="form-select" required> 
-              <option value="" selected disabled> Selecciona una opción </option>
-              <option value="si"> Sí, acepto la política de no reembolso </option> 
-              <option value="no"> No, no acepto la política </option> 
-            </select> 
-      
-      </div>
+                {% for salida in salidas %}
+                    <button type="button"
+                            class="departure-option"
+                            data-id-salida="{{ salida.id_salida }}"
+                            data-fecha="{{ salida.fecha_salida }}"
+                            data-regreso="{{ salida.fecha_regreso }}">
+                        <strong>
+                            {{ salida.fecha_salida.strftime('%d/%m/%Y') }}
+                        </strong>
 
-      <div class="form-group" style="margin-bottom:var(--space-8)">
-        <label class="form-label">Notas o solicitudes especiales</label>
-        <textarea name="notas" class="form-textarea" rows="3" placeholder="Preferencias, celebraciones..."></textarea>
-      </div>
+                        <span>
+                            Regreso:
+                            {{ salida.fecha_regreso.strftime('%d/%m/%Y') }}
+                        </span>
+                    </button>
+                {% endfor %}
 
-      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center">
-        Guardar reserva ✈
-      </button>
+            </div>
 
-    </form>
-  </div>
+            <section class="booking-card">
+                <div class="booking-card__header">
+                    <span class="booking-step">01</span>
 
+                    <div>
+                        <span class="eyebrow">PASAJEROS</span>
+
+                        <h2>¿Quiénes viajan?</h2>
+
+                        <p>
+                            Indica cuántas personas asistirán y el idioma
+                            preferido de cada viajero para que el guía pueda
+                            prepararse.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid-3 booking-input-grid">
+                    <div class="form-group">
+                        <label class="form-label">Adultos</label>
+
+                        <input type="number"
+                               name="adultos"
+                               id="inputAdultos"
+                               class="form-input"
+                               min="1"
+                               max="20"
+                               value="1"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Menores (2–17)</label>
+
+                        <input type="number"
+                               name="menores"
+                               id="inputMenores"
+                               class="form-input"
+                               min="0"
+                               max="20"
+                               value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mascotas</label>
+
+                        <select name="mascotas" class="form-select">
+                            <option value="0">No</option>
+                            <option value="1">Sí</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="viajerosContainer"
+                     class="traveler-builder"></div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Alergias, movilidad o necesidades especiales
+                    </label>
+
+                    <input type="text"
+                           name="alergias"
+                           class="form-input"
+                           placeholder="Ej. alergia al maní, movilidad reducida, ninguna...">
+                </div>
+            </section>
+
+            <section class="booking-card">
+                <div class="booking-card__header">
+                    <span class="booking-step">02</span>
+
+                    <div>
+                        <span class="eyebrow">FECHAS</span>
+
+                        <h2>Elige cuándo viajar</h2>
+
+                        <p>
+                            Selecciona una de las fechas disponibles para
+                            este viaje.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="date-picker-shell">
+                    <div class="date-picker-top">
+                        <button type="button"
+                                class="calendar-nav"
+                                id="prevMonth">
+                            ‹
+                        </button>
+
+                        <div>
+                            <strong id="calendarMonth">
+                                Calendario
+                            </strong>
+
+                            <span id="calendarHint">
+                                Selecciona una fecha
+                            </span>
+                        </div>
+
+                        <button type="button"
+                                class="calendar-nav"
+                                id="nextMonth">
+                            ›
+                        </button>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>L</span>
+                        <span>M</span>
+                        <span>X</span>
+                        <span>J</span>
+                        <span>V</span>
+                        <span>S</span>
+                        <span>D</span>
+                    </div>
+
+                    <div id="calendario"
+                         class="calendar-grid"></div>
+
+                    <div class="date-selected">
+                        <span>Fecha elegida</span>
+
+                        <strong id="fechaSeleccionadaTexto">
+                            Aún no seleccionada
+                        </strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="booking-card">
+                <div class="booking-card__header">
+                    <span class="booking-step">03</span>
+
+                    <div>
+                        <span class="eyebrow">PERSONALIZACIÓN</span>
+
+                        <h2>Arma el viaje a tu medida</h2>
+
+                        <p>
+                            Si el paquete lo permite, puedes indicar qué
+                            componentes prefieres y agregar experiencias.
+                        </p>
+                    </div>
+                </div>
+
+                <input type="hidden"
+                       name="plan"
+                       id="planInput"
+                       value="completo">
+
+                {% if paquete.personalizable %}
+
+                    <div class="customizer-grid">
+                        {% for key, label, icon in [
+                            ('alojamiento', 'Alojamiento', '🏨'),
+                            ('transporte', 'Transporte', '🚐'),
+                            ('alimentacion', 'Alimentación', '🍽️'),
+                            ('guia', 'Guía turístico', '🧭'),
+                            ('seguro', 'Seguro de viaje', '🛡️')
+                        ] %}
+
+                            <label class="custom-option">
+                                <input type="checkbox"
+                                       name="personalizado"
+                                       value="{{ key }}"
+                                       checked>
+
+                                <span class="custom-option__icon">
+                                    {{ icon }}
+                                </span>
+
+                                <span>
+                                    <strong>{{ label }}</strong>
+
+                                    <small>
+                                        Quiero incluirlo en mi propuesta
+                                    </small>
+                                </span>
+
+                                <b>✓</b>
+                            </label>
+
+                        {% endfor %}
+                    </div>
+
+                    <div class="grid-2 custom-bottom">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Presupuesto objetivo (opcional)
+                            </label>
+
+                            <input class="form-input"
+                                   type="number"
+                                   name="presupuesto_personalizado"
+                                   min="0"
+                                   step="50000"
+                                   placeholder="Ej. 2500000">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Nivel de flexibilidad
+                            </label>
+
+                            <select class="form-select"
+                                    name="flexibilidad">
+                                <option value="estandar">
+                                    Estándar
+                                </option>
+
+                                <option value="alta">
+                                    Alta — priorizar alternativas
+                                </option>
+
+                                <option value="premium">
+                                    Premium — priorizar comodidad
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                {% else %}
+
+                    <div class="custom-static">
+                        <span>✓</span>
+
+                        <div>
+                            <strong>Paquete preconfigurado</strong>
+
+                            <p>
+                                Este paquete tiene una composición fija.
+                                Puedes agregar servicios extra y dejar
+                                solicitudes especiales.
+                            </p>
+                        </div>
+                    </div>
+
+                {% endif %}
+
+                {% if paquete.servicios_extra %}
+
+                    <div class="extras-heading">
+                        <span>EXPERIENCIAS OPCIONALES</span>
+                        <small>Se añaden a tu solicitud</small>
+                    </div>
+
+                    <div class="extras-grid">
+                        {% for s in paquete.servicios_extra %}
+
+                            <label class="extra-option">
+                                <input type="checkbox"
+                                       name="extras"
+                                       value="{{ s.id }}">
+
+                                <span>
+                                    <strong>{{ s.nombre }}</strong>
+
+                                    <small>
+                                        {{ s.descripcion }}
+                                    </small>
+                                </span>
+
+                                <b>
+                                    +${{ "{:,.0f}".format(s.precio) }}
+                                </b>
+                            </label>
+
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
+            </section>
+
+            <section class="booking-card">
+                <div class="booking-card__header">
+                    <span class="booking-step">04</span>
+
+                    <div>
+                        <span class="eyebrow">DETALLES FINALES</span>
+
+                        <h2>Déjanos tus indicaciones</h2>
+
+                        <p>
+                            Esta información ayuda al equipo a preparar
+                            una experiencia más clara y personalizada.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Notas o solicitudes especiales
+                    </label>
+
+                    <textarea name="observaciones"
+                              class="form-textarea"
+                              rows="5"
+                              placeholder="Celebraciones, preferencias, horarios, necesidades..."></textarea>
+                </div>
+            </section>
+
+            <aside class="booking-sidebar">
+                <div class="booking-checkout">
+
+                    <span class="eyebrow">RESUMEN</span>
+
+                    <h2>Tu reserva</h2>
+
+                    <div class="checkout-package">
+                        <strong>{{ paquete.nombre }}</strong>
+
+                        <span>{{ paquete.nombre_destino }}</span>
+                    </div>
+
+                    <div class="checkout-line">
+                        <span>Precio base</span>
+
+                        <strong>
+                            ${{ "{:,.0f}".format(paquete.precio) }}
+                        </strong>
+                    </div>
+
+                    <div class="checkout-line">
+                        <span>Fecha</span>
+
+                        <strong id="checkoutDate">
+                            Por seleccionar
+                        </strong>
+                    </div>
+
+                    <div class="checkout-divider"></div>
+
+                    <div class="policy-confirmed">
+                        <span>✓</span>
+
+                        <div>
+                            <strong>
+                                Política aceptada al crear tu cuenta
+                            </strong>
+
+                            <p>
+                                No necesitas aceptarla nuevamente durante
+                                la reserva. Aplican las excepciones legales
+                                y condiciones particulares informadas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg booking-submit">
+                        Solicitar reserva
+                        <span>→</span>
+                    </button>
+
+                    <small class="checkout-safe">
+                        🔒 Tus datos se procesan dentro del flujo seguro
+                        de MAREVA.
+                    </small>
+
+                </div>
+            </aside>
+
+        </form>
+    </div>
 </main>
 
 <script src="{{ url_for('static', filename='js/reserva.js') }}"></script>
+
 {% endblock %}

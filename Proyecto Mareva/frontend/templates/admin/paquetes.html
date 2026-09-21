@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Administrar paquetes · MAREVA{% endblock %}
+{% block content %}
+<section class="admin-hero">
+  <div class="container admin-hero__inner">
+    <div><span class="eyebrow">CENTRO DE OPERACIONES</span><h1>Paquetes turísticos</h1><p>Gestiona disponibilidad, precios, estado y asignación de guías sin perder de vista las reservas existentes.</p></div>
+    <a href="{{ url_for('paquetes.mostrar_form_crear') }}" class="btn btn-primary btn-lg">＋ Nuevo paquete</a>
+  </div>
+</section>
+<section class="section"><div class="container">
+  {% with mensajes=get_flashed_messages(with_categories=true) %}{% if mensajes %}{% for categoria,mensaje in mensajes %}<div class="alert {% if categoria=='error' %}alert-error{% else %}alert-success{% endif %}">{{ mensaje }}</div>{% endfor %}{% endif %}{% endwith %}
+  <div class="admin-package-grid">
+    {% for p in paquetes %}
+    <article class="admin-package-card">
+      <div class="admin-package-card__media">
+        {% if p.imagen_url %}<img src="{{ url_for('static', filename=p.imagen_url) }}" alt="{{ p.nombre }}">{% else %}<div>{{ p.emoji|default('🧳') }}</div>{% endif %}
+        <span class="status-pill {{ 'status-pill--on' if p.estado=='activo' else 'status-pill--off' }}">{{ 'Activo' if p.estado=='activo' else 'Suspendido' }}</span>
+      </div>
+      <div class="admin-package-card__body">
+        <div class="category-badge category-{{ (p.categoria or 'cultural')|lower }}">{{ p.categoria|capitalize }}</div>
+        <h2>{{ p.nombre }}</h2><p>{{ p.nombre_destino }} · {{ p.duracion_dias }} días / {{ p.duracion_noches }} noches</p>
+        <div class="admin-package-metrics"><div><small>Precio</small><strong>${{ "{:,.0f}".format(p.precio) }}</strong></div><div><small>Cupos</small><strong>{{ p.cupos_disponibles }}/{{ p.cupos_totales }}</strong></div><div><small>Reservas</small><strong>{{ p.reservas_activas }}</strong></div></div>
+        {% if p.reservas_activas %}<div class="admin-warning">⚠️ Tiene reservas activas. No se puede suspender sin una contingencia real.</div>{% endif %}
+      </div>
+      <footer class="admin-package-card__actions">
+        <a href="{{ url_for('paquetes.mostrar_form_editar', id_paquete=p.id_paquete) }}" class="btn btn-outline btn-sm">Editar</a>
+        {% if p.estado == 'activo' %}
+          {% if not p.reservas_activas %}
+          <form method="POST" action="{{ url_for('paquetes.suspender', id_paquete=p.id_paquete) }}"><button class="btn btn-ghost btn-sm" type="submit">Desactivar</button></form>
+          {% else %}
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('contingencia-{{ p.id_paquete }}').showModal()">Contingencia / cancelar</button>
+          {% endif %}
+        {% else %}
+          <form method="POST" action="{{ url_for('paquetes.activar', id_paquete=p.id_paquete) }}"><button class="btn btn-primary btn-sm" type="submit">Activar</button></form>
+        {% endif %}
+      </footer>
+    </article>
+    {% if p.reservas_activas and p.estado == 'activo' %}
+    <dialog id="contingencia-{{ p.id_paquete }}" class="admin-dialog">
+      <form method="POST" action="{{ url_for('paquetes.cancelar_por_contingencia', id_paquete=p.id_paquete) }}">
+        <span class="eyebrow">PROTOCOLO EXTRAORDINARIO</span><h2>Cancelar por contingencia</h2>
+        <p>Esta acción cancela las reservas activas, suspende el paquete y las deja marcadas como <strong>reembolso pendiente</strong>. Úsala solo ante causas reales como cierre de aeropuerto, emergencia climática o imposibilidad comprobada del servicio.</p>
+        <label class="form-label">Motivo documentado *</label><textarea class="form-textarea" name="motivo" minlength="15" required placeholder="Ej.: cierre del aeropuerto por condiciones meteorológicas..." rows="4"></textarea>
+        <div class="admin-dialog__actions"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Volver</button><button class="btn btn-primary" type="submit">Cancelar reservas y marcar reembolso</button></div>
+      </form>
+    </dialog>
+    {% endif %}
+    {% else %}<div class="empty-state"><span>🧳</span><h2>No hay paquetes registrados</h2><p>Crea el primer paquete para empezar.</p></div>{% endfor %}
+  </div>
+</div></section>
+{% endblock %}

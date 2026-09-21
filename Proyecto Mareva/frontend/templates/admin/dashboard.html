@@ -305,7 +305,7 @@
           </span>
 
           <h1 class="dashboard-header__title">
-            🎛️ Dashboard
+            🎛️ Panel Administrador
           </h1>
 
           <p class="dashboard-header__description">
@@ -509,6 +509,9 @@
 
 </section>
 
+<script>
+    window.DASHBOARD_PANEL_URL = "{{ url_for('dashboard.obtener_panel_completo') }}";
+</script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 {% endblock %}

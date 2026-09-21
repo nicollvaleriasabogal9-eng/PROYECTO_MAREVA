@@ -48,6 +48,16 @@
 
  
     <div style="margin-bottom: 20px;">
+      <label style="display: block; margin-bottom: 5px;"><strong>Imagen del paquete</strong></label>
+      <input type="text" name="imagen_url" value="{{ paquete.imagen_url if paquete else '' }}" placeholder="img/paquetes/Cartagena.jpeg" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:1em;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display:flex;gap:9px;align-items:center;font-weight:700;"><input type="checkbox" name="personalizable" value="1" {% if paquete and paquete.personalizable %}checked{% endif %}> Este paquete permite personalización</label>
+      <small style="display:block;margin-top:6px;color:#718096">Actívalo para que el cliente pueda seleccionar componentes y preferencias durante la reserva.</small>
+    </div>
+
+    <div style="margin-bottom: 20px;">
       <label style="display: block; margin-bottom: 5px;"><strong>Descripción *</strong></label>
       <textarea 
         name="descripcion" 
@@ -151,7 +161,7 @@
           <option 
             value="{{ guia.id_guia }}"
             {% if paquete and paquete.id_guia == guia.id_guia %}selected{% endif %}>
-            {{ guia.nombre_guia }}
+            {{ guia.nombre_completo }}
           </option>
         {% endfor %}
       </select>

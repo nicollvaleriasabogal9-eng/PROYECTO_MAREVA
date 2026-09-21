@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.favorite-button').forEach((boton) => {
+  const SELECCION = '.favorite-button, .package-favorite-btn';
+
+  document.querySelectorAll(SELECCION).forEach((boton) => {
     boton.addEventListener('click', async () => {
       boton.disabled = true;
       try {
@@ -10,11 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const datos = await respuesta.json();
         if (!respuesta.ok || !datos.ok) throw new Error(datos.error || 'No se pudo actualizar');
 
-        document.querySelectorAll(`.favorite-button[data-paquete-id="${boton.dataset.paqueteId}"]`)
+        document.querySelectorAll(`${SELECCION}[data-paquete-id="${boton.dataset.paqueteId}"]`)
           .forEach((item) => {
-            item.classList.toggle('is-favorite', datos.agregado);
-            item.setAttribute('aria-pressed', datos.agregado ? 'true' : 'false');
-            item.textContent = datos.agregado ? '♥ Favorito' : '♡ Favorito';
+            const agregado = datos.agregado;
+            item.classList.toggle('is-favorite', agregado);
+            item.classList.toggle('is-active', agregado);
+            item.setAttribute('aria-pressed', agregado ? 'true' : 'false');
+            item.title = agregado ? 'Quitar de favoritos' : 'Agregar a favoritos';
+
+            if (item.classList.contains('favorite-button')) {
+              item.innerHTML = agregado ? '♥ Favorito' : '♡ Favorito';
+            } else {
+              item.textContent = agregado ? '♥' : '♡';
+            }
           });
 
         document.querySelectorAll('[data-favoritos-total]').forEach((contador) => {

@@ -1,85 +1,768 @@
 {% extends "base.html" %}
 
+{% block title %}MAREVA · Viajes por Colombia{% endblock %}
+
 {% block content %}
 
-<section class="hero">
-  <div class="container hero__content">
 
-    <div class="hero__text">
-      <p class="section-label">🌿 Colombia te espera</p>
+<section class="home-hero home-hero--video">
 
-      <h1 class="hero__title text-display">
-        Viaja, explora y <em class="gradient-text">vive Colombia</em>
-      </h1>
+<div class="home-hero__video">
 
-      <p class="hero__desc">
-        Descubre los mejores destinos con MAREVA.
-      </p>
+    <video
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-hidden="true"
+    >
+        <source
+            src="{{ url_for('static', filename='videos/video_inicio2.mp4') }}"
+            type="video/mp4"
+        >
+    </video>
 
-      <form class="search-bar" method="GET" action="{{ url_for('paquetes.listar_catalogo') }}">
-        <input type="text" id="searchInput" class="search-bar__input" name="q" placeholder="Buscar destino o paquete...">
-        <button type="submit" class="btn btn-primary">Buscar</button>
-      </form>
+</div>
+
+
+<div class="home-hero__overlay"></div>
+
+
+<div class="container home-hero__inner">
+
+    <div class="home-hero__copy">
+
+        <span class="eyebrow home-hero__eyebrow">
+            ☀️ EL PAÍS DE LA BELLEZA, A TU MANERA
+        </span>
+
+        <h1>
+            Encuentra tu próximo
+            <em>viaje.</em>
+        </h1>
+
+        <p>
+            Explora destinos, compara paquetes y consulta
+            disponibilidad sin registrarte.
+        </p>
 
     </div>
 
-  </div>
+
+    <!-- BUSCADOR -->
+
+    <div class="home-search-card">
+
+        <div class="home-search-card__top">
+
+            <div>
+                <span class="eyebrow">
+                    BUSCADOR DE VIAJES
+                </span>
+
+                <h2>
+                    Filtra antes de elegir
+                </h2>
+            </div>
+
+            <span class="search-open-note">
+                Sin registro · consulta libre
+            </span>
+
+        </div>
+
+
+        <form
+            method="GET"
+            action="{{ url_for('paquetes.listar_catalogo') }}"
+            class="home-search-grid"
+        >
+
+            <!-- BÚSQUEDA -->
+
+            <div class="search-field search-field--wide">
+
+                <label for="search-q">
+                    Destino o experiencia
+                </label>
+
+                <input
+                    id="search-q"
+                    name="q"
+                    type="search"
+                    placeholder="Cartagena, playa, aventura..."
+                    value="{{ request.args.get('q','') }}"
+                >
+
+            </div>
+
+
+            <!-- DESTINO -->
+
+            <div class="search-field">
+
+                <label for="search-destino">
+                    Destino
+                </label>
+
+                <select id="search-destino" name="destino">
+
+                    <option value="">
+                        Todos los destinos
+                    </option>
+
+                    {% for d in destinos %}
+
+                        <option
+                            value="{{ d.id_destino }}"
+                            {% if request.args.get('destino') == d.id_destino|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ d.nombre_destino }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- CATEGORÍA -->
+
+            <div class="search-field">
+
+                <label for="search-categoria">
+                    Tipo de viaje
+                </label>
+
+                <select id="search-categoria" name="categoria">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    {% for c in categorias %}
+
+                        <option
+                            value="{{ c }}"
+                            {% if request.args.get('categoria') == c %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ c|capitalize }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- PRECIO -->
+
+            <div class="search-field">
+
+                <label for="search-precio">
+                    Presupuesto máximo
+                </label>
+
+                <select
+                    id="search-precio"
+                    name="precio_max"
+                >
+
+                    <option value="">
+                        Cualquier precio
+                    </option>
+
+                    <option value="1000000">
+                        $1.000.000
+                    </option>
+
+                    <option value="1500000">
+                        $1.500.000
+                    </option>
+
+                    <option value="2000000">
+                        $2.000.000
+                    </option>
+
+                    <option value="3000000">
+                        $3.000.000
+                    </option>
+
+                    <option value="5000000">
+                        $5.000.000+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- DURACIÓN -->
+
+            <div class="search-field">
+
+                <label for="search-duracion">
+                    Duración
+                </label>
+
+                <select
+                    id="search-duracion"
+                    name="duracion"
+                >
+
+                    <option value="">
+                        Cualquier duración
+                    </option>
+
+                    <option value="corto">
+                        1–3 días
+                    </option>
+
+                    <option value="medio">
+                        4–7 días
+                    </option>
+
+                    <option value="largo">
+                        8+ días
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- FECHA -->
+
+            <div class="search-field">
+
+                <label for="search-fecha">
+                    Viajar desde
+                </label>
+
+                <input
+                    id="search-fecha"
+                    type="date"
+                    name="fecha_desde"
+                    value="{{ request.args.get('fecha_desde','') }}"
+                >
+
+            </div>
+
+
+            <button
+                class="btn btn-primary btn-lg home-search-button"
+                type="submit"
+            >
+                <span>
+                    Ver disponibilidad
+                </span>
+
+                <span>
+                    →
+                </span>
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
 </section>
 
-<section class="stats-bar">
-  <div class="container">
-    <ul class="stats-bar__list">
-      <li><strong>20+</strong> Destinos</li>
-      <li><strong>5</strong> Niveles</li>
-      <li><strong>100%</strong> Seguro</li>
-      <li><strong>24/7</strong> Soporte</li>
-    </ul>
-  </div>
+
+<section class="section home-promos">
+
+
+<div class="container">
+
+    <div class="section-heading-row">
+
+        <div>
+
+            <span class="eyebrow">
+                PROMOCIONES
+            </span>
+
+            <h2 class="section-title">
+                Descuentos que vale la pena mirar
+            </h2>
+
+            <p class="section-desc">
+                Ofertas destacadas con rotación automática
+                y controles manuales.
+            </p>
+
+        </div>
+
+        <div class="promo-carousel__controls">
+
+            <button
+                type="button"
+                class="carousel-arrow"
+                id="promoPrev"
+                aria-label="Promoción anterior"
+            >
+                ‹
+            </button>
+
+            <button
+                type="button"
+                class="carousel-arrow"
+                id="promoNext"
+                aria-label="Siguiente promoción"
+            >
+                ›
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="promo-carousel"
+        id="promoCarousel"
+    >
+
+        {% set promos = promociones[:4] %}
+
+        {% if promos %}
+
+            {% for promo in promos %}
+
+                <article
+                    class="promo-slide {% if loop.first %}is-active{% endif %}"
+                >
+
+                    <div class="promo-slide__visual">
+
+                        {% if promo.imagen_url %}
+
+                            <img
+                                src="{{ url_for('static', filename=promo.imagen_url) }}"
+                                alt="{{ promo.nombre or 'Promoción MAREVA' }}"
+                            >
+
+                        {% else %}
+
+                            <span>🌴</span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="promo-slide__content">
+
+                        <span class="promo-discount">
+                            -{{ "{:g}".format(promo.descuento) }}%
+                        </span>
+
+                        <span class="eyebrow">
+                            OFERTA ESPECIAL
+                        </span>
+
+                        <h3>
+                            {{ promo.nombre or 'Experiencia MAREVA' }}
+                        </h3>
+
+                        <p>
+                            {{ promo.descripcion or
+                            'Aprovecha esta promoción por tiempo limitado.' }}
+                        </p>
+
+                        {% if promo.nombre_destino %}
+
+                            <small>
+                                📍 {{ promo.nombre_destino }}
+                            </small>
+
+                        {% endif %}
+
+                        {% if promo.slug %}
+
+                            <a
+                                href="{{ url_for(
+                                    'paquetes.ver_detalle',
+                                    slug=promo.slug
+                                ) }}"
+                                class="btn btn-primary"
+                            >
+                                Ver paquete →
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            {% for p in destacados[:4] %}
+
+                <article
+                    class="promo-slide {% if loop.first %}is-active{% endif %}"
+                >
+
+                    <div class="promo-slide__visual">
+
+                        {% if p.imagen_url %}
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename=p.imagen_url
+                                ) }}"
+                                alt="{{ p.nombre }}"
+                            >
+
+                        {% else %}
+
+                            <span>
+                                {{ p.emoji|default('🌴') }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="promo-slide__content">
+
+                        <span class="promo-discount">
+                            DESTACADO
+                        </span>
+
+                        <span class="eyebrow">
+                            PLANES MAREVA
+                        </span>
+
+                        <h3>
+                            {{ p.nombre }}
+                        </h3>
+
+                        <p>
+                            {{ p.descripcion }}
+                        </p>
+
+                        <a
+                            href="{{ url_for(
+                                'paquetes.ver_detalle',
+                                slug=p.slug
+                            ) }}"
+                            class="btn btn-primary"
+                        >
+                            Ver paquete →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+
+    <div
+        class="promo-dots"
+        id="promoDots"
+    ></div>
+
+</div>
+
+
 </section>
 
-<section class="section" id="paquetes">
 
-  <div class="container">
+<section class="section home-category-section">
 
-    <div class="section-header">
-      <p class="section-label">✨ Destacados</p>
-      <h2 class="section-title">Paquetes populares</h2>
-      <div class="grid-3" id="destacadosGrid">
-    </div>
-    </div>
 
-    <div class="filtros">
-      <button class="filtro-btn active" onclick="filtrarPaquetes('todos')">Todos</button>
-      <button class="filtro-btn" onclick="filtrarPaquetes('aventura')">Aventura</button>
-      <button class="filtro-btn" onclick="filtrarPaquetes('cultural')">Cultural</button>
-      <button class="filtro-btn" onclick="filtrarPaquetes('ecoturismo')">Ecoturismo</button>
-      <button class="filtro-btn" onclick="filtrarPaquetes('playa')">Playa</button>
-    </div>
+<div class="container">
 
-    {% for p in destacados %}
-      <article class="card" data-categoria="{{ p.categoria }}">
-        <div class="card__img-wrap">
-          <div class="card__img--placeholder">{{ p.emoji }}</div>
-          <span class="card__badge badge badge-blue">{{ p.categoria }}</span>
+    <div class="section-heading-row">
+
+        <div>
+
+            <span class="eyebrow">
+                EXPLORA POR ESTILO
+            </span>
+
+            <h2 class="section-title">
+                ¿Qué te provoca hoy?
+            </h2>
+
         </div>
-        <div class="card__body">
-          <div class="card__tag">{{ p.departamento }}</div>
-          <h3 class="card__title">{{ p.nombre }}</h3>
-          <p class="card__desc">{{ p.descripcion }}</p>
-        </div>
-        <div class="card__footer">
-          <div class="card__price">${{ "{:,.0f}".format(p.precio) }}</div>
-          <a href="{{ url_for('paquetes.ver_detalle', slug=p.slug) }}" class="btn btn-primary btn-sm">Ver detalles</a>
-        </div>
-      </article>
-      {% else %}
-      <p class="text-muted">Aún no hay paquetes destacados disponibles.</p>
-      {% endfor %}
 
-    
+        <a
+            href="{{ url_for('paquetes.listar_catalogo') }}"
+            class="btn btn-outline"
+        >
+            Ver todos →
+        </a>
 
-  </div>
+    </div>
+
+
+    <div class="home-categorybar">
+
+        {% for c, icon in [
+            ('playa','🏖️'),
+            ('montaña','⛰️'),
+            ('aventura','🧗'),
+            ('ecoturismo','🌿'),
+            ('cultural','🏛️'),
+            ('ciudad','🌆')
+        ] %}
+
+            <a
+                class="home-category-pill category-{{ c }}"
+                href="{{ url_for(
+                    'paquetes.listar_catalogo'
+                ) }}?categoria={{ c }}"
+            >
+
+                <span>{{ icon }}</span>
+
+                <strong>
+                    {{ c|capitalize }}
+                </strong>
+
+                <small>
+                    Ver opciones
+                </small>
+
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
 
 </section>
+
+
+<section class="section">
+
+<div class="container">
+
+    <div class="section-heading-row">
+
+        <div>
+
+            <span class="eyebrow">
+                PAQUETES DESTACADOS
+            </span>
+
+            <h2 class="section-title">
+                Viajes para empezar a planear
+            </h2>
+
+            <p class="section-desc">
+                Consulta precio y fechas sin crear una cuenta.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('paquetes.listar_catalogo') }}"
+            class="btn btn-outline"
+        >
+            Ver paquetes →
+        </a>
+
+    </div>
+
+
+    <div class="grid-3">
+
+        {% for p in destacados[:6] %}
+
+            <article class="travel-card">
+
+                <div class="travel-card__media">
+
+                    {% if p.imagen_url %}
+
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename=p.imagen_url
+                            ) }}"
+                            alt="{{ p.nombre }}"
+                        >
+
+                    {% else %}
+
+                        <div class="travel-card__fallback">
+                            {{ p.emoji|default('✈️') }}
+                        </div>
+
+                    {% endif %}
+
+                    <span
+                        class="travel-card__category category-{{ p.categoria|lower }}"
+                    >
+                        {{ p.categoria|capitalize }}
+                    </span>
+
+                </div>
+
+
+                <div class="travel-card__body">
+
+                    <span class="muted">
+                        {{ p.nombre_destino }}
+                        ·
+                        {{ p.duracion_dias }} días /
+                        {{ p.duracion_noches }} noches
+                    </span>
+
+                    <h3>
+                        {{ p.nombre }}
+                    </h3>
+
+                    <p>
+                        {{ p.descripcion }}
+                    </p>
+
+                </div>
+
+
+                <div class="travel-card__footer">
+
+                    <div>
+
+                        <small>
+                            Desde
+                        </small>
+
+                        <strong>
+                            ${{ "{:,.0f}".format(p.precio) }}
+                        </strong>
+
+                    </div>
+
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{{ url_for(
+                            'paquetes.ver_detalle',
+                            slug=p.slug
+                        ) }}"
+                    >
+                        Ver disponibilidad →
+                    </a>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+</section>
+
+<!-- =========================================================
+     DESTINOS
+========================================================= -->
+
+<section class="section home-destinations">
+
+
+<div class="container">
+
+    <div class="section-heading-row">
+
+        <div>
+
+            <span class="eyebrow">
+                DESTINOS
+            </span>
+
+            <h2 class="section-title">
+                Ver paquetes por destino
+            </h2>
+
+        </div>
+
+        <a
+            href="{{ url_for('destinos.listar_catalogo') }}"
+            class="btn btn-outline"
+        >
+            Todos los destinos →
+        </a>
+
+    </div>
+
+
+    <div class="destination-pills">
+
+        {% for d in destinos[:8] %}
+
+            <a
+                class="destination-pill"
+                href="{{ url_for(
+                    'paquetes.listar_catalogo'
+                ) }}?destino={{ d.id_destino }}"
+            >
+
+                <span>
+                    {{ d.emoji|default('🗺️') }}
+                </span>
+
+                <div>
+
+                    <b>
+                        {{ d.nombre_destino }}
+                    </b>
+
+                    <small>
+                        {{ d.ciudad }} · {{ d.departamento }}
+                    </small>
+
+                </div>
+
+                <span>
+                    →
+                </span>
+
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+</section>
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/home_promos.js'
+    ) }}"
+></script>
 
 {% endblock %}

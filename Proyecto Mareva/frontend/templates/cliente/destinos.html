@@ -1,40 +1,47 @@
 {% extends "base.html" %}
-
+{% block title %}Destinos · MAREVA{% endblock %}
 {% block content %}
-
-<main>
-  <section class="page-hero">
-    <div class="container">
-      <p class="section-label">🗺️ Colombia entera</p>
-      <h1 class="section-title">Nuestros destinos</h1>
-      <p class="section-desc">20 destinos increíbles por todo el país</p>
+<section class="catalog-video-banner">
+    <video class="catalog-video-banner__media" autoplay muted loop playsinline preload="metadata">
+        <source src="{{ url_for('static',filename='videos/videoinicio.mp4') }}" type="video/mp4">
+    </video>
+    <div class="catalog-video-banner__overlay"></div>
+    <div class="container catalog-video-banner__content">
+        <span class="eyebrow">MAREVA · DESTINOS</span>
+        <h1>Primero el lugar. Después, el viaje.</h1>
+        <p>Explora destinos y consulta los paquetes disponibles sin registrarte.</p>
     </div>
-  </section>
-
-  <section class="section">
+</section>
+<section class="section">
     <div class="container">
-      <div class="grid-3">
-        {% for d in destinos %}
-        <article class="card">
-          <div class="">
-            <div class="">
-              <img src="{{ url_for('static', filename=d.imagen_principal) }}" alt="{{  d.nombre_destino }}">
+        <div class="grid-3">
+            {% for d in destinos %}
+            <article class="travel-card destination-card">
+                <div class="travel-card__media">
+                    {% if d.imagen_principal %}
+                    <img src="{{ url_for('static',filename=d.imagen_principal) }}" alt="{{ d.nombre_destino }}">
+                    {% else %}
+                    <div class="travel-card__fallback">{{ d.emoji|default('🗺️') }}</div>
+                    {% endif %}
+                    <span class="travel-card__category category-{{ d.categoria|lower }}">{{ d.emoji|default('📍') }} {{ d.categoria|capitalize }}</span>
+                </div>
+                <div class="travel-card__body">
+                    <span class="muted">{{ d.ciudad }} · {{ d.departamento }}</span>
+                    <h3>{{ d.nombre_destino }}</h3>
+                    <p>{{ d.descripcion }}</p>
+                </div>
+                <div class="travel-card__footer">
+                    <a class="btn btn-outline btn-sm" href="{{ url_for('destinos.ver_detalle',id_destino=d.id_destino) }}">Conocer destino</a>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('paquetes.listar_catalogo') }}?destino={{ d.id_destino }}">Ver paquetes →</a>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                <span>🗺️</span>
+                <h3>No hay destinos activos</h3>
             </div>
-            <span class="card__badge badge badge-blue">{{ d.categoria }}</span>
-          </div>
-          <div class="card__body">
-            <div class="card__tag">{{ d.departamento }}</div>
-            <h3 class="card__title">{{ d.nombre_destino }}</h3>
-            <p class="card__desc">{{ d.descripcion }}</p>
-          </div>
-          <div class="card__footer">
-            <span class="text-muted" style="font-size:var(--text-xs)">{{ d.ciudad }}</span>
-            <a href="{{ url_for('paquetes.listar_catalogo') }}?q={{ d.nombre_destino }}" class="btn btn-outline btn-sm">Ver paquetes</a>
-          </div>
-        </article>
-        {% endfor %}
-      </div>
+            {% endfor %}
+        </div>
     </div>
-  </section>
-</main>
+</section>
 {% endblock %}

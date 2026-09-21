@@ -65,7 +65,11 @@
                             </th>
 
                             <th style="text-align:left; padding:var(--space-3);">
-                                Acción
+                                Precio
+                            </th>
+
+                            <th style="text-align:left; padding:var(--space-3);">
+                                Acción / reembolso
                             </th>
 
                         </tr>
@@ -136,36 +140,22 @@
 
                                 </td>
 
+                                <td style="padding:var(--space-3);"><strong>${{ "{:,.0f}".format(reserva.precio_total|default(0)|float) }}</strong></td>
+
                                 <td style="padding:var(--space-3);">
 
-                                    {% if reserva.estado != "completada" %}
-
-                                        <form
-                                            method="POST"
-                                            action="{{ url_for(
-                                                'reserva.completar_reserva',
-                                                id_reserva=reserva.id_reserva
-                                            ) }}"
-                                            onsubmit="return confirm(
-                                                '¿Marcar esta reserva como completada? Se enviará la encuesta al correo del cliente.'
-                                            );"
-                                        >
-
-                                            <button
-                                                type="submit"
-                                                class="btn btn-primary btn-sm"
-                                            >
-                                                ✓ Completar
-                                            </button>
-
+                                    {% if reserva.estado != "completada" and reserva.estado != "cancelada" %}
+                                        <form method="POST" action="{{ url_for('reserva.completar_reserva', id_reserva=reserva.id_reserva) }}" onsubmit="return confirm('¿Marcar esta reserva como completada? Se enviará la encuesta al correo del cliente.');">
+                                            <button type="submit" class="btn btn-primary btn-sm">✓ Completar</button>
                                         </form>
-
-                                    {% else %}
-
-                                        <span class="text-muted">
-                                            Encuesta enviada
-                                        </span>
-
+                                    {% elif reserva.estado == "completada" %}
+                                        <span class="text-muted">Encuesta enviada</span>
+                                    {% endif %}
+                                    {% if reserva.reembolso_estado == 'pendiente' %}
+                                        <div style="margin-top:7px;padding:7px;border-radius:9px;background:#fff7e3;color:#775e20;font-size:.7rem;">💸 Reembolso pendiente{% if reserva.motivo_cancelacion %}<br><small>{{ reserva.motivo_cancelacion }}</small>{% endif %}</div>
+                                        <form method="POST" action="{{ url_for('reserva.marcar_reembolso', id_reserva=reserva.id_reserva) }}" style="margin-top:7px;"><button class="btn btn-outline btn-sm" type="submit">Marcar realizado</button></form>
+                                    {% elif reserva.reembolso_estado == 'realizado' %}
+                                        <span class="badge badge-green">✓ Reembolso realizado</span>
                                     {% endif %}
 
                                 </td>

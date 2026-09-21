@@ -1,0 +1,382 @@
+/* =========================================================
+   NIVELES MAREVA
+   ========================================================= */
+
+.levels-page {
+    background:
+        radial-gradient(circle at 8% 10%, rgba(84, 198, 169, .10), transparent 28%),
+        radial-gradient(circle at 92% 18%, rgba(246, 201, 76, .12), transparent 25%),
+        var(--mareva-bg);
+    min-height: 100vh;
+    padding: 70px 0 90px;
+}
+
+/* Encabezado */
+
+.levels-page .section-heading-row {
+    margin-bottom: 34px;
+}
+
+.levels-page .section-title {
+    margin: 8px 0 10px;
+    color: var(--mareva-ink);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -.04em;
+}
+
+.levels-page .section-desc {
+    max-width: 650px;
+    margin: 0;
+    color: var(--mareva-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.levels-page .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--mareva-sea);
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .13em;
+}
+
+/* =========================================================
+   NIVEL ACTUAL
+   ========================================================= */
+
+.current-level-card {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    gap: 45px;
+    align-items: center;
+    padding: 38px 42px;
+    margin-bottom: 42px;
+
+    background:
+        radial-gradient(circle at 92% 15%, rgba(246, 201, 76, .25), transparent 24%),
+        radial-gradient(circle at 5% 100%, rgba(84, 198, 169, .20), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #f7fcfa 100%);
+
+    border: 1px solid rgba(15, 143, 164, .14);
+    border-radius: 28px;
+    box-shadow: 0 20px 55px rgba(35, 60, 68, .08);
+}
+
+.current-level-card::after {
+    content: "✦";
+    position: absolute;
+    right: 30px;
+    top: 18px;
+    color: rgba(246, 201, 76, .55);
+    font-size: 42px;
+    transform: rotate(15deg);
+}
+
+.current-level-card h2 {
+    margin: 8px 0 10px;
+    color: var(--mareva-ink);
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1;
+    letter-spacing: -.04em;
+}
+
+.current-level-card p {
+    max-width: 600px;
+    margin: 0;
+    color: var(--mareva-muted);
+    line-height: 1.7;
+}
+
+/* Progreso */
+
+.level-progress {
+    padding: 24px;
+    background: rgba(255, 255, 255, .82);
+    border: 1px solid rgba(15, 143, 164, .10);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(35, 60, 68, .06);
+}
+
+.level-progress__numbers {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 13px;
+}
+
+.level-progress__numbers strong {
+    color: var(--mareva-sea-deep);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.level-progress__numbers span {
+    color: var(--mareva-muted);
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 13px;
+    overflow: hidden;
+    background: #e7efed;
+    border-radius: 999px;
+}
+
+.progress-bar span {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--mareva-sea),
+        var(--mareva-mint),
+        var(--mareva-sun)
+    );
+    box-shadow: 0 4px 12px rgba(15, 143, 164, .25);
+    transition: width .6s ease;
+}
+
+/* =========================================================
+   GRID DE NIVELES
+   ========================================================= */
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.level-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 285px;
+    padding: 30px;
+
+    background: #fff;
+    border: 1px solid rgba(32, 50, 72, .08);
+    border-radius: 24px;
+
+    box-shadow: 0 10px 30px rgba(35, 60, 68, .06);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        border-color .25s ease;
+}
+
+.level-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(
+        90deg,
+        var(--mareva-sea),
+        var(--mareva-mint)
+    );
+    opacity: .35;
+}
+
+.level-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(15, 143, 164, .20);
+    box-shadow: 0 20px 45px rgba(35, 60, 68, .11);
+}
+
+/* Nivel actual */
+
+.level-card.is-current {
+    border: 2px solid var(--mareva-sea);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(84, 198, 169, .13), transparent 35%),
+        #fff;
+    box-shadow: 0 18px 45px rgba(15, 143, 164, .14);
+}
+
+.level-card.is-current::before {
+    opacity: 1;
+}
+
+.level-card.is-current::after {
+    content: "NIVEL ACTUAL";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    padding: 7px 11px;
+    border-radius: 999px;
+
+    background: rgba(15, 143, 164, .10);
+    color: var(--mareva-sea-deep);
+
+    font-size: .66rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+}
+
+/* Icono */
+
+.level-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 58px;
+    height: 58px;
+    margin-bottom: 20px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(246, 201, 76, .25),
+            rgba(84, 198, 169, .18)
+        );
+
+    font-size: 28px;
+}
+
+/* Texto */
+
+.level-card h2 {
+    margin: 0 0 9px;
+    color: var(--mareva-ink);
+    font-size: 1.4rem;
+    letter-spacing: -.025em;
+}
+
+.level-card p {
+    min-height: 52px;
+    margin: 0 0 22px;
+    color: var(--mareva-muted);
+    font-size: .92rem;
+    line-height: 1.6;
+}
+
+/* Requisitos */
+
+.level-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(32, 50, 72, .08);
+}
+
+.level-requirements span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--mareva-ink);
+    font-size: .84rem;
+    font-weight: 700;
+}
+
+.level-requirements span:first-child {
+    color: var(--mareva-sea-deep);
+}
+
+/* Estado vacío */
+
+.empty-state {
+    grid-column: 1 / -1;
+    padding: 55px 25px;
+    text-align: center;
+
+    background: #fff;
+    border: 1px dashed rgba(32, 50, 72, .16);
+    border-radius: 22px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    color: var(--mareva-muted);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .levels-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .current-level-card {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .levels-page {
+        padding: 45px 0 65px;
+    }
+
+    .current-level-card {
+        padding: 28px 24px;
+        border-radius: 22px;
+    }
+
+    .current-level-card h2 {
+        font-size: 2.15rem;
+    }
+
+    .levels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .level-card {
+        min-height: auto;
+        padding: 26px;
+    }
+
+    .level-card p {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .levels-page .section-title {
+        font-size: 2rem;
+    }
+
+    .current-level-card {
+        padding: 24px 20px;
+    }
+
+    .level-progress {
+        padding: 19px;
+    }
+
+    .level-progress__numbers strong {
+        font-size: 1.7rem;
+    }
+
+    .level-card {
+        padding: 23px;
+        border-radius: 20px;
+    }
+
+    .level-card.is-current::after {
+        position: static;
+        display: inline-flex;
+        margin-top: 15px;
+    }
+}
