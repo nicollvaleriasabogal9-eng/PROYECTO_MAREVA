@@ -295,7 +295,7 @@ CREATE TABLE contrato
     fecha_respuesta          TIMESTAMP,
     firma_proveedor          BOOLEAN NOT NULL DEFAULT FALSE,
     fecha_firma              TIMESTAMP,
-    metodo_firma             VARCHAR(50)
+    metodo_firma             VARCHAR(50),
 
 
     CONSTRAINT contrato_proveedor_fkey
