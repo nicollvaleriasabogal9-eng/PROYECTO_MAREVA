@@ -15,17 +15,14 @@ def requiere_admin(f):
         return f(*args, **kwargs)
     return wrapper
 
-#Funciones para el catálogo de paquetes 
 @paquetes_bp.route("/paquetes")
 def listar_catalogo():
     return controller.listar_catalogo()
 
-#Funciones para ver el detalle de un paquete
+
 @paquetes_bp.route("/paquetes/<slug>")
 def ver_detalle(slug):
     return controller.ver_detalle(slug)
-
-
 
 #Funciones para el panel de administración de paquetes
 @paquetes_bp.route("/admin/paquetes")
@@ -61,7 +58,16 @@ def actualizar(id_paquete):
 def suspender(id_paquete):
     return controller.suspender(id_paquete)
 
+@paquetes_bp.route("/admin/paquetes/<int:id_paquete>/cancelar-contingencia", methods=["POST"])
+@requiere_admin
+def cancelar_por_contingencia(id_paquete):
+    return controller.cancelar_por_contingencia(id_paquete)
+
 @paquetes_bp.route("/admin/paquetes/<int:id_paquete>/activar", methods=["POST"])
 @requiere_admin
 def activar(id_paquete):
     return controller.activar(id_paquete)
+
+@paquetes_bp.route("/comparar", methods=["GET"])
+def comparar():
+    return controller.comparar_paquetes()

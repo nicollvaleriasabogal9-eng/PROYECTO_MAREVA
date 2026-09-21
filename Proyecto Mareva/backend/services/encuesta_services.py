@@ -1,9 +1,3 @@
-import os
-import smtplib
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
 from repositories.encuesta_repository import EncuestaRepository
 
 
@@ -13,98 +7,8 @@ class EncuestaService:
         self.encuesta_repo = EncuestaRepository()
 
     def enviar_encuesta(self, correo_cliente, nombre_cliente, id_reserva):
-
-        if not correo_cliente:
-            return {
-                "ok": False,
-                "error": "El cliente no tiene un correo registrado."
-            }
-
-        correo_emisor = os.getenv("MAIL_USERNAME")
-        contrasena = os.getenv("MAIL_PASSWORD")
-
-        if not correo_emisor or not contrasena:
-            print("ERROR: No están configuradas las credenciales del correo.")
-            return {
-                "ok": False,
-                "error": "No está configurado el servicio de correo."
-            }
-
-        url_encuesta = (
-            f"http://127.0.0.1:5000/encuesta/{id_reserva}"
-        )
-
-        mensaje = MIMEMultipart("alternative")
-
-        mensaje["Subject"] = "Mareva - Encuesta de satisfacción"
-        mensaje["From"] = correo_emisor
-        mensaje["To"] = correo_cliente
-
-        contenido = f"""
-        <html>
-            <body>
-                <h2>¡Hola, {nombre_cliente}!</h2>
-
-                <p>
-                    Esperamos que hayas disfrutado tu viaje con Mareva.
-                </p>
-
-                <p>
-                    Tu reserva ya fue marcada como completada.
-                    Nos gustaría conocer tu experiencia.
-                </p>
-
-                <p>
-                    <a href="{url_encuesta}">
-                        Responder encuesta de satisfacción
-                    </a>
-                </p>
-
-                <p>
-                    Tu opinión nos ayuda a mejorar nuestros servicios.
-                </p>
-
-                <p>
-                    Gracias por viajar con Mareva.
-                </p>
-            </body>
-        </html>
-        """
-
-        mensaje.attach(MIMEText(contenido, "html"))
-
-        try:
-            with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
-
-                servidor.starttls()
-
-                servidor.login(
-                    correo_emisor,
-                    contrasena
-                )
-
-                servidor.sendmail(
-                    correo_emisor,
-                    correo_cliente,
-                    mensaje.as_string()
-                )
-
-            print(
-                f"Encuesta enviada correctamente a {correo_cliente}"
-            )
-
-            return {
-                "ok": True
-            }
-
-        except Exception as e:
-
-            print("ERROR ENVIANDO ENCUESTA:", e)
-
-            return {
-                "ok": False,
-                "error": "No fue posible enviar la encuesta."
-            }
+        print(f"[SKIP EMAIL] Encuesta pendiente para {correo_cliente} (reserva {id_reserva})")
+        return {"ok": True}
 
     def obtener_encuesta(self, id_reserva, id_cliente):
 

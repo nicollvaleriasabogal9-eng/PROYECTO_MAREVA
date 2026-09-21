@@ -9,14 +9,14 @@ class AuthRepository:
     def __init__(self):
         self.conexion = Conexion().obtener_conexion()
     # Guarda un nuevo usuario en la base de datos
-    def guardar_usuario(self, nombre, apellido, tipo_documento, numero_documento, telefono, codigo, correo, password):
+    def guardar_usuario(self, nombre, apellido, tipo_documento, numero_documento, telefono, codigo, correo, password, acepta_politica_no_reembolso=False):
         cursor = self.conexion.cursor() 
         password_hash = generate_password_hash(password)# encripta la contraseña antes de guardarla en la base de datos
 
         try:
-            cursor.execute("""INSERT INTO cliente(nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                            (nombre, apellido, tipo_documento, numero_documento, telefono, correo, password_hash))
+            cursor.execute("""INSERT INTO cliente(nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, acepta_politica_no_reembolso, fecha_aceptacion_politica, version_politica)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, '1.0')""",
+                            (nombre, apellido, tipo_documento, numero_documento, telefono, correo, password_hash, acepta_politica_no_reembolso))
 
             self.conexion.commit()
             cursor.close()
@@ -69,12 +69,37 @@ class AuthRepository:
             fila[11], # estado
             fila[12], # intentos_fallidos
             fila[13], # bloqueado_hasta
-            fila[14]  # id_nivel
+            fila[14], # acepta_politica_no_reembolso
+            fila[15], # fecha_aceptacion_politica
+            fila[16], # version_politica
+            fila[17]  # id_nivel
         )
 
         return usuario
     
     # Obtiene la contraseña de un usuario por su correo electrónico
+    def estado_acceso_cliente(self, correo):
+        cursor = self.conexion.cursor()
+        cursor.execute("SELECT id_cliente, estado, intentos_fallidos, bloqueado_hasta FROM cliente WHERE correo=%s", (correo,))
+        fila = cursor.fetchone()
+        cursor.close()
+        return fila
+
+    def registrar_intento_fallido(self, correo, bloquear_hasta=None):
+        cursor = self.conexion.cursor()
+        if bloquear_hasta:
+            cursor.execute("UPDATE cliente SET intentos_fallidos=5, bloqueado_hasta=%s WHERE correo=%s", (bloquear_hasta, correo))
+        else:
+            cursor.execute("UPDATE cliente SET intentos_fallidos=intentos_fallidos+1 WHERE correo=%s", (correo,))
+        self.conexion.commit()
+        cursor.close()
+
+    def limpiar_intentos(self, correo):
+        cursor = self.conexion.cursor()
+        cursor.execute("UPDATE cliente SET intentos_fallidos=0, bloqueado_hasta=NULL WHERE correo=%s", (correo,))
+        self.conexion.commit()
+        cursor.close()
+
     def obtener_password_por_correo(self, correo):
         cursor = self.conexion.cursor()
 
@@ -215,3 +240,46 @@ class AuthRepository:
             self.conexion.rollback()
             cursor.close()
             return None
+    def obtener_favoritos_cliente(self, id_cliente):
+        cursor = self.conexion.cursor()
+        cursor.execute("SELECT id_paquete FROM favoritos WHERE id_cliente=%s ORDER BY fecha_agregado DESC", (id_cliente,))
+        ids = [fila[0] for fila in cursor.fetchall()]
+        cursor.close()
+        return ids
+
+    def actualizar_correo(self, id_cliente, correo):
+        cursor = self.conexion.cursor()
+        try:
+            cursor.execute("UPDATE cliente SET correo=%s WHERE id_cliente=%s", (correo, id_cliente))
+            self.conexion.commit()
+            actualizado = cursor.rowcount > 0
+            cursor.close()
+            return {"ok": actualizado}
+        except UniqueViolation:
+            self.conexion.rollback()
+            cursor.close()
+            return {"ok": False, "error": "Ese correo ya está registrado."}
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return {"ok": False, "error": "No fue posible actualizar el correo."}
+
+    def actualizar_password(self, id_cliente, password_hash):
+        cursor = self.conexion.cursor()
+        try:
+            cursor.execute("UPDATE cliente SET contrasena=%s WHERE id_cliente=%s", (password_hash, id_cliente))
+            self.conexion.commit()
+            actualizado = cursor.rowcount > 0
+            cursor.close()
+            return actualizado
+        except Exception:
+            self.conexion.rollback()
+            cursor.close()
+            return False
+
+    def obtener_password_por_id(self, id_cliente):
+        cursor = self.conexion.cursor()
+        cursor.execute("SELECT contrasena FROM cliente WHERE id_cliente=%s", (id_cliente,))
+        fila = cursor.fetchone()
+        cursor.close()
+        return fila[0] if fila else None

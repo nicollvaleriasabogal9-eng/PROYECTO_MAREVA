@@ -13,7 +13,7 @@ class ProveedorController:
         usuario = session.get("usuario")
 
         if not usuario:
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.mostrar_login"))
 
         if usuario.get("rol") != "admin":
             return redirect(url_for("home.home"))
@@ -25,7 +25,7 @@ class ProveedorController:
         usuario = session.get("usuario")
 
         if not usuario:
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.mostrar_login"))
 
         if usuario.get("rol") != "admin":
             return redirect(url_for("home.home"))
@@ -34,7 +34,6 @@ class ProveedorController:
         nit = request.form.get("nit", "").strip()
         tipo_empresa = request.form.get("tipo_empresa", "").strip()
         descripcion = request.form.get("descripcion", "").strip()
-        direccion = request.form.get("direccion", "").strip()
         ciudad = request.form.get("ciudad", "").strip()
         telefono = request.form.get("telefono", "").strip()
         correo = request.form.get("correo", "").strip().lower()
@@ -60,8 +59,7 @@ class ProveedorController:
             nit,
             tipo_empresa,
             descripcion,
-            direccion,
-            ciudad,
+                ciudad,
             telefono,
             correo,
             contrasena,

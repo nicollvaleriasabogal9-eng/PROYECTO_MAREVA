@@ -22,7 +22,10 @@ def funcion_registro():
 @auth_bp.route("/login", methods=["GET"])
 def mostrar_login():
     print("Se accedio al GET del login correctamente")
-    return render_template("principal/login.html")
+    return render_template(
+        "principal/login.html",
+        next=request.args.get("next", "")
+    )
 
 #Maneja el inicio de sesión de un usuario
 @auth_bp.route("/login", methods=["POST"])

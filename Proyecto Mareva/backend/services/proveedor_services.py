@@ -18,7 +18,6 @@ class ProveedorService:
         nit,
         tipo_empresa,
         descripcion,
-        direccion,
         ciudad,
         telefono,
         correo,
@@ -90,15 +89,6 @@ class ProveedorService:
                 "ok": False,
                 "campo": "descripcion",
                 "error": "La descripción no puede superar los 1000 caracteres."
-            }
-
-        direccion = direccion.strip()
-
-        if direccion and len(direccion) > 200:
-            return {
-                "ok": False,
-                "campo": "direccion",
-                "error": "La dirección no puede superar los 200 caracteres."
             }
 
         ciudad = " ".join(ciudad.split())
@@ -233,8 +223,7 @@ class ProveedorService:
             nit,
             tipo_empresa,
             descripcion,
-            direccion,
-            ciudad,
+                ciudad,
             telefono,
             correo,
             contrasena,

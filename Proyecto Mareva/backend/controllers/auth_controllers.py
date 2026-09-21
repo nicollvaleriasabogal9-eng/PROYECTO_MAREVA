@@ -20,6 +20,9 @@ class AuthController:
         codigo = request.form.get("codigo", "").strip()
         correo = request.form.get("correo", "").strip().lower()
         password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        terminos = request.form.get("terminos")
+        acepta_politica = request.form.get("politica_no_reembolso")
 
         #Validaciones de los datos del nombre del cliente
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,50}", nombre):
@@ -81,17 +84,24 @@ class AuthController:
 
         # Validación del correo electrónico
 
-        correo_valido = r"^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|live|yahoo)\.(com|es|co)$"
+        correo_valido = r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
 
         if not re.fullmatch(correo_valido, correo):
             return render_template(
                 "principal/registro.html",
-                error="Solo se permiten correos Gmail, Outlook, Hotmail/Live o Yahoo."
+                error="El correo electrónico no es válido."
             )
 
 
-        # Validación de la contraseña
-
+        # Validación de contraseña, confirmación y términos
+        if not terminos:
+            return render_template("principal/registro.html", error="Debes aceptar los términos y condiciones.")
+        if not acepta_politica:
+            return render_template("principal/registro.html", error="Debes leer y aceptar la Política de No Reembolso para crear tu cuenta.")
+        if password != confirm_password:
+            return render_template("principal/registro.html", error="Las contraseñas no coinciden.")
+        if not (len(password) >= 8 and re.search(r"[A-ZÁÉÍÓÚÑ]", password) and re.search(r"\d", password) and re.search(r"[^A-Za-z0-9]", password)):
+            return render_template("principal/registro.html", error="La contraseña debe tener mínimo 8 caracteres, mayúscula, número y carácter especial.")
         if len(password) < 8:
             return render_template(
                 "principal/registro.html",
@@ -107,7 +117,8 @@ class AuthController:
             telefono,
             codigo,
             correo,
-            password
+            password,
+            True
         )
 
         if resultado["ok"]:
@@ -143,9 +154,12 @@ class AuthController:
             "nombre": usuario.nombre if hasattr(usuario, "nombre") else usuario["nombre"],
             "apellido": usuario.apellido if hasattr(usuario, "apellido") else usuario.get("apellido"),
             "correo": usuario.correo if hasattr(usuario, "correo") else usuario["correo"],
-            "rol": usuario.rol if hasattr(usuario, "rol") else usuario["rol"]
+            "rol": usuario.rol if hasattr(usuario, "rol") else usuario["rol"],
+            "acepta_politica_no_reembolso": getattr(usuario, "acepta_politica_no_reembolso", True)
         }
 
+        if session["usuario"]["rol"] == "cliente":
+            session["favoritos"] = self.service.favoritos(session["usuario"]["id"])
         print("Usuario autenticado:", session["usuario"]["correo"])
       
         next_url = request.args.get("next") or request.form.get("next")

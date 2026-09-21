@@ -17,7 +17,6 @@ class ProveedorRepository:
         nit,
         tipo_empresa,
         descripcion,
-        direccion,
         ciudad,
         telefono,
         correo,
@@ -41,8 +40,7 @@ class ProveedorRepository:
                     nit,
                     tipo_empresa,
                     descripcion,
-                    direccion,
-                    ciudad,
+                                ciudad,
                     telefono,
                     correo,
                     contrasena,
@@ -51,7 +49,7 @@ class ProveedorRepository:
                     correo_contacto
                 )
                 VALUES (
-                    %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s
                 )
             """, (
@@ -59,8 +57,7 @@ class ProveedorRepository:
                 nit,
                 tipo_empresa,
                 descripcion,
-                direccion,
-                ciudad,
+                        ciudad,
                 telefono,
                 correo,
                 password_hash,

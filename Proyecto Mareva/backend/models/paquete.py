@@ -1,6 +1,15 @@
 from abc import ABC, abstractmethod
 
 
+EMOJI_POR_CATEGORIA = {
+    "playa": "🏖️",
+    "ciudad": "🏙️",
+    "aventura": "🏔️",
+    "montaña": "⛰️",
+    "cultural": "🏛️",
+}
+
+
 class PaqueteBase(ABC):
     def __init__(self, data: dict):
         self._data = data

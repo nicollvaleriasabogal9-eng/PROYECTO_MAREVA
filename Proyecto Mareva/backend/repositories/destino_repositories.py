@@ -58,3 +58,55 @@ class DestinoRepository:
             return None
 
         return self._fila_a_dict(fila)
+
+    # Crea un nuevo destino.
+    def crear(self, datos):
+        cursor = self.conexion.cursor()
+
+        cursor.execute("""
+            INSERT INTO destino
+                (nombre_destino, departamento, ciudad, categoria,
+                 descripcion, atracciones, docs_requeridos, imagen_principal, estado)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+            RETURNING id_destino
+        """, (
+            datos["nombre_destino"], datos.get("departamento"), datos.get("ciudad"),
+            datos.get("categoria"), datos.get("descripcion"), datos.get("atracciones"),
+            datos.get("docs_requeridos"), datos.get("imagen_principal"),
+        ))
+
+        id_destino = cursor.fetchone()[0]
+        self.conexion.commit()
+        cursor.close()
+
+        return id_destino
+
+    # Actualiza un destino existente.
+    def actualizar(self, id_destino, datos):
+        cursor = self.conexion.cursor()
+
+        cursor.execute("""
+            UPDATE destino
+            SET nombre_destino = %s, departamento = %s, ciudad = %s, categoria = %s,
+                descripcion = %s, atracciones = %s, docs_requeridos = %s, imagen_principal = %s
+            WHERE id_destino = %s
+        """, (
+            datos["nombre_destino"], datos.get("departamento"), datos.get("ciudad"),
+            datos.get("categoria"), datos.get("descripcion"), datos.get("atracciones"),
+            datos.get("docs_requeridos"), datos.get("imagen_principal"), id_destino,
+        ))
+
+        self.conexion.commit()
+        cursor.close()
+
+    # Activa o suspende un destino (borrado lógico).
+    def cambiar_estado(self, id_destino, estado: bool):
+        cursor = self.conexion.cursor()
+
+        cursor.execute(
+            "UPDATE destino SET estado = %s WHERE id_destino = %s",
+            (estado, id_destino),
+        )
+
+        self.conexion.commit()
+        cursor.close()

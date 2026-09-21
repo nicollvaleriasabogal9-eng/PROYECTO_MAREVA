@@ -17,7 +17,12 @@ class FavoritosController:
         ]
 
     def listar(self):
-        ids = self._ids_favoritos()
+        usuario = session.get("usuario")
+        if usuario and usuario.get("rol") == "cliente":
+            ids = self.service.obtener_favoritos_cliente(usuario["id"])
+            session["favoritos"] = ids
+        else:
+            ids = self._ids_favoritos()
         paquetes = self.service.listar_por_ids(ids)
         return render_template("cliente/favoritos.html", paquetes=paquetes)
 
@@ -26,15 +31,25 @@ class FavoritosController:
         if not paquete or paquete.get("estado") != "activo":
             return jsonify({"ok": False, "error": "Paquete no disponible."}), 404
 
-        favoritos = self._ids_favoritos()
-        if id_paquete in favoritos:
-            favoritos.remove(id_paquete)
-            agregado = False
+        usuario = session.get("usuario")
+        if usuario and usuario.get("rol") == "cliente":
+            favoritos = self.service.obtener_favoritos_cliente(usuario["id"])
+            if id_paquete in favoritos:
+                self.service.quitar_favorito(usuario["id"], id_paquete)
+                favoritos.remove(id_paquete)
+                agregado = False
+            else:
+                self.service.agregar_favorito(usuario["id"], id_paquete)
+                favoritos.append(id_paquete)
+                agregado = True
         else:
-            favoritos.append(id_paquete)
-            agregado = True
-
-        # Se conserva únicamente en la sesión; nunca se escribe en PostgreSQL.
+            favoritos = self._ids_favoritos()
+            if id_paquete in favoritos:
+                favoritos.remove(id_paquete)
+                agregado = False
+            else:
+                favoritos.append(id_paquete)
+                agregado = True
         session["favoritos"] = favoritos
         session.modified = True
         respuesta = {
