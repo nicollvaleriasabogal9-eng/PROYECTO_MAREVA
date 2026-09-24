@@ -1,0 +1,739 @@
+{% extends "base.html" %}
+
+{% block title %}Pago · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="payment-page">
+
+    <div class="container payment-container">
+
+        <div class="payment-header">
+
+            <span class="eyebrow">
+                PAGO SIMULADO
+            </span>
+
+            <h1>
+                Completa tu pago
+            </h1>
+
+            <p>
+                Selecciona un método de pago para continuar
+                con la simulación de tu reserva.
+            </p>
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="payment-error">
+            ⚠️ {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <div class="payment-layout">
+
+
+            <div class="payment-card">
+
+                <form
+                    method="POST"
+                    action="{{ url_for('reserva.procesar_pago') }}"
+                    id="formPago"
+                >
+
+                    <div class="payment-section">
+
+                        <span class="eyebrow">
+                            MÉTODO DE PAGO
+                        </span>
+
+                        <h2>
+                            ¿Cómo deseas pagar?
+                        </h2>
+
+
+                        <div class="payment-methods">
+
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="nequi"
+                                    required
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        📱 Nequi
+                                    </strong>
+
+                                    <span>
+                                        Simulación mediante número celular
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="pse"
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        🏦 PSE
+                                    </strong>
+
+                                    <span>
+                                        Simulación mediante entidad bancaria
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="tarjeta"
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        💳 Tarjeta
+                                    </strong>
+
+                                    <span>
+                                        Simulación con tarjeta
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         NEQUI
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formNequi"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            📱 Pago con Nequi
+                        </h3>
+
+                        <p>
+                            Utiliza un número ficticio para realizar
+                            la simulación.
+                        </p>
+
+                        <label>
+                            Número de celular
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nequi_telefono"
+                            id="nequiTelefono"
+                            inputmode="numeric"
+                            maxlength="10"
+                            placeholder="3001234567"
+                        >
+
+                        <small>
+                            Debe contener exactamente 10 dígitos
+                            y comenzar por 3.
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PSE
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formPse"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            🏦 Pago con PSE
+                        </h3>
+
+                        <p>
+                            Selecciona datos ficticios para
+                            realizar la simulación.
+                        </p>
+
+
+                        <label>
+                            Banco
+                        </label>
+
+                        <select
+                            name="pse_banco"
+                            id="pseBanco"
+                        >
+
+                            <option value="">
+                                Selecciona tu banco
+                            </option>
+
+                            <option value="Bancolombia">
+                                Bancolombia
+                            </option>
+
+                            <option value="Davivienda">
+                                Davivienda
+                            </option>
+
+                            <option value="Banco de Bogotá">
+                                Banco de Bogotá
+                            </option>
+
+                            <option value="BBVA">
+                                BBVA
+                            </option>
+
+                            <option value="Banco de Occidente">
+                                Banco de Occidente
+                            </option>
+
+                        </select>
+
+
+                        <label>
+                            Tipo de documento
+                        </label>
+
+                        <select
+                            name="pse_tipo_documento"
+                            id="pseTipoDocumento"
+                        >
+
+                            <option value="">
+                                Selecciona
+                            </option>
+
+                            <option value="CC">
+                                Cédula de ciudadanía
+                            </option>
+
+                            <option value="CE">
+                                Cédula de extranjería
+                            </option>
+
+                            <option value="TI">
+                                Tarjeta de identidad
+                            </option>
+
+                            <option value="NIT">
+                                NIT
+                            </option>
+
+                        </select>
+
+
+                        <label>
+                            Número de documento
+                        </label>
+
+                        <input
+                            type="text"
+                            name="pse_documento"
+                            id="pseDocumento"
+                            inputmode="numeric"
+                            maxlength="12"
+                            placeholder="1234567890"
+                        >
+
+                    </div>
+
+
+                    <!-- =================================================
+                         TARJETA
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formTarjeta"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            💳 Pago con tarjeta
+                        </h3>
+
+                        <p>
+                            Utiliza únicamente datos ficticios.
+                            No ingreses una tarjeta real.
+                        </p>
+
+
+                        <label>
+                            Número de tarjeta
+                        </label>
+
+                        <input
+                            type="text"
+                            name="tarjeta_numero"
+                            id="tarjetaNumero"
+                            inputmode="numeric"
+                            maxlength="19"
+                            placeholder="4111 1111 1111 1111"
+                        >
+
+
+                        <label>
+                            Nombre del titular
+                        </label>
+
+                        <input
+                            type="text"
+                            name="tarjeta_titular"
+                            id="tarjetaTitular"
+                            maxlength="80"
+                            placeholder="NOMBRE DE PRUEBA"
+                        >
+
+
+                        <div class="payment-fields-row">
+
+                            <div>
+
+                                <label>
+                                    Vencimiento
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="tarjeta_vencimiento"
+                                    id="tarjetaVencimiento"
+                                    maxlength="5"
+                                    placeholder="12/30"
+                                >
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    CVV
+                                </label>
+
+                                <input
+                                    type="password"
+                                    name="tarjeta_cvv"
+                                    id="tarjetaCvv"
+                                    inputmode="numeric"
+                                    maxlength="4"
+                                    placeholder="123"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         SEGURIDAD
+                         ================================================= -->
+
+                    <div class="payment-warning">
+
+                        <strong>
+                            🔒 Simulación segura
+                        </strong>
+
+                        <p>
+                            Este formulario es únicamente académico.
+                            MAREVA no almacena números de tarjeta,
+                            CVV, claves bancarias ni datos financieros.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg payment-submit"
+                        id="btnPagar"
+                        disabled
+                    >
+                        💳 Simular pago
+                    </button>
+
+
+                    <a
+                        href="{{ url_for('reserva.confirmacion') }}"
+                        class="btn btn-outline btn-lg"
+                    >
+                        ← Volver a la reserva
+                    </a>
+
+                </form>
+
+            </div>
+
+
+            <!-- =====================================================
+                 RESUMEN
+                 ===================================================== -->
+
+            <aside class="payment-summary">
+
+                <span class="eyebrow">
+                    RESUMEN
+                </span>
+
+                <h2>
+                    {{ reserva.paquete.nombre|default(
+                        reserva.paquete_nombre|default(
+                            "Tu reserva"
+                        )
+                    ) }}
+                </h2>
+
+
+                <div class="payment-summary-row">
+
+                    <span>
+                        Código
+                    </span>
+
+                    <strong>
+                        {{ reserva.codigo_unico|default(
+                            reserva.codigo|default(
+                                "Pendiente"
+                            )
+                        ) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="payment-summary-row">
+
+                    <span>
+                        Fecha
+                    </span>
+
+                    <strong>
+                        {{ reserva.fecha_viaje|default(
+                            "Por confirmar"
+                        ) }}
+                    </strong>
+
+                </div>
+
+
+                <div class="payment-summary-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+
+                        ${{ "{:,.0f}".format(
+                            reserva.precio_total|default(
+                                reserva.valor_referencial|default(
+                                    0
+                                )
+                            )|float
+                        ) }}
+
+                    </strong>
+
+                </div>
+
+            </aside>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const radios =
+            document.querySelectorAll(
+                'input[name="metodo_pago"]'
+            );
+
+        const formNequi =
+            document.getElementById(
+                "formNequi"
+            );
+
+        const formPse =
+            document.getElementById(
+                "formPse"
+            );
+
+        const formTarjeta =
+            document.getElementById(
+                "formTarjeta"
+            );
+
+        const btnPagar =
+            document.getElementById(
+                "btnPagar"
+            );
+
+
+        function actualizarFormulario() {
+
+            const seleccionado =
+                document.querySelector(
+                    'input[name="metodo_pago"]:checked'
+                );
+
+
+            formNequi.style.display =
+                "none";
+
+            formPse.style.display =
+                "none";
+
+            formTarjeta.style.display =
+                "none";
+
+
+            btnPagar.disabled =
+                !seleccionado;
+
+
+            if (!seleccionado) {
+                return;
+            }
+
+
+            if (
+                seleccionado.value ===
+                "nequi"
+            ) {
+
+                formNequi.style.display =
+                    "block";
+            }
+
+
+            if (
+                seleccionado.value ===
+                "pse"
+            ) {
+
+                formPse.style.display =
+                    "block";
+            }
+
+
+            if (
+                seleccionado.value ===
+                "tarjeta"
+            ) {
+
+                formTarjeta.style.display =
+                    "block";
+            }
+
+        }
+
+
+        radios.forEach(
+            function (radio) {
+
+                radio.addEventListener(
+                    "change",
+                    actualizarFormulario
+                );
+
+            }
+        );
+
+
+        actualizarFormulario();
+
+
+        const camposNumericos = [
+
+            document.getElementById(
+                "nequiTelefono"
+            ),
+
+            document.getElementById(
+                "pseDocumento"
+            ),
+
+            document.getElementById(
+                "tarjetaNumero"
+            ),
+
+            document.getElementById(
+                "tarjetaCvv"
+            )
+
+        ];
+
+
+        camposNumericos.forEach(
+            function (campo) {
+
+                if (!campo) {
+                    return;
+                }
+
+
+                campo.addEventListener(
+                    "input",
+                    function () {
+
+                        this.value =
+                            this.value.replace(
+                                /\D/g,
+                                ""
+                            );
+
+                    }
+                );
+
+            }
+        );
+
+
+        const tarjetaNumero =
+            document.getElementById(
+                "tarjetaNumero"
+            );
+
+
+        if (tarjetaNumero) {
+
+            tarjetaNumero.addEventListener(
+                "input",
+                function () {
+
+                    let valor =
+                        this.value
+                            .replace(
+                                /\D/g,
+                                ""
+                            )
+                            .substring(
+                                0,
+                                16
+                            );
+
+
+                    let grupos =
+                        valor.match(
+                            /.{1,4}/g
+                        );
+
+
+                    this.value =
+                        grupos
+                            ? grupos.join(" ")
+                            : "";
+
+                }
+            );
+
+        }
+
+
+        const vencimiento =
+            document.getElementById(
+                "tarjetaVencimiento"
+            );
+
+
+        if (vencimiento) {
+
+            vencimiento.addEventListener(
+                "input",
+                function () {
+
+                    let valor =
+                        this.value
+                            .replace(
+                                /\D/g,
+                                ""
+                            )
+                            .substring(
+                                0,
+                                4
+                            );
+
+
+                    if (
+                        valor.length >= 3
+                    ) {
+
+                        valor =
+                            valor.substring(
+                                0,
+                                2
+                            )
+                            + "/"
+                            + valor.substring(
+                                2
+                            );
+
+                    }
+
+
+                    this.value =
+                        valor;
+
+                }
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pago exitoso - MAREVA</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f7f1ff, #ffffff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .success-container {
+            width: 90%;
+            max-width: 650px;
+            background: white;
+            border-radius: 25px;
+            padding: 45px;
+            text-align: center;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.12);
+        }
+
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            background: #e8f8ee;
+            color: #20a45a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            color: #222;
+            font-size: 32px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .reservation-card {
+            background: #f8f8fa;
+            border-radius: 18px;
+            padding: 25px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .reservation-card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e3e3e3;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-row span {
+            color: #777;
+        }
+
+        .data-row strong {
+            color: #222;
+            text-align: right;
+        }
+
+        .payment-method {
+            display: inline-block;
+            background: #eeeeff;
+            color: #5551b5;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .demo-message {
+            background: #fff8e5;
+            border: 1px solid #f0d98c;
+            color: #765d00;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            background: #222;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #444;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+
+            .success-container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .data-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .data-row strong {
+                text-align: left;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="success-container">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h1>¡Pago realizado con éxito!</h1>
+
+        <p class="message">
+            La simulación del pago se completó correctamente.
+        </p>
+
+        <div class="reservation-card">
+
+            <h2>Detalle de la reserva</h2>
+
+            <div class="data-row">
+                <span>Reserva</span>
+                <strong>{{ reserva.id_reserva }}</strong>
+            </div>
+
+            <div class="data-row">
+                <span>Paquete</span>
+                <strong>{{ reserva.paquete }}</strong>
+            </div>
+
+            <div class="data-row">
+                <span>Destino</span>
+                <strong>{{ reserva.destino }}</strong>
+            </div>
+
+            <div class="data-row">
+                <span>Total</span>
+                <strong>
+                    ${{ "{:,.0f}".format(reserva.precio_total) }}
+                </strong>
+            </div>
+
+            <div class="data-row">
+                <span>Método de pago</span>
+
+                <strong>
+                    <span class="payment-method">
+                        {{ pago.metodo }}
+                    </span>
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="demo-message">
+            Esta pantalla corresponde a una simulación.
+            No se realizó ningún cobro real ni se almacenaron
+            datos bancarios.
+        </div>
+
+        <a href="{{ url_for('reserva.pago') }}" class="btn">
+            Volver a pago
+        </a>
+
+    </div>
+
+</body>
+</html>
