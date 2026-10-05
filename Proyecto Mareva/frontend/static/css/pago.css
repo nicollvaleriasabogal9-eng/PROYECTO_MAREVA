@@ -1,0 +1,435 @@
+/* =========================================================
+   PÁGINA DE PAGO · MAREVA
+   ========================================================= */
+
+.payment-page {
+    min-height: 80vh;
+    padding: 70px 20px;
+    background: #f8f7f4;
+}
+
+.payment-container {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.payment-header {
+    max-width: 700px;
+    margin-bottom: 40px;
+}
+
+.payment-header .eyebrow {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.payment-header h1 {
+    margin: 0 0 12px;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.05;
+    color: #111;
+}
+
+.payment-header p {
+    margin: 0;
+    color: #666;
+    line-height: 1.7;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.payment-error {
+    margin-bottom: 25px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    background: #fff0f0;
+    color: #a00000;
+    font-weight: 700;
+    border: 1px solid #ffd2d2;
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.payment-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, .8fr);
+    gap: 25px;
+    align-items: start;
+}
+
+.payment-card,
+.payment-summary {
+    background: #fff;
+    border: 1px solid #e8e5df;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, .06);
+}
+
+/* =========================================================
+   SECCIONES
+   ========================================================= */
+
+.payment-section {
+    margin-bottom: 28px;
+}
+
+.payment-section .eyebrow,
+.payment-summary .eyebrow,
+.payment-travelers .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.payment-section h2 {
+    margin: 0 0 20px;
+    color: #111;
+    font-size: 25px;
+}
+
+/* =========================================================
+   MÉTODOS DE PAGO
+   ========================================================= */
+
+.payment-methods {
+    display: grid;
+    gap: 12px;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px;
+    border: 1px solid #dedbd5;
+    border-radius: 16px;
+    cursor: pointer;
+    background: #fff;
+    transition:
+        border-color .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+.payment-method:hover {
+    border-color: #111;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
+}
+
+.payment-method:has(input:checked) {
+    border-color: #111;
+    background: #fafafa;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .06);
+}
+
+.payment-method input {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: #111;
+}
+
+.payment-method-content {
+    display: grid;
+    gap: 4px;
+}
+
+.payment-method-content strong {
+    color: #111;
+    font-size: 15px;
+}
+
+.payment-method-content span {
+    color: #777;
+    font-size: 14px;
+}
+
+/* =========================================================
+   FORMULARIOS DE CADA MÉTODO
+   ========================================================= */
+
+.payment-form-section {
+    display: none;
+    margin-top: 25px;
+    padding: 24px;
+    background: #f8f7f4;
+    border-radius: 18px;
+    border: 1px solid #ece9e3;
+}
+
+.payment-form-section h3 {
+    margin: 0 0 8px;
+    color: #111;
+    font-size: 20px;
+}
+
+.payment-form-section p {
+    margin: 0 0 20px;
+    color: #777;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.payment-form-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #222;
+}
+
+.payment-form-section input,
+.payment-form-section select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 15px;
+    margin-bottom: 16px;
+    border: 1px solid #d8d5cf;
+    border-radius: 12px;
+    background: #fff;
+    color: #111;
+    font: inherit;
+    outline: none;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.payment-form-section input:focus,
+.payment-form-section select:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, .08);
+}
+
+.payment-form-section small {
+    display: block;
+    margin-top: -7px;
+    margin-bottom: 15px;
+    color: #777;
+    line-height: 1.5;
+}
+
+.payment-fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.payment-fields-row > div {
+    min-width: 0;
+}
+
+/* =========================================================
+   AVISO DE SIMULACIÓN
+   ========================================================= */
+
+.payment-warning {
+    margin-top: 25px;
+    padding: 18px;
+    border-radius: 15px;
+    background: #f3f1ec;
+    border: 1px solid #e7e3dc;
+}
+
+.payment-warning strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #222;
+}
+
+.payment-warning p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.payment-submit {
+    width: 100%;
+    margin-top: 25px;
+}
+
+.payment-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.payment-card form > .btn-outline {
+    width: 100%;
+    margin-top: 12px;
+    justify-content: center;
+}
+
+/* =========================================================
+   RESUMEN DE RESERVA
+   ========================================================= */
+
+.payment-summary {
+    position: sticky;
+    top: 25px;
+}
+
+.payment-summary h2 {
+    margin: 8px 0 25px;
+    color: #111;
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+.payment-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 14px 0;
+    border-bottom: 1px solid #eeeae4;
+}
+
+.payment-summary-row span {
+    color: #777;
+    font-size: 14px;
+}
+
+.payment-summary-row strong {
+    color: #222;
+    font-size: 14px;
+    text-align: right;
+    max-width: 60%;
+}
+
+/* =========================================================
+   TOTAL
+   ========================================================= */
+
+.payment-summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding-top: 20px;
+    margin-top: 5px;
+    border-top: 2px solid #e5e2dc;
+}
+
+.payment-summary-total span {
+    color: #555;
+    font-weight: 700;
+}
+
+.payment-summary-total strong {
+    color: #111;
+    font-size: 22px;
+}
+
+/* =========================================================
+   VIAJEROS
+   ========================================================= */
+
+.payment-travelers {
+    margin-top: 28px;
+    padding-top: 25px;
+    border-top: 1px solid #e5e2dc;
+}
+
+.payment-traveler {
+    padding: 13px 0;
+    border-bottom: 1px solid #eeeae4;
+}
+
+.payment-traveler:last-child {
+    border-bottom: 0;
+}
+
+.payment-traveler strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #222;
+}
+
+.payment-traveler small {
+    color: #777;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    .payment-page {
+        padding: 45px 16px;
+    }
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-summary {
+        position: static;
+    }
+
+    .payment-header {
+        margin-bottom: 30px;
+    }
+
+    .payment-header h1 {
+        font-size: clamp(32px, 9vw, 46px);
+    }
+}
+
+@media (max-width: 500px) {
+
+    .payment-card,
+    .payment-summary {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .payment-fields-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .payment-summary-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .payment-summary-row strong {
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .payment-summary-total {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .payment-summary-total strong {
+        font-size: 24px;
+    }
+}

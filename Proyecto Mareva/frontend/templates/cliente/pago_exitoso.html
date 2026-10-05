@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Pago exitoso · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="payment-page">
+    <div class="container payment-container">
+
+        <div class="payment-header">
+            <span class="eyebrow">PAGO SIMULADO</span>
+            <h1>¡Pago realizado con éxito!</h1>
+            <p>
+                La simulación se completó correctamente. Este es el
+                resumen de tu reserva.
+            </p>
+        </div>
+
+        <div class="payment-layout">
+
+            <!-- ============ COLUMNA PRINCIPAL ============ -->
+            <div class="payment-card">
+
+                <div class="payment-section">
+                    <span class="eyebrow">MÉTODO DE PAGO</span>
+
+                    <h2>
+                        {% if metodo == 'nequi' %}📱 Nequi
+                        {% elif metodo == 'pse' %}🏦 PSE
+                        {% elif metodo == 'tarjeta' %}💳 Tarjeta
+                        {% else %}No especificado{% endif %}
+                    </h2>
+
+                    <div class="payment-method" style="cursor: default;">
+                        <div class="payment-method-content">
+                            <strong>✅ Pago aprobado</strong>
+                            <span>Tu reserva ya quedó registrada.</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if reserva.viajeros %}
+                    <div class="payment-travelers">
+                        <span class="eyebrow">VIAJEROS</span>
+
+                        {% for viajero in reserva.viajeros %}
+                            <div class="payment-traveler">
+                                <strong>
+                                    {{ viajero.nombre }}
+                                    {{ viajero.apellido }}
+                                </strong>
+                                <small>
+                                    {{ viajero.tipo_documento }}
+                                    · {{ viajero.numero_documento }}
+                                    {% if viajero.idioma %}
+                                        · {{ viajero.idioma }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="payment-warning">
+                    <strong>🔒 Simulación segura</strong>
+                    <p>
+                        Esta pantalla corresponde a una simulación. No se
+                        realizó ningún cobro real ni se almacenaron datos
+                        bancarios.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ url_for('home.perfil') }}"
+                    class="btn btn-primary btn-lg payment-submit"
+                    style="display: block; text-align: center; text-decoration: none;"
+                >
+                    Ver mis reservas
+                </a>
+
+            </div>
+
+            <!-- ============ RESUMEN ============ -->
+            <aside class="payment-summary">
+
+                <span class="eyebrow">RESUMEN DE RESERVA</span>
+
+                <h2>{{ paquete.nombre|default("Paquete turístico") }}</h2>
+
+                {% if paquete.nombre_destino %}
+                    <div class="payment-summary-row">
+                        <span>Destino</span>
+                        <strong>📍 {{ paquete.nombre_destino }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if paquete.categoria %}
+                    <div class="payment-summary-row">
+                        <span>Categoría</span>
+                        <strong>{{ paquete.categoria|capitalize }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if paquete.duracion_dias is not none %}
+                    <div class="payment-summary-row">
+                        <span>Duración</span>
+                        <strong>
+                            {{ paquete.duracion_dias }} días
+                            {% if paquete.duracion_noches is not none %}
+                                / {{ paquete.duracion_noches }} noches
+                            {% endif %}
+                        </strong>
+                    </div>
+                {% endif %}
+
+                <div class="payment-summary-row">
+                    <span>Código de reserva</span>
+                    <strong>{{ reserva.codigo_unico|default("Pendiente") }}</strong>
+                </div>
+
+                {% if reserva.id_reserva %}
+                    <div class="payment-summary-row">
+                        <span>Reserva</span>
+                        <strong>#{{ reserva.id_reserva }}</strong>
+                    </div>
+                {% endif %}
+
+                {% if reserva.viajeros %}
+                    <div class="payment-summary-row">
+                        <span>Viajeros</span>
+                        <strong>{{ reserva.viajeros|length }}</strong>
+                    </div>
+                {% endif %}
+
+                <div class="payment-summary-total">
+                    <span>Total pagado</span>
+                    <strong>
+                        ${{ "{:,.0f}".format(paquete.precio|default(0)|float) }}
+                    </strong>
+                </div>
+
+            </aside>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

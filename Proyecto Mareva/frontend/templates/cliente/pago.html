@@ -1,0 +1,702 @@
+{% extends "base.html" %}
+
+{% block title %}Pago · MAREVA{% endblock %}
+
+{% block content %}
+
+<section class="payment-page">
+
+    <div class="container payment-container">
+
+        <!-- =====================================================
+             CABECERA
+             ===================================================== -->
+
+        <div class="payment-header">
+
+            <span class="eyebrow">
+                PAGO SIMULADO
+            </span>
+
+            <h1>
+                Completa tu pago
+            </h1>
+
+            <p>
+                Selecciona un método de pago para continuar
+                con la simulación de tu reserva.
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             ERROR
+             ===================================================== -->
+
+        {% if error %}
+
+            <div class="payment-error">
+                ⚠️ {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <!-- =====================================================
+             CONTENIDO PRINCIPAL
+             ===================================================== -->
+
+        <div class="payment-layout">
+
+
+            <!-- =================================================
+                 FORMULARIO DE PAGO
+                 ================================================= -->
+
+            <div class="payment-card">
+
+                <form
+                    method="POST"
+                    action="{{ url_for('reserva.procesar_pago', id_reserva=reserva.id_reserva) }}"
+                    id="formPago"
+                >
+
+
+                    <!-- =========================================
+                         MÉTODO DE PAGO
+                         ========================================= -->
+
+                    <div class="payment-section">
+
+                        <span class="eyebrow">
+                            MÉTODO DE PAGO
+                        </span>
+
+                        <h2>
+                            ¿Cómo deseas pagar?
+                        </h2>
+
+
+                        <div class="payment-methods">
+
+
+                            <!-- NEQUI -->
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="nequi"
+                                    required
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        📱 Nequi
+                                    </strong>
+
+                                    <span>
+                                        Simulación mediante número celular
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <!-- PSE -->
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="pse"
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        🏦 PSE
+                                    </strong>
+
+                                    <span>
+                                        Simulación mediante entidad bancaria
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <!-- TARJETA -->
+
+                            <label class="payment-method">
+
+                                <input
+                                    type="radio"
+                                    name="metodo_pago"
+                                    value="tarjeta"
+                                >
+
+                                <div class="payment-method-content">
+
+                                    <strong>
+                                        💳 Tarjeta
+                                    </strong>
+
+                                    <span>
+                                        Simulación con tarjeta
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         NEQUI
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formNequi"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            📱 Pago con Nequi
+                        </h3>
+
+                        <p>
+                            Utiliza un número ficticio para realizar
+                            la simulación.
+                        </p>
+
+                        <label>
+                            Número de celular
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nequi_telefono"
+                            id="nequiTelefono"
+                            inputmode="numeric"
+                            maxlength="10"
+                            placeholder="3001234567"
+                        >
+
+                        <small>
+                            Debe contener exactamente 10 dígitos
+                            y comenzar por 3.
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PSE
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formPse"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            🏦 Pago con PSE
+                        </h3>
+
+                        <p>
+                            Selecciona datos ficticios para
+                            realizar la simulación.
+                        </p>
+
+
+                        <label>
+                            Banco
+                        </label>
+
+                        <select
+                            name="pse_banco"
+                            id="pseBanco"
+                        >
+
+                            <option value="">
+                                Selecciona tu banco
+                            </option>
+
+                            <option value="Bancolombia">
+                                Bancolombia
+                            </option>
+
+                            <option value="Davivienda">
+                                Davivienda
+                            </option>
+
+                            <option value="Banco de Bogotá">
+                                Banco de Bogotá
+                            </option>
+
+                            <option value="BBVA">
+                                BBVA
+                            </option>
+
+                            <option value="Banco de Occidente">
+                                Banco de Occidente
+                            </option>
+
+                        </select>
+
+
+                        <label>
+                            Tipo de documento
+                        </label>
+
+                        <select
+                            name="pse_tipo_documento"
+                            id="pseTipoDocumento"
+                        >
+
+                            <option value="">
+                                Selecciona
+                            </option>
+
+                            <option value="CC">
+                                Cédula de ciudadanía
+                            </option>
+
+                            <option value="CE">
+                                Cédula de extranjería
+                            </option>
+
+                            <option value="TI">
+                                Tarjeta de identidad
+                            </option>
+
+                            <option value="NIT">
+                                NIT
+                            </option>
+
+                        </select>
+
+
+                        <label>
+                            Número de documento
+                        </label>
+
+                        <input
+                            type="text"
+                            name="pse_documento"
+                            id="pseDocumento"
+                            inputmode="numeric"
+                            maxlength="12"
+                            placeholder="1234567890"
+                        >
+
+                    </div>
+
+
+                    <!-- =================================================
+                         TARJETA
+                         ================================================= -->
+
+                    <div
+                        class="payment-form-section"
+                        id="formTarjeta"
+                        style="display: none;"
+                    >
+
+                        <h3>
+                            💳 Pago con tarjeta
+                        </h3>
+
+                        <p>
+                            Utiliza únicamente datos ficticios.
+                            No ingreses una tarjeta real.
+                        </p>
+
+
+                        <label>
+                            Número de tarjeta
+                        </label>
+
+                        <input
+                            type="text"
+                            name="tarjeta_numero"
+                            id="tarjetaNumero"
+                            inputmode="numeric"
+                            maxlength="19"
+                            placeholder="4111 1111 1111 1111"
+                        >
+
+
+                        <label>
+                            Nombre del titular
+                        </label>
+
+                        <input
+                            type="text"
+                            name="tarjeta_titular"
+                            id="tarjetaTitular"
+                            maxlength="80"
+                            placeholder="NOMBRE DE PRUEBA"
+                        >
+
+
+                        <div class="payment-fields-row">
+
+                            <div>
+
+                                <label>
+                                    Vencimiento
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="tarjeta_vencimiento"
+                                    id="tarjetaVencimiento"
+                                    maxlength="5"
+                                    placeholder="12/30"
+                                >
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    CVV
+                                </label>
+
+                                <input
+                                    type="password"
+                                    name="tarjeta_cvv"
+                                    id="tarjetaCvv"
+                                    inputmode="numeric"
+                                    maxlength="4"
+                                    placeholder="123"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         SEGURIDAD
+                         ================================================= -->
+
+                    <div class="payment-warning">
+
+                        <strong>
+                            🔒 Simulación segura
+                        </strong>
+
+                        <p>
+                            Este formulario es únicamente académico.
+                            MAREVA no almacena números de tarjeta,
+                            CVV, claves bancarias ni datos financieros.
+                        </p>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         BOTÓN PAGAR
+                         ================================================= -->
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg payment-submit"
+                        id="btnPagar"
+                        disabled
+                    >
+                        💳 Simular pago
+                    </button>
+
+
+                    <!-- VOLVER -->
+
+                    <a
+                        href="{{ url_for('reserva.confirmacion') }}"
+                        class="btn btn-outline btn-lg"
+                    >
+                        ← Volver a la reserva
+                    </a>
+
+                </form>
+
+            </div>
+
+
+            <!-- =====================================================
+                 RESUMEN DE RESERVA
+                 ===================================================== -->
+
+            <aside class="payment-summary">
+
+                <span class="eyebrow">
+                    RESUMEN DE RESERVA
+                </span>
+
+
+                <!-- ================================================
+                     PAQUETE
+                     ================================================ -->
+
+                <h2>
+                    {{ paquete.nombre|default("Paquete turístico") }}
+                </h2>
+
+
+                <!-- DESTINO -->
+
+                {% if paquete.nombre_destino %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Destino
+                        </span>
+
+                        <strong>
+                            📍 {{ paquete.nombre_destino }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- CATEGORÍA -->
+
+                {% if paquete.categoria %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Categoría
+                        </span>
+
+                        <strong>
+                            {{ paquete.categoria|capitalize }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- DURACIÓN -->
+
+                {% if paquete.duracion_dias is not none %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Duración
+                        </span>
+
+                        <strong>
+
+                            {{ paquete.duracion_dias }} días
+
+                            {% if paquete.duracion_noches is not none %}
+                                / {{ paquete.duracion_noches }} noches
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- CÓDIGO DE RESERVA -->
+
+                <div class="payment-summary-row">
+
+                    <span>
+                        Código de reserva
+                    </span>
+
+                    <strong>
+                        {{ reserva.codigo_unico|default("Pendiente") }}
+                    </strong>
+
+                </div>
+
+
+                <!-- ID RESERVA -->
+
+                {% if reserva.id_reserva %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Reserva
+                        </span>
+
+                        <strong>
+                            #{{ reserva.id_reserva }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ESTADO -->
+
+                {% if reserva.estado %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Estado
+                        </span>
+
+                        <strong>
+                            {{ reserva.estado|capitalize }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ================================================
+                     VIAJEROS
+                     ================================================ -->
+
+                {% if reserva.viajeros %}
+
+                    <div class="payment-summary-row">
+
+                        <span>
+                            Viajeros
+                        </span>
+
+                        <strong>
+                            {{ reserva.viajeros|length }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ================================================
+                     PRECIO DEL PAQUETE
+                     ================================================ -->
+
+                <div class="payment-summary-row">
+
+                    <span>
+                        Precio del paquete
+                    </span>
+
+                    <strong>
+
+                        ${{ "{:,.0f}".format(
+                            paquete.precio|default(0)|float
+                        ) }}
+
+                    </strong>
+
+                </div>
+
+
+                <!-- ================================================
+                     TOTAL
+                     ================================================ -->
+
+                <div class="payment-summary-total">
+
+                    <span>
+                        Total a pagar
+                    </span>
+
+                    <strong>
+
+                        ${{ "{:,.0f}".format(
+                            paquete.precio|default(0)|float
+                        ) }}
+
+                    </strong>
+
+                </div>
+
+
+                <!-- ================================================
+                     VIAJEROS REGISTRADOS
+                     ================================================ -->
+
+                {% if reserva.viajeros %}
+
+                    <div class="payment-travelers">
+
+                        <span class="eyebrow">
+                            VIAJEROS
+                        </span>
+
+                        {% for viajero in reserva.viajeros %}
+
+                            <div class="payment-traveler">
+
+                                <strong>
+                                    {{ viajero.nombre }}
+                                    {{ viajero.apellido }}
+                                </strong>
+
+                                <small>
+
+                                    {{ viajero.tipo_documento }}
+                                    ·
+                                    {{ viajero.numero_documento }}
+
+                                    {% if viajero.idioma %}
+                                        · {{ viajero.idioma }}
+                                    {% endif %}
+
+                                </small>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     JAVASCRIPT DE PAGO
+     ========================================================= -->
+
+<script
+    src="{{ url_for('static', filename='js/pago.js') }}"
+></script>
+
+
+{% endblock %}
