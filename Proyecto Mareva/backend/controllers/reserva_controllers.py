@@ -6,12 +6,14 @@ from flask import (
     session,
     url_for,
 )
+import re
+import datetime
 
 from services.reserva_services import ReservaService
 from services.paquete_services import PaqueteService
 from services.pdf_services import PDFService
 from repositories.salida_repository import SalidaRepository
-
+from services.correo_service import CorreoService
 
 class ReservaController:
 
@@ -24,6 +26,8 @@ class ReservaController:
         self.pdf_service = PDFService()
 
         self.salida_repository = SalidaRepository()
+
+        self.correo_service = CorreoService()
 
 
     # =========================================================
@@ -48,7 +52,7 @@ class ReservaController:
 
 
     # =========================================================
-    # PREPARAR RESERVA (desde el detalle del paquete)
+    # PREPARAR RESERVA (desde el reserva del paquete)
     # =========================================================
 
     def preparar_reserva(self, slug):
@@ -185,7 +189,8 @@ class ReservaController:
     def confirmar(
         self,
         slug
-    ):
+    ):      
+        print("========== ENTRÓ A ReservaController.confirmar ==========", flush=True)
 
         usuario = session.get("usuario")
 
@@ -589,7 +594,7 @@ class ReservaController:
                 }
             )
 
-
+        
         # -----------------------------------------------------
         # SERVICIOS EXTRA
         # -----------------------------------------------------
@@ -654,6 +659,8 @@ class ReservaController:
         # -----------------------------------------------------
         # DATOS DE RESERVA
         # -----------------------------------------------------
+        
+
 
         resultado = (
             self.service.confirmar_reserva(
@@ -767,15 +774,6 @@ class ReservaController:
             }
         )
 
-
-        session["detalle_reserva"] = detalle
-
-
-        return redirect(
-            url_for(
-                "reserva.confirmacion"
-            )
-        )
 
 
     # =========================================================
@@ -1183,6 +1181,52 @@ class ReservaController:
             }
         )
 
+        print("DEBUG - Usuario en sesión:", usuario is not None)
+        print("DEBUG - Claves disponibles:", list(usuario.keys()) if isinstance(usuario, dict) else "No es un diccionario")
+        print("DEBUG - Correo disponible:", bool(usuario.get("correo")) if isinstance(usuario, dict) else False)
+                
+        correo_cliente = (
+           usuario.get("correo")
+        )
+                
+        nombre_cliente = (
+           usuario.get("nombre")
+          or "Cliente"
+        )
+                
+        envio_correo = (
+            self.correo_service.enviar_confirmacion_reserva(
+            correo_cliente=correo_cliente,
+            nombre_cliente=nombre_cliente,
+            reserva=detalle
+                )
+            )
+                
+        if not envio_correo.get("ok"):
+                
+            print(
+                "AVISO: La reserva fue creada, "
+                "pero no se pudo enviar el correo "
+                "de confirmación."
+            )
+                
+        else:
+                
+            print(
+            f"Correo de confirmación enviado a "
+            f"{correo_cliente}"
+            )
+                
+                
+            session["detalle_reserva"] = detalle
+                
+                
+            return redirect(
+                url_for(
+                "reserva.confirmacion"
+                )
+            )
+
         session["detalle_reserva"] = detalle
 
         session.pop("seleccion_reserva", None)
@@ -1464,11 +1508,6 @@ class ReservaController:
             detalle=detalle
         )
 
-
-    # =========================================================
-    # PDF
-    # =========================================================
-
     def descargar_pdf(self):
 
         detalle = session.get(
@@ -1491,3 +1530,445 @@ class ReservaController:
 
     def listar_reservas_cliente(self, id_cliente):
         return self.repo.listar_reservas_cliente(id_cliente)
+
+    def mostrar_pago(self, id_reserva):
+
+        usuario = session.get("usuario")
+
+        if not usuario:
+
+            return redirect(
+                url_for(
+                    "auth.mostrar_login"
+                )
+            )
+
+        id_cliente = usuario["id"]
+        
+        reserva = self.service.obtener_reserva_con_viajeros(id_reserva, id_cliente)
+        id_paquete = reserva["id_paquete"]
+        paquete = self.paquete_service.obtener_por_id(id_paquete)
+
+        if not reserva:
+            return redirect(url_for("perfil.perfil"))
+
+        return render_template(
+            "cliente/pago.html",
+            reserva=reserva,
+            paquete=paquete,
+            error=None
+        )
+
+    def procesar_pago(self, id_reserva):
+
+        usuario = session.get("usuario")
+
+        if not usuario:
+
+            return redirect(
+                url_for(
+                    "auth.mostrar_login"
+                )
+            )
+
+        id_cliente = usuario["id"]
+                
+        reserva = self.service.obtener_reserva_con_viajeros(id_reserva, id_cliente)
+        
+        id_paquete = reserva["id_paquete"]
+        paquete = self.paquete_service.obtener_por_id(id_paquete)
+
+
+        metodo = (
+            request.form
+            .get(
+                "metodo_pago",
+                ""
+            )
+            .strip()
+            .lower()
+        )
+
+        metodos_validos = {
+            "nequi",
+            "pse",
+            "tarjeta"
+        }
+
+        if metodo not in metodos_validos:
+
+            return render_template(
+                "cliente/pago.html",
+                reserva=reserva,
+                paquete=paquete,
+                error=(
+                    "Debes seleccionar "
+                    "un método de pago válido."
+                )
+            )
+
+        if metodo == "nequi":
+
+            telefono = (
+                request.form
+                .get(
+                    "nequi_telefono",
+                    ""
+                )
+                .strip()
+            )
+
+            if not telefono:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes ingresar "
+                        "el número de celular."
+                    )
+                )
+
+            if not telefono.isdigit():
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El número de Nequi "
+                        "solo debe contener números."
+                    )
+                )
+
+            if len(telefono) != 10:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El número de Nequi "
+                        "debe tener exactamente 10 dígitos."
+                    )
+                )
+
+            if not telefono.startswith("3"):
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El número de Nequi "
+                        "debe comenzar por 3."
+                    )
+                )
+
+
+        elif metodo == "pse":
+
+            banco = (
+                request.form
+                .get(
+                    "pse_banco",
+                    ""
+                )
+                .strip()
+            )
+
+            tipo_documento = (
+                request.form
+                .get(
+                    "pse_tipo_documento",
+                    ""
+                )
+                .strip()
+                .upper()
+            )
+
+            documento = (
+                request.form
+                .get(
+                    "pse_documento",
+                    ""
+                )
+                .strip()
+            )
+
+            bancos_validos = {
+                "Bancolombia",
+                "Davivienda",
+                "Banco de Bogotá",
+                "BBVA",
+                "Banco de Occidente"
+            }
+
+            tipos_validos = {
+                "CC",
+                "CE",
+                "TI",
+                "NIT"
+            }
+
+            if banco not in bancos_validos:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes seleccionar "
+                        "un banco válido."
+                    )
+                )
+
+            if tipo_documento not in tipos_validos:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes seleccionar "
+                        "un tipo de documento válido."
+                    )
+                )
+
+            if not documento:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes ingresar "
+                        "el número de documento."
+                    )
+                )
+
+            if not documento.isdigit():
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El documento debe contener "
+                        "solo números."
+                    )
+                )
+
+            if not (
+                6 <= len(documento) <= 12
+            ):
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El documento debe tener "
+                        "entre 6 y 12 dígitos."
+                    )
+                )
+
+
+        elif metodo == "tarjeta":
+
+            numero = (
+                request.form
+                .get(
+                    "tarjeta_numero",
+                    ""
+                )
+                .replace(
+                    " ",
+                    ""
+                )
+                .strip()
+            )
+
+            titular = (
+                request.form
+                .get(
+                    "tarjeta_titular",
+                    ""
+                )
+                .strip()
+            )
+
+            vencimiento = (
+                request.form
+                .get(
+                    "tarjeta_vencimiento",
+                    ""
+                )
+                .strip()
+            )
+
+            cvv = (
+                request.form
+                .get(
+                    "tarjeta_cvv",
+                    ""
+                )
+                .strip()
+            )
+
+            if not numero:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes ingresar "
+                        "el número de tarjeta."
+                    )
+                )
+
+            if not numero.isdigit():
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El número de tarjeta "
+                        "solo debe contener números."
+                    )
+                )
+
+            if len(numero) != 16:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El número de tarjeta "
+                        "debe tener exactamente 16 dígitos."
+                    )
+                )
+
+            if not titular:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes ingresar "
+                        "el nombre del titular."
+                    )
+                )
+
+            if len(titular) < 3:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El nombre del titular "
+                        "no es válido."
+                    )
+                )
+
+            if not re.fullmatch(
+                r"(0[1-9]|1[0-2])/[0-9]{2}",
+                vencimiento
+            ):
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El vencimiento debe tener "
+                        "el formato MM/AA."
+                    )
+                )
+
+            mes = int(
+                vencimiento[:2]
+            )
+
+            anio = int(
+                vencimiento[3:]
+            )
+
+            anio_completo = 2000 + anio
+
+            fecha_actual = datetime.now()
+
+            if (
+                anio_completo < fecha_actual.year
+                or (
+                    anio_completo == fecha_actual.year
+                    and mes < fecha_actual.month
+                )
+            ):
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "La tarjeta está vencida."
+                    )
+                )
+
+
+            if not cvv:
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "Debes ingresar "
+                        "el CVV."
+                    )
+                )
+
+            if not cvv.isdigit():
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El CVV solo debe contener números."
+                    )
+                )
+
+            if len(cvv) not in (3, 4):
+
+                return render_template(
+                    "cliente/pago.html",
+                    reserva=reserva,
+                    paquete=paquete,
+                    error=(
+                        "El CVV debe tener "
+                        "3 o 4 dígitos."
+                    )
+                )
+            
+        cambio_estado = self.service.cambiar_estado_reserva(id_reserva, id_cliente)
+
+        if not cambio_estado["ok"]:
+            return render_template(
+                "cliente/pago.html",
+                reserva=reserva,
+                paquete=paquete,
+                error=(
+                    "Hubo un error al cambiar el estado de su reserva"
+                    "Intentelo mas tarde o comuniquese con servicio al cliente"
+                )
+            )
+
+        return render_template("cliente/pago_exitoso.html", reserva=reserva, paquete=paquete, metodo=metodo, cambio_estado=cambio_estado)
+        
