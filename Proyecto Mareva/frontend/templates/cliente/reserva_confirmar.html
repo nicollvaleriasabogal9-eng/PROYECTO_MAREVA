@@ -140,12 +140,16 @@
                             <input type="checkbox"
                                    name="alimentacion"
                                    value="{{ comida.id_alimentacion }}"
+                                   data-precio="{{ comida.precio|default(0)|float }}"
                                    {% if comida.id_alimentacion in seleccion.alimentacion %}checked{% endif %}>
                             <span class="package-service-card__icon">🍽️</span>
                             <div>
                                 <h3>{{ comida.restaurante|default('Restaurante') }}</h3>
                                 {% if comida.tipo_comida %}<p><strong>{{ comida.tipo_comida }}</strong></p>{% endif %}
                                 {% if comida.tipo_servicio %}<p>{{ comida.tipo_servicio }}</p>{% endif %}
+                                {% if comida.precio and comida.precio > 0 %}
+                                <p class="pick-price">+${{ "{:,.0f}".format(comida.precio|float) }}</p>
+                                {% endif %}
                             </div>
                             <b class="pick-check">✓</b>
                         </label>
@@ -173,6 +177,7 @@
                             <input type="checkbox"
                                    name="transporte"
                                    value="{{ transporte.id_transporte }}"
+                                   data-precio="{{ transporte.precio|default(0)|float }}"
                                    {% if transporte.id_transporte in seleccion.transporte %}checked{% endif %}>
                             <span class="package-service-card__icon">
                                 {% if transporte.tipo == 'Aéreo' %}✈️{% else %}🚌{% endif %}
@@ -185,6 +190,9 @@
                                     {% if transporte.hora_salida %}🕐 {{ transporte.hora_salida }}{% endif %}
                                     {% if transporte.hora_regreso %}· {{ transporte.hora_regreso }}{% endif %}
                                 </span>
+                                {% if transporte.precio and transporte.precio > 0 %}
+                                <p class="pick-price">+${{ "{:,.0f}".format(transporte.precio|float) }}</p>
+                                {% endif %}
                             </div>
                             <b class="pick-check">✓</b>
                         </label>
@@ -212,6 +220,7 @@
                             <input type="checkbox"
                                    name="actividades"
                                    value="{{ actividad.id_actividad }}"
+                                   data-precio="{{ actividad.costo|default(0)|float }}"
                                    {% if actividad.id_actividad in seleccion.actividades %}checked{% endif %}>
                             <span class="package-service-card__icon">🎟️</span>
                             <div>
@@ -286,6 +295,7 @@
                                 <input type="checkbox"
                                        name="extras"
                                        value="{{ extra.id }}"
+                                       data-precio="{{ extra.precio|float }}"
                                        {% if extra.id in seleccion.extras %}checked{% endif %}>
                                 <span class="package-service-card__icon">✨</span>
                                 <div>
@@ -398,15 +408,21 @@
                     <div class="policy-confirmed">
                         <span>✓</span>
                         <div>
-                            <strong>Política de no reembolso</strong>
-                            <p>Al guardar la reserva aceptas la política
-                               aceptada al crear tu cuenta.</p>
+                            <strong>Política de reembolso</strong>
+                            <p>Al guardar la reserva aceptas la
+                               <a href="{{ url_for('static', filename='docs/politica_reembolso.pdf') }}"
+                                  target="_blank" rel="noopener noreferrer"
+                                  style="color: var(--fill-accent, #0f7c86); font-weight: 600; text-decoration: underline;">
+                                   política de reembolso
+                               </a>
+                               que aceptaste al crear tu cuenta.</p>
                         </div>
                     </div>
 
                     <div class="confirm-total">
                         <span>Precio por persona</span>
-                        <strong>${{ "{:,.0f}".format(paquete.precio|float) }}</strong>
+                        <strong id="precioTotal"
+                                data-base="{{ paquete.precio|float }}">${{ "{:,.0f}".format(paquete.precio|float) }}</strong>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg btn-block"
