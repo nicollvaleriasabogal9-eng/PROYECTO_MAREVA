@@ -6,6 +6,9 @@ class EncuestaRepository:
     def __init__(self):
         self.conexion = Conexion().obtener_conexion()
 
+    def guardar_encuesta():
+        return
+
     def obtener_preguntas_activas(self):
         cursor = self.conexion.cursor()
 
