@@ -205,18 +205,7 @@ class ReservaRepository:
         self,
         id_reserva,
         viajeros
-    ):
-        """
-        viajeros:
-        lista de diccionarios con:
-
-        nombre
-        apellido
-        tipo_documento
-        numero_documento
-        idioma
-        """
-
+        ):
         if not viajeros:
             return
 
@@ -521,6 +510,8 @@ class ReservaRepository:
                 """
                 SELECT
                     r.id_reserva,
+                    r.id_paquete,
+                    r.precio_total,
                     r.codigo_unico,
                     r.estado,
                     p.nombre,
@@ -560,9 +551,11 @@ class ReservaRepository:
 
         reserva = {
             "id_reserva": filas[0][0],
-            "codigo_unico": filas[0][1],
-            "estado": filas[0][2],
-            "paquete_nombre": filas[0][3],
+            "id_paquete": filas[0][1],
+            "precio_total": filas[0][2],
+            "codigo_unico": filas[0][3],
+            "estado": filas[0][4],
+            "paquete_nombre": filas[0][5],
             "viajeros": []
         }
 
@@ -730,6 +723,62 @@ class ReservaRepository:
 
             cursor.close()
 
+
+    def cambiar_estado_reserva(self, id_reserva, id_cliente):
+        cursor = self.conexion.cursor()
+
+        try:
+            cursor.execute(
+                """
+                UPDATE reserva 
+                SET estado = 'confirmada'
+                WHERE id_reserva = %s
+                  AND id_cliente = %s
+                  AND estado = 'solicitada'
+                RETURNING id_reserva
+                """, (id_reserva, id_cliente, )
+            )
+
+            fila = cursor.fetchone()
+
+            if not fila:
+            
+                self.conexion.rollback()
+            
+                return {
+                        "ok": False,
+                        "error": "No se pudo cambiar el estado de la reserva."
+                        }
+            
+            self.conexion.commit()
+
+            return {
+                "ok": True
+            }
+        
+        except Exception as e:
+        
+                self.conexion.rollback()
+        
+        
+                print(
+                    "ERROR COMPLETANDO RESERVA:",
+                    e
+                )
+        
+        
+                return {
+                    "ok": False,
+                    "error": (
+                        "No fue posible completar la reserva."
+                    )
+                }
+        
+        
+        finally:
+        
+            cursor.close()
+        
 
     # =========================================================
     # MARCAR COMPLETADA
