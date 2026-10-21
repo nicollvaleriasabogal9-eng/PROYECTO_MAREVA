@@ -7,6 +7,7 @@
   <meta name="description" content="MAREVA: descubre, compara y reserva experiencias inolvidables por Colombia.">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pago.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/paquetes.css') }}">
@@ -120,7 +121,7 @@
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
-      <div class="site-footer__brand"><img src="{{ url_for('static', filename='img/logo_mareva.png') }}" alt="MAREVA"><p>Viajes por Colombia con más claridad, más opciones y una experiencia más humana.</p></div>
+      <div class="site-footer__brand"><p>Viajes por Colombia con más claridad, más opciones y una experiencia más humana.</p></div>
       <div><span class="site-footer__label">Explora</span><a href="{{ url_for('paquetes.listar_catalogo') }}">Paquetes</a><a href="{{ url_for('destinos.listar_catalogo') }}">Destinos</a><a href="{{ url_for('paquetes.comparar') }}">Comparar</a></div>
       <div><span class="site-footer__label">Ayuda</span><a href="{{ url_for('auth.mostrar_login') }}">Iniciar sesión</a><a href="{{ url_for('auth.mostrar_registro') }}">Crear cuenta</a></div>
 <div class="payment-block">
