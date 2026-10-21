@@ -2,7 +2,7 @@ from config.conexion import Conexion
 from models.cliente import Cliente
 from werkzeug.security import generate_password_hash
 from psycopg.errors import UniqueViolation
-
+import secrets
 
 class AuthRepository:
 
@@ -283,3 +283,126 @@ class AuthRepository:
         fila = cursor.fetchone()
         cursor.close()
         return fila[0] if fila else None
+
+    def crear_cliente_google(
+            self,
+            nombre,
+            apellido,
+            correo,
+            numero_documento
+        ):
+
+            cursor = self.conexion.cursor()
+
+            password_hash = generate_password_hash(
+                secrets.token_urlsafe(32)
+            )
+
+            try:
+
+                cursor.execute(
+                    """
+                    INSERT INTO cliente(
+                        nombre,
+                        apellido,
+                        tipo_documento,
+                        numero_documento,
+                        telefono,
+                        correo,
+                        contrasena,
+                        rol,
+                        acepta_politica_no_reembolso,
+                        id_nivel
+                    )
+                    VALUES(
+                        %s,
+                        %s,
+                        'GOOGLE',
+                        %s,
+                        NULL,
+                        %s,
+                        %s,
+                        'cliente',
+                        FALSE,
+                        (
+                            SELECT id_nivel
+                            FROM nivel
+                            ORDER BY
+                                min_monto ASC,
+                                min_reservas ASC,
+                                id_nivel ASC
+                            LIMIT 1
+                        )
+                    )
+                    RETURNING id_cliente
+                    """,
+                    (
+                        nombre,
+                        apellido,
+                        numero_documento,
+                        correo,
+                        password_hash
+                    )
+                )
+
+                id_cliente = cursor.fetchone()[0]
+
+                self.conexion.commit()
+                cursor.close()
+
+                return {
+                    "ok": True,
+                    "id": id_cliente
+                }
+
+            except UniqueViolation as e:
+
+                self.conexion.rollback()
+                cursor.close()
+
+                mensaje = str(e)
+
+                if "cliente_correo_key" in mensaje:
+
+                    return {
+                        "ok": False,
+                        "error": (
+                            "Ese correo ya está registrado."
+                        )
+                    }
+
+                if "cliente_numero_documento_key" in mensaje:
+
+                    return {
+                        "ok": False,
+                        "error": (
+                            "Ya existe una cuenta de Google "
+                            "con esos datos."
+                        )
+                    }
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Ya existe un usuario "
+                        "con esos datos."
+                    )
+                }
+
+            except Exception as e:
+
+                self.conexion.rollback()
+                cursor.close()
+
+                print(
+                    "ERROR crear_cliente_google:",
+                    repr(e)
+                )
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "No fue posible crear la cuenta "
+                        "de Google en MAREVA."
+                    )
+                }

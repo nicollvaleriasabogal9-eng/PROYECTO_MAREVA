@@ -2,6 +2,12 @@ from repositories.auth_repository import AuthRepository
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 
+import os
+import secrets
+import urllib.parse
+import requests
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 class AuthServices():
 
@@ -97,3 +103,254 @@ class AuthServices():
                 return None
 
         return None
+
+    def crear_url_google(self):
+
+        client_id = os.getenv(
+            "GOOGLE_CLIENT_ID",
+            ""
+        ).strip()
+
+        redirect_uri = os.getenv(
+            "GOOGLE_REDIRECT_URI",
+            "http://127.0.0.1:5000/auth/google/callback"
+        ).strip()
+
+        if not client_id:
+
+            return {
+                "ok": False,
+                "error": (
+                    "Falta GOOGLE_CLIENT_ID en el archivo .env."
+                )
+            }
+
+        state = secrets.token_urlsafe(32)
+
+        parametros = {
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "state": state,
+            "prompt": "select_account"
+        }
+
+        url = (
+            "https://accounts.google.com/o/oauth2/v2/auth?"
+            + urllib.parse.urlencode(parametros)
+        )
+
+        return {
+            "ok": True,
+            "url": url,
+            "state": state
+        }
+
+    def procesar_codigo_google(self, code):
+
+        client_id = os.getenv(
+            "GOOGLE_CLIENT_ID",
+            ""
+        ).strip()
+
+        client_secret = os.getenv(
+            "GOOGLE_CLIENT_SECRET",
+            ""
+        ).strip()
+
+        redirect_uri = os.getenv(
+            "GOOGLE_REDIRECT_URI",
+            "http://127.0.0.1:5000/auth/google/callback"
+        ).strip()
+
+        if not client_id:
+
+            return {
+                "ok": False,
+                "error": (
+                    "Falta GOOGLE_CLIENT_ID en el archivo .env."
+                )
+            }
+
+        if not client_secret:
+
+            return {
+                "ok": False,
+                "error": (
+                    "Falta GOOGLE_CLIENT_SECRET en el archivo .env."
+                )
+            }
+
+        try:
+
+            respuesta = requests.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code"
+                },
+                timeout=20
+            )
+
+            try:
+                datos = respuesta.json()
+            except ValueError:
+                datos = {}
+
+            if respuesta.status_code != 200:
+
+                print(
+                    "GOOGLE TOKEN STATUS:",
+                    respuesta.status_code
+                )
+
+                print(
+                    "GOOGLE TOKEN RESPONSE:",
+                    datos
+                )
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Google no pudo completar la autorización."
+                    )
+                }
+
+            token = datos.get("id_token")
+
+            if not token:
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Google no devolvió el identificador "
+                        "de la cuenta."
+                    )
+                }
+
+            info = id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                client_id,
+                clock_skew_in_seconds=30
+            )
+
+            if info.get("iss") not in {
+                "accounts.google.com",
+                "https://accounts.google.com"
+            }:
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "La identidad de Google no es válida."
+                    )
+                }
+
+            correo = (
+                info.get("email") or ""
+            ).strip().lower()
+
+            if not correo:
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Google no devolvió el correo."
+                    )
+                }
+
+            if not info.get("email_verified"):
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Google no verificó el correo."
+                    )
+                }
+
+            usuario = self.repository.buscar_por_correo(
+                correo
+            )
+
+            if usuario is None:
+                return {
+                    "ok": True,
+                    "nuevo": True,
+                    "perfil_google": {
+                        "correo": correo,
+                        "nombre": info.get("given_name") or "",
+                        "apellido": info.get("family_name") or ""
+                    }
+                }
+
+            if usuario.rol != "cliente":
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "Esta cuenta no corresponde a un cliente."
+                    )
+                }
+
+            if not usuario.estado:
+
+                return {
+                    "ok": False,
+                    "error": (
+                        "La cuenta MAREVA está desactivada."
+                    )
+                }
+
+            return {
+                "ok": True,
+                "usuario": usuario,
+                "nuevo": False
+            }
+
+        except requests.RequestException as e:
+
+            print(
+                "GOOGLE REQUEST ERROR:",
+                repr(e)
+            )
+
+            return {
+                "ok": False,
+                "error": (
+                    "No fue posible conectar con Google."
+                )
+            }
+
+        except ValueError as e:
+
+            print(
+                "GOOGLE VALUE ERROR:",
+                repr(e)
+            )
+
+            return {
+                "ok": False,
+                "error": (
+                    "La respuesta de Google no es válida."
+                )
+            }
+
+        except Exception as e:
+
+            print(
+                "GOOGLE ERROR:",
+                repr(e)
+            )
+
+            return {
+                "ok": False,
+                "error": (
+                    "No fue posible iniciar sesión "
+                    "con Google."
+                )
+            }

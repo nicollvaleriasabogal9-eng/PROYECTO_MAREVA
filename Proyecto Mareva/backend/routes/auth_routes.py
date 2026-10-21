@@ -33,4 +33,16 @@ def funcion_login():
     print("Se accedio al POST del login correctamente")
     return controller.iniciar_sesion()
 
+@auth_bp.route("/auth/google", methods=["GET"])
+def google_login():
+    return controller.iniciar_sesion_google()
+
+
+@auth_bp.route("/auth/google/callback", methods=["GET"])
+def google_callback():
+    return controller.google_callback()
+
+@auth_bp.route("/auth/google/registro", methods=["GET"])
+def google_registro():
+    return controller.iniciar_sesion_google(intencion="registro")
 
