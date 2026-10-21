@@ -1,4 +1,5 @@
 from flask import Flask
+
 from routes.auth_routes import auth_bp
 from routes.home_routes import home_bp
 from routes.paquetes_routes import paquetes_bp
@@ -14,10 +15,16 @@ from routes.dashboard_routes import dashboard_bp
 
 from datetime import timedelta
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 main = Flask(__name__, template_folder="../frontend/templates", static_folder="../frontend/static")
 
 main.secret_key = "mareva_secret_2026"
+
+main.config["GOOGLE_CLIENT_ID"] = os.getenv("GOOGLE_CLIENT_ID","").strip()
 
 main.register_blueprint(proveedor_bp)
 main.register_blueprint(guia_bp)
