@@ -177,6 +177,18 @@ class EncuestaController:
         return redirect(url_for("encuesta.panel_preguntas"))
 
 
+    def guardar_encuesta():
+        usuario = session.get("usuario")
+        
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+        
+        if usuario.get("rol") != "admin":
+            return redirect(url_for("home.home"))
+
+        
+        return
+
     def cambiar_estado_pregunta(self, id_pregunta):
 
         usuario = session.get("usuario")
