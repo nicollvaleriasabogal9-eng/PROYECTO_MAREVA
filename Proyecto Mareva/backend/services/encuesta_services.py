@@ -126,6 +126,9 @@ class EncuestaService:
         }
 
 
+    def guardar_encuesta():
+        return
+
     def obtener_reporte(
         self,
         id_paquete=None,
