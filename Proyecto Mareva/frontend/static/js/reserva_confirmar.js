@@ -137,5 +137,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // ---------- Precio total dinámico ----------
+
+    const precioTotalEl = document.getElementById("precioTotal");
+    const precioBase = parseFloat(precioTotalEl?.dataset.base) || 0;
+
+    function formatearPrecio(valor) {
+        return "$" + Math.round(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function actualizarPrecioTotal() {
+        if (!precioTotalEl) return;
+
+        let total = precioBase;
+
+        document.querySelectorAll(
+            'input[name="alimentacion"]:checked, ' +
+            'input[name="transporte"]:checked, ' +
+            'input[name="actividades"]:checked, ' +
+            'input[name="extras"]:checked'
+        ).forEach(cb => {
+            total += parseFloat(cb.dataset.precio) || 0;
+        });
+
+        precioTotalEl.textContent = formatearPrecio(total);
+    }
+
+    document.querySelectorAll(
+        'input[name="alimentacion"], input[name="transporte"], ' +
+        'input[name="actividades"], input[name="extras"]'
+    ).forEach(cb => {
+        cb.addEventListener("change", actualizarPrecioTotal);
+    });
+
+    actualizarPrecioTotal();
+
     renderTravelers();
 });
