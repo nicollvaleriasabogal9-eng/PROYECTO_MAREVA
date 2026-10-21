@@ -237,3 +237,7 @@ class ReservaService:
 
     def listar_reservas_cliente(self, id_cliente):
         return self.repo.listar_reservas_cliente(id_cliente)
+
+    #AGREGAR FUNCION PARA CAMBIAR EL ESTADO AL MOMENTO DE PROCESAR EL PAGO
+    def cambiar_estado_reserva(self, id_reserva, id_cliente):
+        return self.repo.cambiar_estado_reserva(id_reserva, id_cliente)

@@ -1,4 +1,4 @@
-from flask import Blueprint, session, redirect, url_for, request, send_file
+from flask import Blueprint, session, redirect, url_for, request, send_file, render_template
 
 from controllers.reserva_controllers import ReservaController
 
@@ -89,12 +89,11 @@ def confirmar_reserva(slug):
 def guardar(slug):
     return controller.guardar_reserva(slug)
 
-
 @reserva_bp.route(
     "/confirmar-reserva",
     methods=["POST"]
 )
-def confirmar():
+def confirmar(slug):
     slug = (request.form.get("slug") or "").strip()
 
     if not slug:
@@ -139,3 +138,13 @@ def descargar_pdf():
         as_attachment=True,
         download_name="reserva_mareva.pdf"
     )
+
+@reserva_bp.route("/pago/<int:id_reserva>", methods=["GET"])
+def pago(id_reserva):
+    return controller.mostrar_pago(id_reserva)
+
+
+@reserva_bp.route("/reserva/pago/procesar/<int:id_reserva>", methods=["POST"])
+def procesar_pago(id_reserva):
+    return controller.procesar_pago(id_reserva)
+
