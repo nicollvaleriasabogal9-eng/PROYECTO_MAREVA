@@ -100,6 +100,9 @@ class PaqueteService:
     def obtener_para_editar(self, id_paquete):
         return self.repo.obtener_por_id(id_paquete)
 
+    def obtener_por_id(self, id_paquete):
+        return self.repo.obtener_por_id(id_paquete)
+
     def datos_formulario(self):
         return {
             "destinos": self.repo.obtener_destinos(),
