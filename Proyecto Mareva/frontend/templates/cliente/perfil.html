@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}Mi perfil · MAREVA{% endblock %}
@@ -6,552 +7,626 @@
 
 <section class="profile-page">
 
-```
-<div class="container profile-container">
+    <div class="container profile-container">
 
-    <!-- =====================================================
-         ENCABEZADO DEL PERFIL
-    ====================================================== -->
+        <!-- =====================================================
+             ENCABEZADO DEL PERFIL
+        ====================================================== -->
 
-    <header class="profile-header">
+        <header class="profile-header">
 
-        <div class="profile-header__content">
+            <div class="profile-header__content">
 
-            <span class="eyebrow">
-                MI CUENTA MAREVA
-            </span>
-
-            <h1>
-                Hola, {{ usuario.nombre|default('Viajero') }} 👋
-            </h1>
-
-            <p>
-                Gestiona tus datos y consulta tus próximos viajes.
-            </p>
-
-            {% if usuario.correo %}
-                <div class="profile-email">
-                    <span>✉️</span>
-                    {{ usuario.correo }}
-                </div>
-            {% endif %}
-
-        </div>
-
-        <div class="profile-avatar">
-            <span>
-                {{ usuario.nombre|default('V')|first|upper }}
-            </span>
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         INFORMACIÓN PRINCIPAL
-    ====================================================== -->
-
-    <section class="profile-grid">
-
-        <!-- ================= DATOS PERSONALES ================= -->
-
-        <article class="profile-card profile-personal-card">
-
-            <span class="eyebrow">
-                DATOS PERSONALES
-            </span>
-
-            <h2>
-                Información de cuenta
-            </h2>
-
-            <div class="profile-info">
-
-                <div>
-                    <small>Nombre</small>
-
-                    <strong>
-                        {{ usuario.nombre|default('—') }}
-                    </strong>
-                </div>
-
-
-                <div>
-                    <small>Apellido</small>
-
-                    <strong>
-                        {{ usuario.apellido|default('—') }}
-                    </strong>
-                </div>
-
-
-                <div>
-                    <small>Correo electrónico</small>
-
-                    <strong>
-                        {{ usuario.correo|default('—') }}
-                    </strong>
-                </div>
-
-            </div>
-
-        </article>
-
-
-        <!-- ================= NIVEL MAREVA ================= -->
-
-        <article class="profile-card profile-level-card">
-
-            <span class="eyebrow">
-                NIVEL MAREVA
-            </span>
-
-            <h2>
-                Tu progreso
-            </h2>
-
-            <div class="level-badge">
-                <span>✦</span>
-                Explorador
-            </div>
-
-            <h3>
-                Explorador
-            </h3>
-
-            <p>
-                Sigue viajando con MAREVA y desbloquea nuevos
-                beneficios, insignias y experiencias.
-            </p>
-
-            <a
-                href="{{ url_for('gamificacion.niveles') }}"
-                class="btn-outline"
-            >
-                Ver mi progreso
-                <span>→</span>
-            </a>
-
-        </article>
-
-    </section>
-
-
-    <!-- =====================================================
-         MIS RESERVAS
-    ====================================================== -->
-
-    <section class="profile-reservations">
-
-        <div class="profile-section-heading">
-
-            <div>
                 <span class="eyebrow">
-                    MIS VIAJES
+                    MI CUENTA MAREVA
+                </span>
+
+                <h1>
+                    Hola, {{ usuario.nombre|default('Viajero') }} 👋
+                </h1>
+
+                <p>
+                    Gestiona tus datos y consulta tus próximos viajes.
+                </p>
+
+                {% if usuario.correo %}
+                    <div class="profile-email">
+                        <span>✉️</span>
+                        {{ usuario.correo }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="profile-avatar">
+                <span>
+                    {{ usuario.nombre|default('V')|first|upper }}
+                </span>
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             INFORMACIÓN PRINCIPAL
+        ====================================================== -->
+
+        <section class="profile-grid">
+
+            <!-- ================= DATOS PERSONALES ================= -->
+
+            <article class="profile-card profile-personal-card">
+
+                <span class="eyebrow">
+                    DATOS PERSONALES
                 </span>
 
                 <h2>
-                    Mis reservas
+                    Información de cuenta
                 </h2>
 
-                <p>
-                    Aquí encontrarás todos los viajes que has
-                    reservado con MAREVA.
-                </p>
-            </div>
+                <div class="profile-info">
 
+                    <div>
+                        <small>Nombre</small>
 
-            {% if reservas %}
+                        <strong>
+                            {{ usuario.nombre|default('—') }}
+                        </strong>
+                    </div>
 
-                <div class="reservation-counter">
+                    <div>
+                        <small>Apellido</small>
 
-                    <strong>
-                        {{ reservas|length }}
-                    </strong>
+                        <strong>
+                            {{ usuario.apellido|default('—') }}
+                        </strong>
+                    </div>
 
-                    <span>
-                        {% if reservas|length == 1 %}
-                            reserva
-                        {% else %}
-                            reservas
-                        {% endif %}
-                    </span>
+                    <div>
+                        <small>Correo electrónico</small>
+
+                        <strong>
+                            {{ usuario.correo|default('—') }}
+                        </strong>
+                    </div>
 
                 </div>
 
-            {% endif %}
-
-        </div>
+            </article>
 
 
-        <!-- =================================================
-             RESERVAS EXISTENTES
-        ================================================== -->
+            <!-- ================= NIVEL MAREVA ================= -->
 
-        {% if reservas %}
+            <article class="profile-card profile-level-card">
 
-            <div class="reservations-grid">
+                <span class="eyebrow">
+                    NIVEL MAREVA
+                </span>
 
-                {% for reserva in reservas %}
+                <h2>
+                    Tu progreso
+                </h2>
 
-                    {% set estado = reserva.estado|default('solicitada')|lower|trim %}
+                <div class="level-badge">
+                    <span>✦</span>
+                    Explorador
+                </div>
 
-                    <article
-                        class="reservation-card reservation-card--{{ estado|replace(' ', '-') }}"
-                    >
+                <h3>
+                    Explorador
+                </h3>
 
-                        <!-- CABECERA -->
+                <p>
+                    Sigue viajando con MAREVA y desbloquea nuevos
+                    beneficios, insignias y experiencias.
+                </p>
 
-                        <div class="reservation-card__header">
+                <a
+                    href="{{ url_for('gamificacion.niveles') }}"
+                    class="btn-outline"
+                >
+                    Ver mi progreso
+                    <span>→</span>
+                </a>
 
-                            <div class="reservation-card__destination">
+            </article>
 
-                                <div class="reservation-card__icon">
-                                    🌴
+        </section>
+
+
+        <!-- =====================================================
+             MIS RESERVAS
+        ====================================================== -->
+
+        <section class="profile-reservations">
+
+            <div class="profile-section-heading">
+
+                <div>
+
+                    <span class="eyebrow">
+                        MIS VIAJES
+                    </span>
+
+                    <h2>
+                        Mis reservas
+                    </h2>
+
+                    <p>
+                        Aquí encontrarás todos los viajes que has
+                        reservado con MAREVA.
+                    </p>
+
+                </div>
+
+
+                {% if reservas %}
+
+                    <div class="reservation-counter">
+
+                        <strong>
+                            {{ reservas|length }}
+                        </strong>
+
+                        <span>
+                            {% if reservas|length == 1 %}
+                                reserva
+                            {% else %}
+                                reservas
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 RESERVAS EXISTENTES
+            ================================================== -->
+
+            {% if reservas %}
+
+                <div class="reservations-grid">
+
+                    {% for reserva in reservas %}
+
+                        {% set estado = reserva.estado|default('solicitada')|lower|trim %}
+
+                        <article
+                            class="reservation-card reservation-card--{{ estado|replace(' ', '-') }}"
+                        >
+
+                            <!-- ================= CABECERA ================= -->
+
+                            <div class="reservation-card__header">
+
+                                <div class="reservation-card__destination">
+
+                                    <div class="reservation-card__icon">
+                                        🌴
+                                    </div>
+
+                                    <div>
+
+                                        <span class="reservation-card__eyebrow">
+                                            PAQUETE MAREVA
+                                        </span>
+
+                                        <h3>
+                                            {{ reserva.paquete_nombre|default('Viaje MAREVA') }}
+                                        </h3>
+
+                                        {% if reserva.destino %}
+                                            <p>
+                                                📍 {{ reserva.destino }}
+                                            </p>
+                                        {% endif %}
+
+                                    </div>
+
                                 </div>
 
-                                <div>
 
-                                    <span class="reservation-card__eyebrow">
-                                        PAQUETE MAREVA
-                                    </span>
+                                <!-- =================================================
+                                     ACCIONES DE LA RESERVA
+                                     BOTÓN DE PAGO + ESTADO
+                                ================================================== -->
 
-                                    <h3>
-                                        {{ reserva.paquete_nombre|default('Viaje MAREVA') }}
-                                    </h3>
-
-                                    {% if reserva.destino %}
-                                        <p>
-                                            📍 {{ reserva.destino }}
-                                        </p>
-                                    {% endif %}
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- ESTADO -->
-
-                            <div class="reservation-status reservation-status--{{ estado|replace(' ', '-') }}">
-
-                                <span class="reservation-status__dot"></span>
-
-                                <span>
+                                <div class="reservation-card__actions">
 
                                     {% if estado == 'solicitada' %}
-                                        Solicitada
+
+                                        <a
+                                            href="{{ url_for('reserva.pago', id_reserva=reserva.id_reserva) }}"
+                                            class="reservation-pay-button"
+                                        >
+
+                                            <span>
+                                                Pagar tu reserva
+                                            </span>
+
+                                            <span class="reservation-pay-button__arrow">
+                                                →
+                                            </span>
+                                        </a>
 
                                     {% elif estado == 'pendiente a pago' %}
-                                        Pendiente de pago
 
-                                    {% elif estado == 'confirmada' %}
-                                        Confirmada
+                                        <a
+                                            href="{{ url_for('reserva.pago', id_reserva=reserva.id_reserva) }}"
+                                            class="reservation-pay-button"
+                                        >
+                                            <span>
+                                                Pagar tu reserva
+                                            </span>
 
-                                    {% elif estado == 'en_proceso' %}
-                                        En proceso
+                                            <span class="reservation-pay-button__arrow">
+                                                →
+                                            </span>
+                                        </a>
 
                                     {% elif estado == 'completada' %}
-                                        Completada
 
-                                    {% elif estado == 'cancelada' %}
-                                        Cancelada
+                                        <a
+                                            href="{{ url_for('encuesta.mostrar_encuesta', id_reserva=reserva.id_reserva) }}"
+                                            class="reservation-pay-button"
+                                        >
+                                            <span>
+                                                Encuesta de satisfaccion
+                                            </span>
 
-                                    {% else %}
-                                        {{ reserva.estado|default('En proceso')|capitalize }}
+                                            <span class="reservation-pay-button__arrow">
+                                                →
+                                            </span>
+                                        </a>
+                                    <!--CREAR MAS ELIF PARA LA ENCUESTA, QUE VERIFIQUE EL ESTADO COMO ARRIBA Y QUE VERIFIQUE SI ESTA COMPLETADA PARA MOSTRAR EL BOTON DE ENCUESTA-->
                                     {% endif %}
 
-                                </span>
 
-                            </div>
+                                    <div class="reservation-status reservation-status--{{ estado|replace(' ', '-') }}">
 
-                        </div>
+                                        <span class="reservation-status__dot"></span>
 
+                                        <span>
 
-                        <!-- CUERPO DE LA CARD -->
+                                            {% if estado == 'solicitada' %}
 
-                        <div class="reservation-card__body">
+                                                Solicitada
 
-                            <!-- FECHAS -->
+                                            {% elif estado == 'pendiente a pago' %}
 
-                            <div class="reservation-detail">
+                                                Pendiente de pago
 
-                                <span class="reservation-detail__icon">
-                                    📅
-                                </span>
+                                            {% elif estado == 'confirmada' %}
 
-                                <div>
+                                                Confirmada
 
-                                    <small>
-                                        FECHA DEL VIAJE
-                                    </small>
+                                            {% elif estado == 'en_proceso' %}
 
-                                    <strong>
+                                                En proceso
 
-                                        {% if reserva.fecha_salida %}
+                                            {% elif estado == 'completada' %}
 
-                                            {{ reserva.fecha_salida.strftime('%d/%m/%Y') }}
+                                                Completada
 
-                                            {% if reserva.fecha_regreso %}
-                                                <span class="date-arrow">
-                                                    →
-                                                </span>
+                                            {% elif estado == 'cancelada' %}
 
-                                                {{ reserva.fecha_regreso.strftime('%d/%m/%Y') }}
+                                                Cancelada
+
+                                            {% else %}
+
+                                                {{ reserva.estado|default('En proceso')|capitalize }}
+
                                             {% endif %}
 
-                                        {% elif reserva.fecha_viaje %}
+                                        </span>
 
-                                            {{ reserva.fecha_viaje.strftime('%d/%m/%Y') }}
-
-                                        {% else %}
-
-                                            Fecha por confirmar
-
-                                        {% endif %}
-
-                                    </strong>
+                                    </div>
 
                                 </div>
 
                             </div>
 
 
-                            <!-- VIAJEROS -->
+                            <!-- =================================================
+                                 CUERPO DE LA CARD
+                            ================================================== -->
 
-                            {% set adultos = reserva.cant_adultos|default(0)|int %}
-                            {% set menores = reserva.cant_menores|default(0)|int %}
-                            {% set total = adultos + menores %}
+                            <div class="reservation-card__body">
 
-                            <div class="reservation-detail">
+                                <!-- ================= FECHAS ================= -->
 
-                                <span class="reservation-detail__icon">
-                                    👥
-                                </span>
+                                <div class="reservation-detail">
 
-                                <div>
-
-                                    <small>
-                                        VIAJEROS
-                                    </small>
-
-                                    <strong>
-                                        {{ total }}
-
-                                        {% if total == 1 %}
-                                            viajero
-                                        {% else %}
-                                            viajeros
-                                        {% endif %}
-                                    </strong>
-
-                                    <span class="reservation-detail__sub">
-
-                                        {{ adultos }}
-                                        adulto{% if adultos != 1 %}s{% endif %}
-
-                                        {% if menores > 0 %}
-                                            ·
-                                            {{ menores }}
-                                            menor{% if menores != 1 %}es{% endif %}
-                                        {% endif %}
-
+                                    <span class="reservation-detail__icon">
+                                        📅
                                     </span>
 
+                                    <div>
+
+                                        <small>
+                                            FECHA DEL VIAJE
+                                        </small>
+
+                                        <strong>
+
+                                            {% if reserva.fecha_salida %}
+
+                                                {{ reserva.fecha_salida.strftime('%d/%m/%Y') }}
+
+                                                {% if reserva.fecha_regreso %}
+
+                                                    <span class="date-arrow">
+                                                        →
+                                                    </span>
+
+                                                    {{ reserva.fecha_regreso.strftime('%d/%m/%Y') }}
+
+                                                {% endif %}
+
+                                            {% elif reserva.fecha_viaje %}
+
+                                                {{ reserva.fecha_viaje.strftime('%d/%m/%Y') }}
+
+                                            {% else %}
+
+                                                Fecha por confirmar
+
+                                            {% endif %}
+
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ================= VIAJEROS ================= -->
+
+                                {% set adultos = reserva.cant_adultos|default(0)|int %}
+                                {% set menores = reserva.cant_menores|default(0)|int %}
+                                {% set total = adultos + menores %}
+
+                                <div class="reservation-detail">
+
+                                    <span class="reservation-detail__icon">
+                                        👥
+                                    </span>
+
+                                    <div>
+
+                                        <small>
+                                            VIAJEROS
+                                        </small>
+
+                                        <strong>
+
+                                            {{ total }}
+
+                                            {% if total == 1 %}
+                                                viajero
+                                            {% else %}
+                                                viajeros
+                                            {% endif %}
+
+                                        </strong>
+
+                                        <span class="reservation-detail__sub">
+
+                                            {{ adultos }}
+                                            adulto{% if adultos != 1 %}s{% endif %}
+
+                                            {% if menores > 0 %}
+
+                                                ·
+
+                                                {{ menores }}
+                                                menor{% if menores != 1 %}es{% endif %}
+
+                                            {% endif %}
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ================= CÓDIGO ================= -->
+
+                                <div class="reservation-detail">
+
+                                    <span class="reservation-detail__icon">
+                                        🎫
+                                    </span>
+
+                                    <div>
+
+                                        <small>
+                                            CÓDIGO DE RESERVA
+                                        </small>
+
+                                        <strong class="reservation-code">
+                                            {{ reserva.codigo_unico|default('—') }}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ================= TOTAL ================= -->
+
+                                <div class="reservation-detail reservation-detail--price">
+
+                                    <span class="reservation-detail__icon">
+                                        💰
+                                    </span>
+
+                                    <div>
+
+                                        <small>
+                                            TOTAL
+                                        </small>
+
+                                        <strong>
+
+                                            {% if reserva.precio_total is not none %}
+
+                                                ${{ "{:,.0f}".format(
+                                                    reserva.precio_total|float
+                                                ).replace(',', '.') }} COP
+
+                                            {% else %}
+
+                                                Por confirmar
+
+                                            {% endif %}
+
+                                        </strong>
+
+                                    </div>
+
                                 </div>
 
                             </div>
 
 
-                            <!-- CÓDIGO -->
+                            <!-- =================================================
+                                 PIE
+                            ================================================== -->
 
-                            <div class="reservation-detail">
-
-                                <span class="reservation-detail__icon">
-                                    🎫
-                                </span>
+                            <footer class="reservation-card__footer">
 
                                 <div>
 
-                                    <small>
-                                        CÓDIGO DE RESERVA
-                                    </small>
+                                    <span>
+                                        Reserva #{{ reserva.id_reserva }}
+                                    </span>
 
-                                    <strong class="reservation-code">
-                                        {{ reserva.codigo_unico|default('—') }}
-                                    </strong>
+                                    {% if reserva.fecha_reserva %}
 
-                                </div>
+                                        <span class="reservation-card__date">
 
-                            </div>
+                                            • Reservada el
+                                            {{ reserva.fecha_reserva.strftime('%d/%m/%Y') }}
 
+                                        </span>
 
-                            <!-- TOTAL -->
-
-                            <div class="reservation-detail reservation-detail--price">
-
-                                <span class="reservation-detail__icon">
-                                    💰
-                                </span>
-
-                                <div>
-
-                                    <small>
-                                        TOTAL
-                                    </small>
-
-                                    <strong>
-
-                                        {% if reserva.precio_total is not none %}
-
-                                            ${{ "{:,.0f}".format(
-                                                reserva.precio_total|float
-                                            ).replace(',', '.') }} COP
-
-                                        {% else %}
-
-                                            Por confirmar
-
-                                        {% endif %}
-
-                                    </strong>
+                                    {% endif %}
 
                                 </div>
 
-                            </div>
+                                {% if reserva.codigo_unico %}
 
-                        </div>
-
-
-                        <!-- PIE -->
-
-                        <footer class="reservation-card__footer">
-
-                            <div>
-
-                                <span>
-                                    Reserva #{{ reserva.id_reserva }}
-                                </span>
-
-                                {% if reserva.fecha_reserva %}
-
-                                    <span class="reservation-card__date">
-
-                                        • Reservada el
-                                        {{ reserva.fecha_reserva.strftime('%d/%m/%Y') }}
-
+                                    <span class="reservation-card__secure">
+                                        ✓ Registrada
                                     </span>
 
                                 {% endif %}
 
-                            </div>
+                            </footer>
 
-                            {% if reserva.codigo_unico %}
+                        </article>
 
-                                <span class="reservation-card__secure">
-                                    ✓ Registrada
-                                </span>
+                    {% endfor %}
 
-                            {% endif %}
-
-                        </footer>
-
-                    </article>
-
-                {% endfor %}
-
-            </div>
+                </div>
 
 
-        {% else %}
+            {% else %}
 
-            <!-- =================================================
-                 SIN RESERVAS
-            ================================================== -->
+                <!-- =================================================
+                     SIN RESERVAS
+                ================================================== -->
 
-            <div class="reservations-empty">
+                <div class="reservations-empty">
 
-                <div class="reservations-empty__visual">
+                    <div class="reservations-empty__visual">
 
-                    <div class="reservations-empty__circle">
-                        🧳
+                        <div class="reservations-empty__circle">
+                            🧳
+                        </div>
+
+                        <span class="empty-decoration empty-decoration--one">
+                            ✦
+                        </span>
+
+                        <span class="empty-decoration empty-decoration--two">
+                            •
+                        </span>
+
                     </div>
 
-                    <span class="empty-decoration empty-decoration--one">
-                        ✦
-                    </span>
 
-                    <span class="empty-decoration empty-decoration--two">
-                        •
-                    </span>
+                    <div class="reservations-empty__content">
 
-                </div>
+                        <span class="eyebrow">
+                            TU PRÓXIMA AVENTURA
+                        </span>
 
+                        <h3>
+                            Todavía no tienes reservas
+                        </h3>
 
-                <div class="reservations-empty__content">
+                        <p>
+                            Explora nuestros paquetes y encuentra
+                            el destino perfecto para tu próxima aventura.
+                            Cuando hagas una reserva, aparecerá
+                            automáticamente aquí.
+                        </p>
 
-                    <span class="eyebrow">
-                        TU PRÓXIMA AVENTURA
-                    </span>
+                        <a
+                            href="{{ url_for('paquetes.listar_catalogo') }}"
+                            class="btn btn-primary profile-explore-button"
+                        >
+                            Explorar paquetes
+                            <span>→</span>
+                        </a>
 
-                    <h3>
-                        Todavía no tienes reservas
-                    </h3>
-
-                    <p>
-                        Explora nuestros paquetes y encuentra
-                        el destino perfecto para tu próxima aventura.
-                        Cuando hagas una reserva, aparecerá
-                        automáticamente aquí.
-                    </p>
-
-                    <a
-                        href="{{ url_for('paquetes.listar_catalogo') }}"
-                        class="btn btn-primary profile-explore-button"
-                    >
-                        Explorar paquetes
-                        <span>→</span>
-                    </a>
+                    </div>
 
                 </div>
 
-            </div>
+            {% endif %}
 
-        {% endif %}
-
-    </section>
+        </section>
 
 
-    <!-- =====================================================
-         ACCIONES RÁPIDAS
-    ====================================================== -->
+        <!-- =====================================================
+             ACCIONES RÁPIDAS
+        ====================================================== -->
 
-    <section class="profile-actions">
+        <section class="profile-actions">
 
-        <a
-            href="{{ url_for('gamificacion.niveles') }}"
-            class="profile-action"
-        >
+            <a
+                href="{{ url_for('gamificacion.niveles') }}"
+                class="profile-action"
+            >
 
-            <div class="profile-action__icon">
-                🏆
-            </div>
+                <div class="profile-action__icon">
+                    🏆
+                </div>
 
-            <strong>
-                Niveles e insignias
-            </strong>
+                <strong>
+                    Niveles e insignias
+                </strong>
 
-            <small>
-                Consulta tus logros y progreso
-            </small>
+                <small>
+                    Consulta tus logros y progreso
+                </small>
 
-        </a>
+            </a>
 
-    </section>
+        </section>
 
-</div>
-
+    </div>
 
 </section>
 
 {% endblock %}
+
