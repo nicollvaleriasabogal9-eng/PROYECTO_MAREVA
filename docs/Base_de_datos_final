@@ -36,6 +36,9 @@ CREATE TABLE cliente (
     estado            BOOLEAN      NOT NULL DEFAULT TRUE,
     intentos_fallidos INT          NOT NULL DEFAULT 0,
     bloqueado_hasta   TIMESTAMP,
+    acepta_politica_no_reembolso boolean NOT NULL DEFAULT false,
+    fecha_aceptacion_politica timestamp without time zone,
+    version_politica character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT '1.0'::character varying,
     id_nivel          INT REFERENCES nivel(id_nivel),
     CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente', 'guia'))
 );
