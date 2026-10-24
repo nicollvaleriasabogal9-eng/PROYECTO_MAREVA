@@ -16,6 +16,10 @@ controller = EncuestaController()
 def mostrar_encuesta(id_reserva):
     return controller.mostrar_encuesta(id_reserva)
 
+@encuesta_bp.route("/<int:id_reserva>/guardar_reserva", methods=["POST"])
+def guardar_encuesta_cliente(id_reserva):
+    return controller.guardar_encuesta_cliente(id_reserva)
+
 @encuesta_bp.route("/admin/preguntas", methods=["GET"])
 def panel_preguntas():
     return controller.panel_preguntas()

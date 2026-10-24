@@ -1,10 +1,11 @@
 from repositories.encuesta_repository import EncuestaRepository
-
+from repositories.reserva_repository import ReservaRepository
 
 class EncuestaService:
 
     def __init__(self):
         self.encuesta_repo = EncuestaRepository()
+        self.reserva_repo = ReservaRepository()
 
     def enviar_encuesta(self, correo_cliente, nombre_cliente, id_reserva):
         print(f"[SKIP EMAIL] Encuesta pendiente para {correo_cliente} (reserva {id_reserva})")
@@ -41,6 +42,153 @@ class EncuestaService:
             "ok": True,
             "reserva": reserva,
             "preguntas": preguntas
+        }
+
+    def guardar_encuesta(
+        self,
+        id_cliente,
+        id_reserva,
+        respuestas
+    ):
+
+        if not id_cliente or not id_reserva:
+            return {
+                "ok": False,
+                "error": "No se pudo identificar al cliente o la reserva."
+            }
+
+        if not respuestas:
+            return {
+                "ok": False,
+                "error": "Debes responder todas las preguntas."
+            }
+
+        reserva = self.encuesta_repo.verificar_reserva_cliente(
+            id_reserva=id_reserva,
+            id_cliente=id_cliente
+        )
+
+        if not reserva:
+            return {
+                "ok": False,
+                "error": "La reserva no existe o no te pertenece."
+            }
+
+        preguntas = self.encuesta_repo.obtener_todas_preguntas()
+
+        if not preguntas:
+            return {
+                "ok": False,
+                "error": "No hay preguntas disponibles."
+            }
+
+        preguntas_dict = {
+            pregunta["id_pregunta"]: pregunta
+            for pregunta in preguntas
+        }
+
+        respuestas_dict = {}
+
+        for respuesta in respuestas:
+            id_pregunta = respuesta["id_pregunta"]
+
+            # No aceptar preguntas inexistentes ni duplicadas.
+            if id_pregunta not in preguntas_dict:
+                return {
+                    "ok": False,
+                    "error": "Se recibió una pregunta no válida."
+                }
+
+            if id_pregunta in respuestas_dict:
+                return {
+                    "ok": False,
+                    "error": "Se recibió una respuesta duplicada."
+                }
+
+            respuestas_dict[id_pregunta] = respuesta["valor"]
+
+        # Exigir una respuesta para cada pregunta mostrada.
+        ids_preguntas = set(preguntas_dict.keys())
+
+        if set(respuestas_dict.keys()) != ids_preguntas:
+            return {
+                "ok": False,
+                "error": "Debes responder todas las preguntas."
+            }
+
+        respuestas_procesadas = []
+
+        for id_pregunta, valor in respuestas_dict.items():
+
+            pregunta = preguntas_dict[id_pregunta]
+
+            tipo = (
+                pregunta.get("tipo_respuesta") or ""
+            ).strip().lower()
+
+            valor = str(valor).strip()
+
+            if not valor:
+                return {
+                    "ok": False,
+                    "error": "Las respuestas no pueden estar vacías."
+                }
+
+            if tipo in (
+                "numero",
+                "rating",
+                "calificacion"
+            ):
+                try:
+                    numero = int(valor)
+
+                except (ValueError, TypeError):
+                    return {
+                        "ok": False,
+                        "error": (
+                            f"La pregunta {id_pregunta} "
+                            "requiere una calificación numérica."
+                        )
+                    }
+
+                # El HTML presenta opciones del 1 al 5.
+                if numero < 1 or numero > 5:
+                    return {
+                        "ok": False,
+                        "error": "Las calificaciones deben estar entre 1 y 5."
+                    }
+
+                respuestas_procesadas.append({
+                    "id_pregunta": id_pregunta,
+                    "respuesta_texto": None,
+                    "respuesta_numero": numero
+                })
+
+            else:
+                respuestas_procesadas.append({
+                    "id_pregunta": id_pregunta,
+                    "respuesta_texto": valor,
+                    "respuesta_numero": None
+                })
+
+        guardado = self.encuesta_repo.guardar_respuestas(
+            id_cliente=id_cliente,
+            id_reserva=id_reserva,
+            respuestas=respuestas_procesadas
+        )
+
+        if not guardado:
+            return {
+                "ok": False,
+                "error": (
+                    "No fue posible guardar la encuesta. "
+                    "Verifica si ya fue respondida e inténtalo nuevamente."
+                )
+            }
+
+        return {
+            "ok": True,
+            "mensaje": "Encuesta guardada correctamente."
         }
 
     def obtener_preguntas_admin(self):
@@ -124,10 +272,6 @@ class EncuestaService:
             "paquetes": self.encuesta_repo.obtener_paquetes_reporte(),
             "destinos": self.encuesta_repo.obtener_destinos_reporte()
         }
-
-
-    def guardar_encuesta():
-        return
 
     def obtener_reporte(
         self,

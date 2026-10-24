@@ -1,4 +1,4 @@
-from flask import render_template, session, request, redirect, url_for
+from flask import render_template, flash , session, request, redirect, url_for
 
 from services.encuesta_services import EncuestaService
 
@@ -34,6 +34,72 @@ class EncuestaController:
             preguntas=resultado["preguntas"],
             error=None
         )
+
+    def guardar_encuesta_cliente(self, id_reserva):
+        usuario = session.get("usuario")
+        
+        if not usuario:
+            return redirect(url_for("auth.mostrar_login"))
+
+        id_cliente = usuario.get("id") or usuario.get("id_cliente")
+
+        try:
+            id_reserva = int(id_reserva)
+        except(ValueError, TypeError):
+            flash("la reserva indicada no es valida")
+            return redirect(url_for("home.perfil"))
+
+        respuestas = []
+
+        for nombre_campo, valor in request.form.items():
+            if not nombre_campo.startswith("respuesta_"):
+                continue
+
+            sufijo = nombre_campo.removeprefix("respuesta_")
+
+            try:
+                id_pregunta = int(sufijo)
+
+            except (ValueError, TypeError):
+                continue
+
+            if isinstance(valor, str):
+                valor = valor.strip()
+
+            if not valor:
+                continue
+
+            respuestas.append({
+                "id_pregunta": id_pregunta,
+                "valor": valor
+            })
+
+        resultado = self.service.guardar_encuesta(
+            id_cliente=id_cliente,
+            id_reserva=id_reserva,
+            respuestas=respuestas
+        )
+
+        if not resultado.get("ok"):
+            datos = self.service.obtener_encuesta(
+                id_reserva=id_reserva,
+                id_cliente=id_cliente
+            )
+
+            if not datos.get("ok"):
+                flash(resultado.get("error"), "error")
+                return redirect(url_for("home.perfil"))
+
+            return render_template(
+                "cliente/encuesta.html",
+                reserva=datos["reserva"],
+                preguntas=datos["preguntas"],
+                error=resultado.get("error")
+            )
+
+        flash("¡Gracias! Tu encuesta fue guardada.", "success")
+
+        return redirect(url_for("home.perfil"))
 
     def panel_preguntas(self):
 

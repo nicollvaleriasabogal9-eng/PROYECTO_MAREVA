@@ -6,8 +6,53 @@ class EncuestaRepository:
     def __init__(self):
         self.conexion = Conexion().obtener_conexion()
 
-    def guardar_encuesta():
-        return
+    def guardar_respuestas(
+        self,
+        id_cliente,
+        id_reserva,
+        respuestas
+    ):
+
+        cursor = self.conexion.cursor()
+
+        try:
+            for respuesta in respuestas:
+
+                cursor.execute(
+                    """
+                    INSERT INTO encuesta_respuesta (
+                        id_pregunta,
+                        id_reserva,
+                        id_cliente,
+                        respuesta_texto,
+                        respuesta_numero
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        respuesta["id_pregunta"],
+                        id_reserva,
+                        id_cliente,
+                        respuesta["respuesta_texto"],
+                        respuesta["respuesta_numero"]
+                    )
+                )
+
+            self.conexion.commit()
+
+            return True
+
+        except Exception as e:
+            self.conexion.rollback()
+
+            print(
+                f"Error al guardar respuestas de encuesta: {e}"
+            )
+
+            return False
+
+        finally:
+            cursor.close()
 
     def obtener_preguntas_activas(self):
         cursor = self.conexion.cursor()
