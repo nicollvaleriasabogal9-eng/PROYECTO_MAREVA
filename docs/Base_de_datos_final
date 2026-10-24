@@ -36,6 +36,9 @@ CREATE TABLE cliente (
     estado            BOOLEAN      NOT NULL DEFAULT TRUE,
     intentos_fallidos INT          NOT NULL DEFAULT 0,
     bloqueado_hasta   TIMESTAMP,
+    acepta_politica_no_reembolso boolean NOT NULL DEFAULT false,
+    fecha_aceptacion_politica timestamp without time zone,
+    version_politica character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT '1.0'::character varying,
     id_nivel          INT REFERENCES nivel(id_nivel),
     CONSTRAINT chk_cliente_rol CHECK (rol IN ('admin', 'cliente', 'guia'))
 );
@@ -419,7 +422,7 @@ CREATE TABLE reserva (
         REFERENCES paquete_turistico(id_paquete),
     CONSTRAINT chk_reserva_estado
         CHECK (
-            estado IN ('solicitada', 'confirmada', 'en_proceso', 'completada', 'cancelada')
+            estado IN ('solicitada', 'confirmada', 'en_proceso', 'completada', 'cancelada', 'encuestada')
         ),
     CONSTRAINT chk_cant_adultos
         CHECK (cant_adultos >= 1),
@@ -608,13 +611,13 @@ INSERT INTO insignia (nombre, criterio, estado) VALUES
 ('Referidor Estrella', 'Referir 3 amigos que hayan reservado', TRUE);
 
 --- Admins y cliente de prueba ---
-INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, rol, codigo_referido) VALUES
-('Cesar',  'Uzcategui', 'CC', '1000000001', '3100000001', 'cesar@mareva.co',  'Admin_mareva01', 'admin',   NULL),
-('Andres', 'Aroca',     'CC', '1000000002', '3100000002', 'andres@mareva.co', 'Admin_mareva01', 'admin',   NULL),
-('Laura',  'Rubiano',   'CC', '1000000003', '3100000003', 'laura@mareva.co',  'Admin_mareva01', 'admin',   NULL),
-('Sofia',  'Munevar',   'CC', '1000000004', '3100000004', 'sofia@mareva.co',  'Admin_mareva01', 'admin',   NULL),
-('Nicoll', 'Sabogal',   'CC', '1000000005', '3100000005', 'nicoll@mareva.co', 'Admin_mareva01', 'admin',   NULL),
-('Yadira', 'Narvaez',   'CC', '2000000001', '3200000001', 'yadira@test.co',   'cliente_prueba', 'cliente', 'YN20261');
+INSERT INTO cliente (nombre, apellido, tipo_documento, numero_documento, telefono, correo, contrasena, rol, codigo_referido, acepta_politica_no_reembolso, fecha_aceptacion_politica, version_politica) VALUES
+('Cesar',  'Uzcategui', 'CC', '1000000001', '3100000001', 'cesar@mareva.co',  'scrypt:32768:8:1$OfezC5PlkEjHkACB$d216d80ef624d29146bbc75def4f94e7735245b886e198200cc8ea8503670ffc494d6f71faa458d3720ca6462b5af1cc1b9cc7b0668ee23e8d987a504b314a02', 'admin',   NULL, TRUE, CURRENT_TIMESTAMP, '1.0'),
+('Andres', 'Aroca',     'CC', '1000000002', '3100000002', 'andres@mareva.co', 'scrypt:32768:8:1$OfezC5PlkEjHkACB$d216d80ef624d29146bbc75def4f94e7735245b886e198200cc8ea8503670ffc494d6f71faa458d3720ca6462b5af1cc1b9cc7b0668ee23e8d987a504b314a02', 'admin',   NULL, TRUE, CURRENT_TIMESTAMP, '1.0'),
+('Laura',  'Rubiano',   'CC', '1000000003', '3100000003', 'laura@mareva.co',  'scrypt:32768:8:1$OfezC5PlkEjHkACB$d216d80ef624d29146bbc75def4f94e7735245b886e198200cc8ea8503670ffc494d6f71faa458d3720ca6462b5af1cc1b9cc7b0668ee23e8d987a504b314a02', 'admin',   NULL, TRUE, CURRENT_TIMESTAMP, '1.0'),
+('Sofia',  'Munevar',   'CC', '1000000004', '3100000004', 'sofia@mareva.co',  'scrypt:32768:8:1$OfezC5PlkEjHkACB$d216d80ef624d29146bbc75def4f94e7735245b886e198200cc8ea8503670ffc494d6f71faa458d3720ca6462b5af1cc1b9cc7b0668ee23e8d987a504b314a02', 'admin',   NULL, TRUE, CURRENT_TIMESTAMP, '1.0'),
+('Nicoll', 'Sabogal',   'CC', '1000000005', '3100000005', 'nicoll@mareva.co', 'scrypt:32768:8:1$OfezC5PlkEjHkACB$d216d80ef624d29146bbc75def4f94e7735245b886e198200cc8ea8503670ffc494d6f71faa458d3720ca6462b5af1cc1b9cc7b0668ee23e8d987a504b314a02', 'admin',   NULL, TRUE, CURRENT_TIMESTAMP, '1.0'),
+('Yadira', 'Narvaez',   'CC', '2000000001', '3200000001', 'yadira@test.co',   'scrypt:32768:8:1$OsPW9JDKU8BF6uy1$c12dc8e295c68587bcc6ff01fcfd1357c394d46c95a19957ec6c2f84b771ef91b9a2191af9a552289ff05fc3301822519acf4c3c1a536efc88f71ee52886e235', 'cliente', 'YN20261', TRUE, CURRENT_TIMESTAMP, '1.0');
 
 --- Destinos (20 destinos para los 20 paquetes) ---
 INSERT INTO destino (nombre_destino, departamento, ciudad, categoria, descripcion, atracciones, imagen_principal, estado) VALUES
