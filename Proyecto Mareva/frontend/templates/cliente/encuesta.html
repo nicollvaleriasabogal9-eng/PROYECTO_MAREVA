@@ -269,7 +269,7 @@
             <div class="alert alert-error">{{ error }}</div>
         {% endif %}
 
-        <form method="POST" action="" class="survey-card">
+        <form method="POST" action="{{ url_for('encuesta.guardar_encuesta_cliente', id_reserva=reserva.id_reserva) }}" class="survey-card">
             <input type="hidden" name="id_reserva" value="{{ reserva.id_reserva|default('') }}">
 
             {% for pregunta in preguntas %}
