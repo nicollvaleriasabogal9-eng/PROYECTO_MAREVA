@@ -38,7 +38,8 @@ main.register_blueprint(destinos_bp)
 main.register_blueprint(home_bp)
 main.register_blueprint(reporte_bp)
 main.register_blueprint(dashboard_bp)
-main.permanent_session_lifetime = timedelta(days=30) 
+main.permanent_session_lifetime = timedelta(days=30)
 
 if __name__ == "__main__":
-    main.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    main.run(host="0.0.0.0", port=port, debug=False)
