@@ -1,9 +1,9 @@
-dotenv==0.9.9
+Flask
+python-dotenv
 google-auth==2.62.0
 openpyxl==3.1.5
 phonenumbers==9.0.36
-pip==24.0
-psycopg==3.3.4
+psycopg[binary]==3.3.4
 reportlab==5.0.1
 websocket-client==1.9.0
 gunicorn==23.0.0
