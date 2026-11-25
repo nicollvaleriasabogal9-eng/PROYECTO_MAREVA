@@ -6,3 +6,4 @@ pip==24.0
 psycopg==3.3.4
 reportlab==5.0.1
 websocket-client==1.9.0
+gunicorn==23.0.0
