@@ -51,7 +51,6 @@
         {% elif rol_actual == 'guia' %}
           <li><a href="{{ url_for('guia.panel') }}" class="navbar__link active">Mi viaje</a></li>
         {% elif rol_actual == 'proveedor' %}
-          <li><a href="{{ url_for('home.home') }}" class="navbar__link">Inicio</a></li>
           <li><a href="{{ url_for('proveedor.contratos') }}" class="navbar__link">Contratos</a></li>
           <li><a href="{{ url_for('proveedor.reservas') }}" class="navbar__link {% if request.path.startswith('/proveedores/reservas') %}active{% endif %}">Reservas</a></li>
         {% elif rol_actual == 'cliente' %}
