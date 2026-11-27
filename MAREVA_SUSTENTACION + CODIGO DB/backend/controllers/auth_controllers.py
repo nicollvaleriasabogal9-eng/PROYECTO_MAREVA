@@ -473,7 +473,7 @@ class AuthController:
             return redirect(url_for("guia.panel")) 
         
         elif rol == "proveedor": 
-            return redirect(url_for("home.home")) 
+            return redirect(url_for("proveedor.contratos")) 
         
         elif self._url_reserva_pendiente_valida(reserva_pendiente):
             return redirect(reserva_pendiente)
@@ -689,7 +689,7 @@ class AuthController:
 
             return redirect(
                 url_for(
-                    "home.home"
+                    "proveedor.contratos"
                 )
             )
 
